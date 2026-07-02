@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DiffReport",
+  "type": "object",
+  "required": ["tool", "allowed", "forbidden_changed", "uncertainty", "changed_lines", "errors"],
+  "additionalProperties": true
+}
+

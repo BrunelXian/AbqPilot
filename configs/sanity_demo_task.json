@@ -1,0 +1,50 @@
+{
+  "task_name": "sanity_base_heat_input_x2",
+  "cae_path": "D:\\Projects\\AbqPilot-v2\\CAE_model\\sanity_base\\sanity_base_v01.cae",
+  "work_root": "D:\\Projects\\AbqPilot-v2\\runs",
+  "existing_exported_inp_path": "D:\\Projects\\AbqPilot-v2\\runs\\stage1_6a_cae_to_inp_export\\sanity_base_v01_export.inp",
+  "solver_search_root": "D:\\Projects\\AbqPilot-v2\\CAE_model\\sanity_base",
+  "abaqus_command": "D:\\ABAQUS2024\\Commands\\abq2024.bat",
+  "allow_cae_export": false,
+  "cae_export_mode": "write_input_only",
+  "allow_odb_read": false,
+  "odb_read_mode": "metrics_only",
+  "allow_solver_submit": false,
+  "allow_abqjobpilot": false,
+  "allow_abqjobpilot_preflight": true,
+  "allow_abqjobpilot_dry_run_enqueue": true,
+  "allow_jobpilot_enqueue_authorization": true,
+  "allow_abqjobpilot_real_enqueue": false,
+  "allow_abqjobpilot_status_poll": true,
+  "allow_llm": false,
+  "allow_cae_modify": false,
+  "heat_input_scale": 2.0,
+  "jobpilot": {
+    "cpus": 14,
+    "batch": "sanity_base_heat_x2",
+    "strategy": "power_x2",
+    "submission_mode": "preview_only",
+    "allow_solver_submit": false
+  },
+  "abqjobpilot": {
+    "project_root": "D:\\Projects\\abqjobpilot_dev",
+    "api_import_mode": "local_project_root",
+    "preflight_enabled": true,
+    "dry_run_enqueue_enabled": true,
+    "real_enqueue_enabled": false,
+    "real_enqueue_mode": "queue_only",
+    "require_approval_token": true,
+    "status_poll_enabled": true,
+    "status_poll_read_only": true,
+    "cpus": 14,
+    "batch": "sanity_base_heat_x2",
+    "strategy": "power_x2",
+    "submission_mode": "preview_only",
+    "allow_solver_submit": false
+  },
+  "approval": {
+    "require_human_approval_for_real_enqueue": true,
+    "approval_phrase": "I_APPROVE_ABQJOBPILOT_REAL_ENQUEUE_FOR_THIS_TASK",
+    "default_expires_hours": 24
+  }
+}

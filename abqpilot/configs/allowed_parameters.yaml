@@ -1,0 +1,6 @@
+allowed_parameters:
+  heat_flux_scale:
+    type: number
+    exclusive_minimum: 0
+    mvp01: true
+

@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OdbMetrics",
+  "type": "object",
+  "required": ["target_variable", "target_region", "aggregation", "observed_mean"],
+  "additionalProperties": true
+}
+

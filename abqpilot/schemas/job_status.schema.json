@@ -1,0 +1,7 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "JobStatus",
+  "type": "object",
+  "required": ["backend", "dry_run", "job_id", "status", "executed"],
+  "additionalProperties": true
+}

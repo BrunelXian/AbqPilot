@@ -1,0 +1,16 @@
+{
+  "task_type": "am_thermal_control",
+  "target_variable": "NT11",
+  "target_region": "SURF_TRACK_001_TOP",
+  "aggregation": "mean",
+  "target_range": [480.0, 520.0],
+  "target_temperature": 500.0,
+  "allowed_repairs": ["heat_flux_scale"],
+  "initial_parameters": {
+    "heat_flux_scale": 1.0
+  },
+  "stop_rules": {
+    "max_iterations": 3
+  }
+}
+

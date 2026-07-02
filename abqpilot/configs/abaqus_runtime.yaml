@@ -1,0 +1,19 @@
+runtime:
+  mode: dry_run_only
+  execution_backend: dry
+  abqjobpilot_root: D:\Projects\abqjobpilot_dev
+  python_executable: D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe
+  default_cpus: 14
+  dry_run: true
+  allow_real_execution: false
+  allow_cae_export: true
+  abaqus_command: D:\ABAQUS2024\Commands\abq2024.bat
+  cae_export_mode: write_input_only
+  allow_solver_submit: false
+  allow_odb_read: true
+  odb_read_mode: metrics_only
+  allow_abqjobpilot: false
+  allow_llm: false
+  allow_cae_modify: false
+  submit_jobs: false
+  open_odb: false

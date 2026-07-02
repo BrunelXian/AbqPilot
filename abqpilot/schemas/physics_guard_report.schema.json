@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PhysicsGuardReport",
+  "type": "object",
+  "required": ["tool", "passed", "errors"],
+  "additionalProperties": true
+}
+

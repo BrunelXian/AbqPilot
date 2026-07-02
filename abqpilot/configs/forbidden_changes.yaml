@@ -1,0 +1,18 @@
+forbidden_keywords:
+  - "*Material"
+  - "*Elastic"
+  - "*Plastic"
+  - "*Density"
+  - "*Conductivity"
+  - "*Specific Heat"
+  - "*Expansion"
+  - "*Node"
+  - "*Element"
+  - "*Nset"
+  - "*Elset"
+  - "*Solid Section"
+  - "*Shell Section"
+  - "*Boundary"
+  - "*Contact"
+  - "*Surface Interaction"
+

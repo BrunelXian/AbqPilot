@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ObjectiveSpec",
+  "type": "object",
+  "required": ["task_type", "target_variable", "target_region", "aggregation", "target_range", "allowed_repairs"],
+  "additionalProperties": true
+}
+

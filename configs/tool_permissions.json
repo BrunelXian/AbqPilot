@@ -1,0 +1,41 @@
+{
+  "version": "0.1",
+  "default_policy": "deny_high_risk_by_default",
+  "codex": {
+    "available": false,
+    "allowed_as_development_assistant": true,
+    "allowed_as_runtime_agent": false,
+    "allowed_to_submit_abaqus_jobs": false,
+    "allowed_to_modify_cae": false,
+    "allowed_to_modify_inp_outside_editable_regions": false,
+    "allowed_to_open_odb": false,
+    "allowed_to_freeze_evidence": false,
+    "requires_human_review_for_patches": true
+  },
+  "llm": {
+    "enabled": false,
+    "allowed_as_schema_bound_reasoner": false,
+    "allowed_to_directly_mutate_files": false,
+    "allowed_to_submit_abaqus_jobs": false,
+    "allowed_to_claim_physics_success": false
+  },
+  "abaqus": {
+    "allow_cae_export": true,
+    "allow_odb_metrics_read": true,
+    "allow_solver_submit": false,
+    "allow_abqjobpilot": false,
+    "allow_model_modify": false
+  },
+  "human_approval_required_for": [
+    "solver_submit",
+    "abqjobpilot_submit",
+    "material_change",
+    "geometry_change",
+    "mesh_change",
+    "boundary_condition_change",
+    "guard_relaxation",
+    "evidence_freeze",
+    "overwrite_run_directory",
+    "delete_run_directory"
+  ]
+}

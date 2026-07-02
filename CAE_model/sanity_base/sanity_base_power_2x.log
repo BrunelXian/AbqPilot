@@ -1,0 +1,22 @@
+Analysis initiated from SIMULIA established products
+Abaqus JOB sanity_base_power_2x
+Abaqus 2024
+Abaqus License Manager checked out the following licenses:
+Abaqus/Standard checked out 15 tokens from Flexnet server Boltzmann.
+<9984 out of 9999 licenses remain available>.
+Begin Analysis Input File Processor
+2026/6/24 9:56:51
+Run pre.exe
+2026/6/24 9:56:59
+End Analysis Input File Processor
+Begin Abaqus/Standard Analysis
+2026/6/24 9:56:59
+Run standard.exe
+2026/6/24 10:01:31
+End Abaqus/Standard Analysis
+Begin SIM Wrap-up
+2026/6/24 10:01:32
+Run SMASimUtility.exe
+2026/6/24 10:01:32
+End SIM Wrap-up
+Abaqus JOB sanity_base_power_2x COMPLETED

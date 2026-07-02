@@ -1,0 +1,42 @@
+*Heading
+** AbqPilot MVP-01 thermal dry-run fixture
+*Material, name=STEEL_FIXTURE
+*Density
+7.850e-09
+*Elastic
+210000., 0.3
+*Conductivity
+45.0
+*Specific Heat
+470.0
+*Node
+1, 0.0, 0.0, 0.0
+2, 1.0, 0.0, 0.0
+3, 1.0, 1.0, 0.0
+4, 0.0, 1.0, 0.0
+5, 0.0, 0.0, 1.0
+6, 1.0, 0.0, 1.0
+7, 1.0, 1.0, 1.0
+8, 0.0, 1.0, 1.0
+*Element, type=DC3D8
+1, 1, 2, 3, 4, 5, 6, 7, 8
+*Nset, nset=SURF_TRACK_001_TOP
+5, 6, 7, 8
+*Elset, elset=TRACK_BODY
+1
+*Solid Section, elset=TRACK_BODY, material=STEEL_FIXTURE
+,
+*Boundary
+1, 11, 11, 20.0
+** ABQPILOT_EDITABLE_HEAT_FLUX_START id=HF_SURF_TRACK_001_TOP
+*Dsflux
+SURF_TRACK_001_TOP, S, 1000000.0
+** ABQPILOT_EDITABLE_HEAT_FLUX_END id=HF_SURF_TRACK_001_TOP
+*Step, name=THERMAL_STEP
+*Heat Transfer
+0.1, 1.0
+*Output, field
+*Node Output, nset=SURF_TRACK_001_TOP
+NT11
+*End Step
+

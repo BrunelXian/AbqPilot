@@ -1,0 +1,10 @@
+{
+  "target_variable": "NT11",
+  "target_region": "SURF_TRACK_001_TOP",
+  "aggregation": "mean",
+  "observed_mean": 450.0,
+  "observed_min": 430.0,
+  "observed_max": 470.0,
+  "units": "C"
+}
+

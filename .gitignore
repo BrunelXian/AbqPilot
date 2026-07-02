@@ -1,0 +1,57 @@
+.env
+*.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Build / package
+build/
+dist/
+*.egg-info/
+
+# Abaqus generated files
+*.odb
+*.sim
+*.lck
+*.prt
+*.dat
+*.msg
+*.sta
+*.com
+*.ipm
+*.res
+*.sel
+*.pac
+*.stt
+*.mdl
+
+# Abaqus CAE / journal files
+*.cae
+*.jnl
+
+# Run/evidence outputs
+runs/
+outputs/
+artifacts/
+
+# Local secrets / certificates
+secrets/
+*.key
+*.pem
+*.p12
+*.crt

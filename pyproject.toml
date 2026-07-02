@@ -1,0 +1,12 @@
+[project]
+name = "abqpilot"
+version = "0.1.0"
+description = "AbqPilot deterministic MVP-01 dry-run scaffold"
+requires-python = ">=3.12"
+
+[project.scripts]
+abqpilot = "abqpilot.cli:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

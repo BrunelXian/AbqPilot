@@ -3,7 +3,7 @@ import json
 from abqpilot import cli
 
 
-SECRET = "sk-patch-cli-secret-not-real"
+SECRET = "PATCH_PROPOSAL_CLI_SECRET"
 
 
 def test_propose_patch_mock_writes_artifacts(monkeypatch, tmp_path):

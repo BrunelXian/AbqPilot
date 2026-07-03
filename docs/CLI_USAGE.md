@@ -344,6 +344,41 @@ D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli diagnose-j
 
 Stage 4.1B treats abqjobpilot as the execution-record, lifecycle, and file-path authority. AbqPilot reads abqjobpilot records and referenced text logs read-only, inspects ODB existence/size/timestamps only, and then applies the deterministic Stage 4.1 ODB acceptability taxonomy. The command does not mutate `queue.json`, `live_status.json`, or `runtime\reports`, and ODB existence alone is never accepted as proof of successful completion.
 
+Stage 4.3 guarded DFLUX deactivation preview:
+
+```powershell
+D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli preview-dflux-deactivation-patch --source-inp <inp_path> --output-dir D:\Projects\AbqPilot-v2\runs\stage4_3_guarded_dflux_deactivation_patch_preview --scan-step step_scan_00 --cooling-step Step_cool_00 --load-name load_body_hflux_00
+```
+
+This command writes a copied preview INP and inserts explicit `*Dflux, OP=NEW` reset evidence in `Step_cool_00`. It runs StaticValidator, DFLUX lifecycle diff validation, PhysicsGuard, and a DFLUX lifecycle validator. It does not mutate the source INP, run solver, enqueue jobs, launch QueueRunner, open ODB, or apply the patch in place.
+
+Stage 4.4 DFLUX-guarded controlled solver validation:
+
+```powershell
+D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli prepare-dflux-guarded-solver-run --preview-inp <preview_inp> --validation-json <dflux_lifecycle_validation.json> --output-root D:\Projects\AbqPilot-v2\runs\stage4_4_dflux_deactivated_controlled_solver_validation
+```
+
+```powershell
+D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli approve-dflux-guarded-solver-run --solver-run-dir <solver_run_dir> --approval-phrase I_APPROVE_ABQPILOT_DFLUX_DEACTIVATED_CONTROLLED_SOLVER_RUN
+```
+
+```powershell
+D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli run-dflux-guarded-solver-approved --solver-run-dir <solver_run_dir>
+D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli monitor-dflux-guarded-solver-run --solver-run-dir <solver_run_dir>
+D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli intake-dflux-guarded-solver-output --solver-run-dir <solver_run_dir>
+D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli report-dflux-guarded-solver-run --solver-run-dir <solver_run_dir>
+```
+
+No INP without a passing Stage 4.3 DFLUX lifecycle validation artifact may enter this solver path. The prepare command copies the preview INP to a new Stage 4.4 run directory, writes a fixed command preview, and stops until the DFLUX-specific approval token is created. ODB metrics remain blocked unless Stage 4.1B diagnosis returns `JOB_COMPLETED_ODB_ACCEPTABLE`.
+
+Stage 4.5 Model Condition Preservation Guard:
+
+```powershell
+D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli run-model-condition-guard --source-jnl <jnl> --source-inp <source_exported_inp> --candidate-inp <candidate_inp> --solver-inp <solver_inp> --target-change body_heat_flux_magnitude:load_body_hflux_00:step_scan_00:1e+10:2e+10
+```
+
+MCPGuard checks that original CAE/JNL model-condition intent is preserved in exported, patched, and solver-run INPs. Stage 4.5 implements `MCPGuard.load_lifecycle.body_heat_flux_dflux_bf` and schema hooks for boundary lifecycle, interaction lifecycle, amplitudes, step procedure, output requests, reference integrity, and target patch isolation. The command is read-only and does not run Abaqus or open ODB files.
+
 ```powershell
 D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli run-sanity-demo --config configs\sanity_demo_task.json --task-id demo_001 --resume
 ```

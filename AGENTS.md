@@ -15,6 +15,7 @@ AbqPilot is a closed-loop CAE-ODB automation system for controlled Abaqus simula
 5. Do not freeze evidence unless hashes, logs, metric JSON, and report files are generated.
 6. Do not bypass StaticValidator, DiffGuard, PhysicsGuard, or ODB status checks.
 7. Do not let Codex, LLMs, GUI, or CLI bypass deterministic AbqPilot tools.
+8. Do not validate only the target edit. Also validate that non-target original model conditions are preserved across CAE export, INP patching, candidate generation, and solver-run copies.
 
 ## Hard Rule: SanityBase-Derived Simulation Candidates Only
 
@@ -72,8 +73,11 @@ The agent must record this traceability in evidence artifacts:
 * StaticValidator result
 * DiffGuard result
 * PhysicsGuard result
+* Model Condition Preservation Guard result when available
 
 If the source candidate is not traceable to the sanity base model, the workflow must stop with a warning rather than continue to solver, queue, ODB intake, metrics extraction, or physical interpretation.
+
+Production candidates must also preserve original model-condition intent. A valid patch is not only the intended target edit; it must also avoid losing or drifting non-target conditions such as load lifecycle, boundary lifecycle, interaction lifecycle, amplitudes, step procedures, output requests, set/surface/instance references, and other original CAE/JNL intent. Future solver eligibility should include StaticValidator, DiffGuard, PhysicsGuard, and the Model Condition Preservation Guard.
 
 Recommended warning verdict:
 

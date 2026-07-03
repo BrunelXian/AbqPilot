@@ -310,6 +310,62 @@ Required artifacts include:
 
 Stage 4.2 consumes Stage 4.1 diagnosis evidence and produces a deterministic proposal only. It may recommend later guarded solver-control patch preview types for convergence failures, but it does not apply repairs, mutate INP files, open ODB files, enqueue jobs, run Abaqus, or use LLM execution authority.
 
+## Stage 4.3 Guarded DFLUX Deactivation Patch Preview
+
+Stage 4.3 writes preview artifacts under:
+
+```text
+runs\stage4_3_guarded_dflux_deactivation_patch_preview\
+```
+
+Required artifacts include:
+
+- `dflux_lifecycle_patch_context.json`
+- `dflux_lifecycle_patch_plan.json`
+- `candidate_sanity_base_power_x2_stage4_dflux_deactivated_preview.inp`
+- `dflux_lifecycle_diff_report.json`
+- `dflux_lifecycle_validation.json`
+- `dflux_lifecycle_preview_summary.md`
+- `successful_vs_failed_2x_comparison.json`
+- `successful_vs_failed_2x_comparison.md`
+
+The preview candidate is a copied INP only. Stage 4.3 inserts explicit `*Dflux, OP=NEW` reset evidence in the cooling step and validates that the scan-step BF heat flux is preserved, no positive BF heat flux is added to cooling, source INP remains unchanged, and unrelated changes count is zero. It does not run Abaqus, enqueue jobs, launch QueueRunner, or open ODB files.
+
+## Stage 4.4 DFLUX-Guarded Solver Validation Artifacts
+
+Stage 4.4 writes a timestamped run directory under `runs\stage4_4_dflux_deactivated_controlled_solver_validation\`. The DFLUX lifecycle guard is mandatory before the copied preview INP can be used for a controlled solver run.
+
+Required artifacts include:
+
+- `dflux_guarded_solver_prepare.json`
+- `dflux_guarded_solver_eligibility.json`
+- `dflux_guarded_solver_approval_token.json`
+- `dflux_guarded_solver_command_preview.json`
+- `dflux_guarded_solver_run_result.json`
+- `dflux_guarded_solver_monitor.json`
+- `job_odb_diagnosis_result.json`
+- `dflux_guarded_solver_intake.json`
+- `dflux_guarded_solver_metrics.json`
+- `dflux_guarded_solver_comparison.json`
+- `dflux_guarded_solver_report.md`
+
+Metrics extraction remains blocked unless diagnosis says `JOB_COMPLETED_ODB_ACCEPTABLE` and `odb_acceptable_for_metrics=true`.
+
+## Stage 4.5 Model Condition Preservation Guard Artifacts
+
+Stage 4.5 writes guard artifacts under `runs\stage4_5_model_condition_preservation_guard\`. MCPGuard verifies that original CAE/JNL model-condition intent is preserved in exported, patched, and solver-run INPs. It complements StaticValidator, DiffGuard, and PhysicsGuard.
+
+Required artifacts include:
+
+- `model_condition_source_intent.json`
+- `model_condition_source_exported_inp.json`
+- `model_condition_candidate_inp.json`
+- `model_condition_solver_inp.json`
+- `model_condition_preservation_result.json`
+- `model_condition_preservation_report.md`
+
+The Stage 4.3 DFLUX/BF lifecycle validator is now treated as `MCPGuard.load_lifecycle.body_heat_flux_dflux_bf`, one specialized condition-preservation sub-check.
+
 Stage 3.3 alpha freeze export writes:
 
 - `ALPHA_FREEZE_REPORT.json`

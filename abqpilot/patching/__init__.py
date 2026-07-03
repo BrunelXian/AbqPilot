@@ -10,6 +10,7 @@ from abqpilot.patching.patch_queue_workflow import (
 from abqpilot.patching.patched_job_intake import intake_patched_job_output, poll_patched_job_status
 from abqpilot.patching.patched_job_metrics import extract_patched_job_metrics
 from abqpilot.patching.patched_job_report import report_patched_job
+from abqpilot.patching.dflux_lifecycle_preview import preview_dflux_deactivation_patch_stage
 
 __all__ = [
     "PATCH_QUEUE_APPROVAL_PHRASE",
@@ -19,6 +20,7 @@ __all__ = [
     "poll_patch_queue",
     "poll_patched_job_status",
     "preview_patch",
+    "preview_dflux_deactivation_patch_stage",
     "queue_patch_preview",
     "report_patched_job",
 ]

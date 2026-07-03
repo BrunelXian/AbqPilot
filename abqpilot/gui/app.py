@@ -131,6 +131,14 @@ class AbqPilotGui(BaseWindow):
             ("Preview Patch Context", self._preview_patch_context),
             ("Propose Patch with Real LLM", self._propose_patch_real),
             ("Preview Guarded Patch", self._preview_guarded_patch),
+            ("Preview DFLUX Deactivation Patch", self._preview_dflux_deactivation_patch),
+            ("Run Model Condition Preservation Guard", self._run_model_condition_guard),
+            ("Prepare DFLUX-Guarded Solver Run", self._prepare_dflux_guarded_solver_run),
+            ("Approve DFLUX-Guarded Solver Run", self._approve_dflux_guarded_solver_run),
+            ("Run Approved DFLUX-Guarded Solver", self._run_dflux_guarded_solver),
+            ("Monitor DFLUX-Guarded Solver", self._monitor_dflux_guarded_solver),
+            ("Intake DFLUX-Guarded Solver Output", self._intake_dflux_guarded_solver_output),
+            ("Report DFLUX-Guarded Solver Run", self._report_dflux_guarded_solver_run),
             ("Queue Patch Preview: Preflight", self._queue_patch_preflight),
             ("Queue Patch Preview: Dry-Run Enqueue", self._queue_patch_dry_run),
             ("Create Patch Queue Approval Token", self._create_patch_queue_approval),
@@ -164,6 +172,7 @@ class AbqPilotGui(BaseWindow):
             "Batch Auto Loop [DISABLED]",
             "LLM Run Solver [DISABLED]",
             "Arbitrary Command [DISABLED]",
+            "Auto Retry Loop [DISABLED]",
         ]:
             make_button(buttons, label, lambda name=label: self._blocked_action(name), danger=True).pack(fill="x", pady=3)
 
@@ -396,6 +405,13 @@ class AbqPilotGui(BaseWindow):
     def _preview_guarded_patch(self) -> None:
         self._require_task(lambda: self.controller.preview_guarded_patch(self.task_dir), "Guarded patch preview complete")
 
+    def _preview_dflux_deactivation_patch(self) -> None:
+        source = Path("D:/Projects/AbqPilot-v2/runs/stage4_0_controlled_solver_automation/run_20260703_105833_589810/candidate_sanity_base_power_x2_stage4.inp")
+        output = Path("D:/Projects/AbqPilot-v2/runs/stage4_3_guarded_dflux_deactivation_patch_preview")
+        comparison = Path("D:/Projects/AbqPilot-v2/CAE_model/sanity_base")
+        result = self.controller.preview_dflux_deactivation_patch(source, output, comparison)
+        self._handle_action_result(result, "DFLUX deactivation patch preview complete")
+
     def _queue_patch_preflight(self) -> None:
         self._require_task(
             lambda: self.controller.queue_patch_preview_preflight(self.task_dir, _latest_patch_preview_dir(self.task_dir)),
@@ -579,6 +595,81 @@ class AbqPilotGui(BaseWindow):
         result = self.controller.report_solver_run(solver_run)
         self._handle_action_result(result, "Controlled solver report complete")
 
+    def _prepare_dflux_guarded_solver_run(self) -> None:
+        preview = Path("D:/Projects/AbqPilot-v2/runs/stage4_3_guarded_dflux_deactivation_patch_preview/candidate_sanity_base_power_x2_stage4_dflux_deactivated_preview.inp")
+        validation = Path("D:/Projects/AbqPilot-v2/runs/stage4_3_guarded_dflux_deactivation_patch_preview/dflux_lifecycle_validation.json")
+        output = Path("D:/Projects/AbqPilot-v2/runs/stage4_4_dflux_deactivated_controlled_solver_validation")
+        result = self.controller.prepare_dflux_guarded_solver_run(preview, validation, output)
+        self._handle_action_result(result, "DFLUX-guarded solver run prepared")
+
+    def _run_model_condition_guard(self) -> None:
+        source_jnl = Path("D:/Projects/AbqPilot-v2/CAE_model/sanity_base/sanity_base_v01.jnl")
+        source_inp = Path("D:/Projects/AbqPilot-v2/runs/stage3_9b_real_sanity_base_patch_candidate/source_sanity_base_export.inp")
+        candidate = Path("D:/Projects/AbqPilot-v2/runs/stage4_3_guarded_dflux_deactivation_patch_preview/candidate_sanity_base_power_x2_stage4_dflux_deactivated_preview.inp")
+        solver_inp = Path("D:/Projects/AbqPilot-v2/runs/stage4_4_dflux_deactivated_controlled_solver_validation/run_20260703_232004_870667/candidate_sanity_base_power_x2_stage4_dflux_deactivated_solver.inp")
+        output = Path("D:/Projects/AbqPilot-v2/runs/stage4_5_model_condition_preservation_guard")
+        result = self.controller.run_model_condition_guard(
+            source_jnl=source_jnl,
+            source_inp=source_inp,
+            candidate_inp=candidate,
+            solver_inp=solver_inp,
+            output_dir=output,
+            target_change="body_heat_flux_magnitude:load_body_hflux_00:step_scan_00:1e+10:2e+10",
+        )
+        self._handle_action_result(result, "Model Condition Preservation Guard complete")
+
+    def _approve_dflux_guarded_solver_run(self) -> None:
+        solver_run = _latest_dflux_solver_run_dir()
+        if solver_run is None:
+            self._set_status("No DFLUX-guarded solver run found")
+            return
+        phrase = simpledialog.askstring("DFLUX Solver Approval", "Enter the DFLUX-guarded solver approval phrase:", show=None)
+        if not phrase:
+            self._set_status("DFLUX solver approval cancelled")
+            return
+        result = self.controller.approve_dflux_guarded_solver_run(solver_run, phrase)
+        self._handle_action_result(result, "DFLUX-guarded approval token created")
+
+    def _run_dflux_guarded_solver(self) -> None:
+        solver_run = _latest_dflux_solver_run_dir()
+        if solver_run is None:
+            self._set_status("No DFLUX-guarded solver run found")
+            return
+        confirmed = messagebox.askyesno(
+            "Confirm DFLUX-Guarded Solver Run",
+            "Run the approved DFLUX-deactivated single Abaqus job?\n\n"
+            "The Stage 4.3 lifecycle guard and approval token must both validate.",
+        )
+        if not confirmed:
+            self._set_status("DFLUX-guarded solver run cancelled")
+            return
+        result = self.controller.run_dflux_guarded_solver_approved(solver_run)
+        self._handle_action_result(result, "DFLUX-guarded solver run finished")
+
+    def _monitor_dflux_guarded_solver(self) -> None:
+        solver_run = _latest_dflux_solver_run_dir()
+        if solver_run is None:
+            self._set_status("No DFLUX-guarded solver run found")
+            return
+        result = self.controller.monitor_dflux_guarded_solver_run(solver_run)
+        self._handle_action_result(result, "DFLUX-guarded solver monitor complete")
+
+    def _intake_dflux_guarded_solver_output(self) -> None:
+        solver_run = _latest_dflux_solver_run_dir()
+        if solver_run is None:
+            self._set_status("No DFLUX-guarded solver run found")
+            return
+        result = self.controller.intake_dflux_guarded_solver_output(solver_run)
+        self._handle_action_result(result, "DFLUX-guarded solver output intake complete")
+
+    def _report_dflux_guarded_solver_run(self) -> None:
+        solver_run = _latest_dflux_solver_run_dir()
+        if solver_run is None:
+            self._set_status("No DFLUX-guarded solver run found")
+            return
+        result = self.controller.report_dflux_guarded_solver_run(solver_run)
+        self._handle_action_result(result, "DFLUX-guarded solver report complete")
+
     def _blocked_action(self, name: str) -> None:
         result = self.controller.blocked_action(name)
         messagebox.showwarning("Disabled", DISABLED_ACTION_MESSAGE)
@@ -642,6 +733,14 @@ def _latest_patch_queue_workflow(task_dir: Path) -> Path | None:
 
 def _latest_solver_run_dir() -> Path | None:
     root = Path("D:/Projects/AbqPilot-v2/runs/stage4_0_controlled_solver_automation")
+    if not root.exists():
+        return None
+    candidates = sorted(root.glob("run_*"), key=lambda path: path.stat().st_mtime, reverse=True)
+    return candidates[0] if candidates else None
+
+
+def _latest_dflux_solver_run_dir() -> Path | None:
+    root = Path("D:/Projects/AbqPilot-v2/runs/stage4_4_dflux_deactivated_controlled_solver_validation")
     if not root.exists():
         return None
     candidates = sorted(root.glob("run_*"), key=lambda path: path.stat().st_mtime, reverse=True)

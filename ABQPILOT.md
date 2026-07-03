@@ -23,3 +23,15 @@ High-risk transitions require human approval, including solver submission, mater
 ## Stage 4.1B abqjobpilot-Backed Diagnosis Integration
 
 Stage 4.1B makes abqjobpilot the execution-record, job-lifecycle, and file-path authority. AbqPilot-v2 consumes abqjobpilot records read-only from `runtime\queue.json`, `runtime\live_status.json`, or `runtime\reports\*.json`, then applies AbqPilot's deterministic ODB validity and Abaqus failure diagnosis taxonomy. AbqPilot does not mutate abqjobpilot runtime files, does not launch QueueRunner, does not submit jobs, and does not open ODB files directly. ODB existence alone remains insufficient for metrics intake.
+
+## Stage 4.3 Guarded DFLUX Deactivation Patch Preview
+
+Stage 4.3 addresses the finding that the sanity-base CAE/JNL deactivates `load_body_hflux_00` in `Step_cool_00`, while the exported/patched INP lacked explicit cooling-step DFLUX reset/removal evidence. The stage creates a copied preview INP only and inserts `*Dflux, OP=NEW` at the start of `Step_cool_00` after the analysis procedure data. StaticValidator, a DFLUX lifecycle diff guard, PhysicsGuard, and the DFLUX lifecycle validator must pass. It does not mutate the source INP, does not run Abaqus, does not enqueue, does not launch QueueRunner, and does not open ODB files.
+
+## Stage 4.4 DFLUX-Guarded Controlled Solver Validation
+
+Stage 4.4 validates the Stage 4.3 DFLUX-deactivated preview candidate through the controlled single-job Abaqus runner. The DFLUX lifecycle guard is a mandatory solver eligibility gate: StaticValidator, DiffGuard, PhysicsGuard, the DFLUX lifecycle validator, source unchanged evidence, `*Dflux, OP=NEW` in `Step_cool_00`, preserved scan-step BF heat flux, and zero unrelated changes must all pass before an approval request is created. Solver launch still requires the exact DFLUX-specific human approval phrase and a token bound to the preview hash, copied solver INP hash, validation hash, command preview, run directory, job name, CPU count, expected ODB, and guard fields. Metrics extraction remains blocked unless Stage 4.1B diagnosis accepts the ODB as completed and metric-safe.
+
+## Stage 4.5 Model Condition Preservation Guard
+
+Stage 4.5 generalizes the Stage 4.3 DFLUX lifecycle bug into the Model Condition Preservation Guard, or MCPGuard. The guard checks whether original CAE/JNL condition intent is preserved across source export, candidate patching, and solver-run INP copies. It distinguishes declared target edits, such as `BodyHeatFlux BF 1e+10 -> 2e+10`, from unintended condition loss or semantic drift. The Stage 4.3 DFLUX/BF lifecycle check is now one specialized sub-check: `MCPGuard.load_lifecycle.body_heat_flux_dflux_bf`. Future solver eligibility should require StaticValidator, DiffGuard, PhysicsGuard, and MCPGuard. MCPGuard is read-only: it does not mutate CAE/JNL/INP/ODB files, run Abaqus, launch QueueRunner, enqueue jobs, open ODB files, or call LLM providers.

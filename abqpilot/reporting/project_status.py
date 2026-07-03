@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any
 
 
-LATEST_VERDICT = "PASS_ABQPILOT_V2_STAGE4_1B_ABQJOBPILOT_BACKED_DIAGNOSIS_INTEGRATION_READY"
+LATEST_VERDICT = "PASS_ABQPILOT_V2_STAGE4_5_MODEL_CONDITION_PRESERVATION_GUARD_READY"
 
 PIPELINE_ORDER = [
     "01_export_cae",
@@ -67,6 +67,10 @@ CAPABILITIES = [
     "deterministic solver-failure repair proposal",
     "abqjobpilot-backed job/ODB diagnosis integration",
     "abqjobpilot runtime/report record reader",
+    "guarded DFLUX deactivation patch preview",
+    "DFLUX lifecycle guarded controlled solver validation",
+    "Model Condition Preservation Guard",
+    "generalized source-intent to INP condition preservation checks",
 ]
 
 SAFETY_BOUNDARIES = {
@@ -92,6 +96,9 @@ SAFETY_BOUNDARIES = {
     "Job/ODB diagnosis": "read-only log and metadata parser; ODB existence alone is not accepted",
     "Solver-failure repair proposal": "diagnosis-driven and proposal-only; no INP mutation, no solver run, no ODB open",
     "abqjobpilot execution records": "abqjobpilot remains execution-record/path authority; AbqPilot consumes records read-only for diagnosis and repair context",
+    "DFLUX deactivation preview": "copied candidate INP only; inserts explicit cooling-step DFLUX reset, validator-gated, no solver/enqueue/ODB open",
+    "DFLUX guarded solver validation": "requires Stage 4.3 DFLUX lifecycle guard PASS plus solver-specific approval token before a fixed single-job Abaqus run",
+    "Model Condition Preservation Guard": "checks original CAE/JNL model-condition intent against exported, patched, and solver-run INPs; no solver/ODB/runtime mutation",
     "Arbitrary solver commands": "not accepted",
     "LLM solver authority": "not integrated",
     "API key display": "masked only",
@@ -110,6 +117,14 @@ MAIN_COMMANDS = [
     "python -m abqpilot.cli propose-patch --task-dir <task_dir> --provider mock",
     "python -m abqpilot.cli propose-patch --task-dir <task_dir> --provider chatanywhere --confirm-send-patch-context",
     "python -m abqpilot.cli preview-patch --task-dir <task_dir> --provider-source llm",
+    "python -m abqpilot.cli preview-dflux-deactivation-patch --source-inp <inp_path> --output-dir <out_dir>",
+    "python -m abqpilot.cli prepare-dflux-guarded-solver-run --preview-inp <preview_inp> --validation-json <dflux_lifecycle_validation.json>",
+    "python -m abqpilot.cli approve-dflux-guarded-solver-run --solver-run-dir <solver_run_dir> --approval-phrase I_APPROVE_ABQPILOT_DFLUX_DEACTIVATED_CONTROLLED_SOLVER_RUN",
+    "python -m abqpilot.cli run-dflux-guarded-solver-approved --solver-run-dir <solver_run_dir>",
+    "python -m abqpilot.cli monitor-dflux-guarded-solver-run --solver-run-dir <solver_run_dir>",
+    "python -m abqpilot.cli intake-dflux-guarded-solver-output --solver-run-dir <solver_run_dir>",
+    "python -m abqpilot.cli report-dflux-guarded-solver-run --solver-run-dir <solver_run_dir>",
+    "python -m abqpilot.cli run-model-condition-guard --source-jnl <jnl> --source-inp <source_inp> --candidate-inp <candidate_inp> --solver-inp <solver_inp> --target-change body_heat_flux_magnitude:load_body_hflux_00:step_scan_00:1e+10:2e+10",
     "python -m abqpilot.cli queue-patch-preview --task-dir <task_dir> --patch-preview-dir <preview_dir> --mode preflight-only",
     "python -m abqpilot.cli queue-patch-preview --task-dir <task_dir> --patch-preview-dir <preview_dir> --mode dry-run-enqueue",
     "python -m abqpilot.cli approve-patch-queue --workflow-dir <workflow_dir> --approved-by human --approval-phrase I_APPROVE_ABQPILOT_PATCH_CANDIDATE_QUEUE_ONLY_ENQUEUE",
@@ -180,9 +195,12 @@ def export_project_status(root: str | Path = ".") -> dict[str, Any]:
             "Stage 4.2 creates repair proposals only and does not apply solver-control patches.",
             "Stage 4.1B consumes abqjobpilot records read-only; abqjobpilot remains the execution lifecycle and path authority.",
             "Attempt-block parsing is intentionally minimal and supports START/END marker styles used by abqjobpilot logs.",
+            "Stage 4.3 creates a preview INP copy with explicit *Dflux, OP=NEW in the cooling step; it does not run solver or open ODB.",
+            "Stage 4.4 permits a controlled solver attempt only after the Stage 4.3 DFLUX lifecycle guard passes and a DFLUX-specific approval token validates.",
+            "Stage 4.5 generalizes the DFLUX lifecycle bug into MCPGuard; Stage 4.5 currently implements concrete body heat flux DFLUX/BF lifecycle preservation plus schema hooks for other condition categories.",
         ],
         "recommended_next_stages": [
-            "Stage 4.3 guarded solver-control patch preview for approved Stage 4.2 proposals",
+            "Integrate MCPGuard as a mandatory future solver eligibility gate beside StaticValidator, DiffGuard, and PhysicsGuard",
             "GUI persistence and usability hardening",
         ],
     }

@@ -176,6 +176,44 @@ class GuiActionController:
     def preview_guarded_patch(self, task_dir: str | Path) -> dict[str, Any]:
         return self._safe("preview_guarded_patch", lambda: cli.command_preview_patch(task_dir=task_dir, provider_source="llm"))
 
+    def preview_dflux_deactivation_patch(
+        self,
+        source_inp: str | Path,
+        output_dir: str | Path | None = None,
+        compare_successful_job_dir: str | Path | None = None,
+    ) -> dict[str, Any]:
+        return self._safe(
+            "preview_dflux_deactivation_patch",
+            lambda: cli.command_preview_dflux_deactivation_patch(
+                source_inp=source_inp,
+                output_dir=output_dir,
+                compare_successful_job_dir=compare_successful_job_dir,
+            ),
+        )
+
+    def run_model_condition_guard(
+        self,
+        source_jnl: str | Path,
+        source_inp: str | Path,
+        candidate_inp: str | Path,
+        solver_inp: str | Path | None = None,
+        output_dir: str | Path | None = None,
+        target_change: str | None = None,
+    ) -> dict[str, Any]:
+        from abqpilot.cli import command_run_model_condition_guard
+
+        return self._safe(
+            "run_model_condition_guard",
+            lambda: command_run_model_condition_guard(
+                source_jnl=source_jnl,
+                source_inp=source_inp,
+                candidate_inp=candidate_inp,
+                solver_inp=solver_inp,
+                output_dir=output_dir,
+                target_change=target_change,
+            ),
+        )
+
     def queue_patch_preview_preflight(self, task_dir: str | Path, patch_preview_dir: str | Path | None = None) -> dict[str, Any]:
         return self._safe(
             "queue_patch_preview_preflight",
@@ -367,6 +405,51 @@ class GuiActionController:
         from abqpilot.solver import report_solver_run
 
         return self._safe("report_solver_run", lambda: report_solver_run(solver_run_dir=solver_run_dir))
+
+    def prepare_dflux_guarded_solver_run(
+        self,
+        preview_inp: str | Path,
+        validation_json: str | Path,
+        output_root: str | Path | None = None,
+    ) -> dict[str, Any]:
+        from abqpilot.solver import prepare_dflux_guarded_solver_run
+
+        return self._safe(
+            "prepare_dflux_guarded_solver_run",
+            lambda: prepare_dflux_guarded_solver_run(
+                preview_inp=preview_inp,
+                validation_json=validation_json,
+                output_root=output_root or self.project_root / "runs" / "stage4_4_dflux_deactivated_controlled_solver_validation",
+            ),
+        )
+
+    def approve_dflux_guarded_solver_run(self, solver_run_dir: str | Path, approval_phrase: str) -> dict[str, Any]:
+        from abqpilot.solver import approve_dflux_guarded_solver_run
+
+        return self._safe(
+            "approve_dflux_guarded_solver_run",
+            lambda: approve_dflux_guarded_solver_run(solver_run_dir=solver_run_dir, approval_phrase=approval_phrase, approved_by="human"),
+        )
+
+    def run_dflux_guarded_solver_approved(self, solver_run_dir: str | Path) -> dict[str, Any]:
+        from abqpilot.solver import run_dflux_guarded_solver_approved
+
+        return self._safe("run_dflux_guarded_solver_approved", lambda: run_dflux_guarded_solver_approved(solver_run_dir=solver_run_dir))
+
+    def monitor_dflux_guarded_solver_run(self, solver_run_dir: str | Path) -> dict[str, Any]:
+        from abqpilot.solver import monitor_dflux_guarded_solver_run
+
+        return self._safe("monitor_dflux_guarded_solver_run", lambda: monitor_dflux_guarded_solver_run(solver_run_dir=solver_run_dir))
+
+    def intake_dflux_guarded_solver_output(self, solver_run_dir: str | Path) -> dict[str, Any]:
+        from abqpilot.solver import intake_dflux_guarded_solver_output
+
+        return self._safe("intake_dflux_guarded_solver_output", lambda: intake_dflux_guarded_solver_output(solver_run_dir=solver_run_dir))
+
+    def report_dflux_guarded_solver_run(self, solver_run_dir: str | Path) -> dict[str, Any]:
+        from abqpilot.solver import report_dflux_guarded_solver_run
+
+        return self._safe("report_dflux_guarded_solver_run", lambda: report_dflux_guarded_solver_run(solver_run_dir=solver_run_dir))
 
     def open_artifact_folder(self, path: str | Path) -> dict[str, Any]:
         target = Path(path)

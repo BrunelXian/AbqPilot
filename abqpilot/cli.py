@@ -20,16 +20,26 @@ from abqpilot.diagnostics import (
     load_abqjobpilot_record_by_job_id,
     load_abqjobpilot_report,
 )
+from abqpilot.guards import run_model_condition_guard
+from abqpilot.guards.model_condition_schema import parse_target_change
 from abqpilot.odb import OdbMetricsExtractor
 from abqpilot.patching.equivalent_real_odb_stage import run_stage3_9c_equivalent_odb
+from abqpilot.patching.dflux_lifecycle_preview import preview_dflux_deactivation_patch_stage
 from abqpilot.patching.real_sanity_base_candidate import create_real_sanity_base_patch_candidate
 from abqpilot.repair import propose_solver_failure_repair
 from abqpilot.solver import (
+    DFLUX_APPROVAL_PHRASE,
     approve_solver_run,
+    approve_dflux_guarded_solver_run,
+    intake_dflux_guarded_solver_output,
     intake_solver_run_output,
+    monitor_dflux_guarded_solver_run,
     monitor_solver_run,
+    prepare_dflux_guarded_solver_run,
     prepare_solver_run,
+    report_dflux_guarded_solver_run,
     report_solver_run,
+    run_dflux_guarded_solver_approved,
     run_solver_approved,
 )
 from abqpilot.tools.diff_guard_tool import DiffGuard
@@ -169,6 +179,49 @@ def command_list_abqjobpilot_records(
         verdict="ABQJOBPILOT_RECORDS_LISTED",
         success=True,
         details=details,
+    )
+    write_result_json(result, result_json)
+    return result
+
+
+def command_preview_dflux_deactivation_patch(
+    source_inp: str | Path,
+    output_dir: str | Path | None = None,
+    scan_step: str = "step_scan_00",
+    cooling_step: str = "Step_cool_00",
+    load_name: str = "load_body_hflux_00",
+    compare_successful_job_dir: str | Path | None = None,
+    result_json: str | Path | None = None,
+) -> dict[str, Any]:
+    result = preview_dflux_deactivation_patch_stage(
+        source_inp=source_inp,
+        output_dir=output_dir,
+        scan_step=scan_step,
+        cooling_step=cooling_step,
+        load_name=load_name,
+        compare_successful_job_dir=compare_successful_job_dir,
+    )
+    write_result_json(result, result_json)
+    return result
+
+
+def command_run_model_condition_guard(
+    source_jnl: str | Path,
+    source_inp: str | Path,
+    candidate_inp: str | Path,
+    solver_inp: str | Path | None = None,
+    output_dir: str | Path | None = None,
+    target_change: str | None = None,
+    result_json: str | Path | None = None,
+) -> dict[str, Any]:
+    target = parse_target_change(target_change) if target_change else None
+    result = run_model_condition_guard(
+        source_jnl=source_jnl,
+        source_inp=source_inp,
+        candidate_inp=candidate_inp,
+        solver_inp=solver_inp,
+        output_dir=output_dir,
+        declared_target_changes=[target] if target else [],
     )
     write_result_json(result, result_json)
     return result
@@ -1314,6 +1367,30 @@ def build_parser() -> argparse.ArgumentParser:
     preview_patch_parser.add_argument("--force-no-write", action="store_true")
     preview_patch_parser.add_argument("--result-json", default=None)
 
+    dflux_preview = subparsers.add_parser(
+        "preview-dflux-deactivation-patch",
+        help="Create guarded DFLUX deactivation reset preview INP",
+    )
+    dflux_preview.add_argument("--source-inp", required=True)
+    dflux_preview.add_argument("--output-dir", default=None)
+    dflux_preview.add_argument("--scan-step", default="step_scan_00")
+    dflux_preview.add_argument("--cooling-step", default="Step_cool_00")
+    dflux_preview.add_argument("--load-name", default="load_body_hflux_00")
+    dflux_preview.add_argument("--compare-successful-job-dir", default=None)
+    dflux_preview.add_argument("--result-json", default=None)
+
+    mcp_guard = subparsers.add_parser(
+        "run-model-condition-guard",
+        help="Run Model Condition Preservation Guard across JNL/source/candidate/solver INP evidence",
+    )
+    mcp_guard.add_argument("--source-jnl", required=True)
+    mcp_guard.add_argument("--source-inp", required=True)
+    mcp_guard.add_argument("--candidate-inp", required=True)
+    mcp_guard.add_argument("--solver-inp", default=None)
+    mcp_guard.add_argument("--output-dir", default=None)
+    mcp_guard.add_argument("--target-change", default=None)
+    mcp_guard.add_argument("--result-json", default=None)
+
     queue_patch = subparsers.add_parser("queue-patch-preview", help="Run guarded patch candidate JobPilot queue workflow")
     queue_patch.add_argument("--task-dir", default=None)
     queue_patch.add_argument("--patch-preview-dir", default=None)
@@ -1405,6 +1482,45 @@ def build_parser() -> argparse.ArgumentParser:
     report_solver.add_argument("--runtime-config", default=None)
     report_solver.add_argument("--baseline-odb", default=None)
     report_solver.add_argument("--result-json", default=None)
+
+    prepare_dflux_solver = subparsers.add_parser(
+        "prepare-dflux-guarded-solver-run",
+        help="Prepare a controlled solver run gated by Stage 4.3 DFLUX lifecycle validation",
+    )
+    prepare_dflux_solver.add_argument("--preview-inp", required=True)
+    prepare_dflux_solver.add_argument("--validation-json", required=True)
+    prepare_dflux_solver.add_argument("--output-root", default=None)
+    prepare_dflux_solver.add_argument("--cpus", type=int, default=14)
+    prepare_dflux_solver.add_argument("--abaqus-command", default=None)
+    prepare_dflux_solver.add_argument("--result-json", default=None)
+
+    approve_dflux_solver = subparsers.add_parser(
+        "approve-dflux-guarded-solver-run",
+        help="Create approval token for a DFLUX-guarded controlled solver run",
+    )
+    approve_dflux_solver.add_argument("--solver-run-dir", required=True)
+    approve_dflux_solver.add_argument("--approval-phrase", required=True)
+    approve_dflux_solver.add_argument("--approved-by", default="human")
+    approve_dflux_solver.add_argument("--expires-hours", type=float, default=24)
+    approve_dflux_solver.add_argument("--result-json", default=None)
+
+    run_dflux_solver = subparsers.add_parser("run-dflux-guarded-solver-approved", help="Run approved DFLUX-guarded controlled solver")
+    run_dflux_solver.add_argument("--solver-run-dir", required=True)
+    run_dflux_solver.add_argument("--approval-token", default=None)
+    run_dflux_solver.add_argument("--timeout-seconds", type=int, default=7200)
+    run_dflux_solver.add_argument("--result-json", default=None)
+
+    monitor_dflux_solver = subparsers.add_parser("monitor-dflux-guarded-solver-run", help="Monitor DFLUX-guarded solver run")
+    monitor_dflux_solver.add_argument("--solver-run-dir", required=True)
+    monitor_dflux_solver.add_argument("--result-json", default=None)
+
+    intake_dflux_solver = subparsers.add_parser("intake-dflux-guarded-solver-output", help="Intake DFLUX-guarded solver output after diagnosis")
+    intake_dflux_solver.add_argument("--solver-run-dir", required=True)
+    intake_dflux_solver.add_argument("--result-json", default=None)
+
+    report_dflux_solver = subparsers.add_parser("report-dflux-guarded-solver-run", help="Report DFLUX-guarded solver metrics after intake")
+    report_dflux_solver.add_argument("--solver-run-dir", required=True)
+    report_dflux_solver.add_argument("--result-json", default=None)
 
     diagnose_job = subparsers.add_parser("diagnose-job-output", help="Diagnose Abaqus job logs and ODB acceptability")
     diagnose_job.add_argument("--job-dir", default=None)
@@ -1539,6 +1655,26 @@ def main(argv: list[str] | None = None) -> int:
             force_no_write=args.force_no_write,
             result_json=args.result_json,
         )
+    elif args.command == "preview-dflux-deactivation-patch":
+        result = command_preview_dflux_deactivation_patch(
+            source_inp=args.source_inp,
+            output_dir=args.output_dir,
+            scan_step=args.scan_step,
+            cooling_step=args.cooling_step,
+            load_name=args.load_name,
+            compare_successful_job_dir=args.compare_successful_job_dir,
+            result_json=args.result_json,
+        )
+    elif args.command == "run-model-condition-guard":
+        result = command_run_model_condition_guard(
+            source_jnl=args.source_jnl,
+            source_inp=args.source_inp,
+            candidate_inp=args.candidate_inp,
+            solver_inp=args.solver_inp,
+            output_dir=args.output_dir,
+            target_change=args.target_change,
+            result_json=args.result_json,
+        )
     elif args.command == "queue-patch-preview":
         result = command_queue_patch_preview(
             task_dir=args.task_dir,
@@ -1639,6 +1775,39 @@ def main(argv: list[str] | None = None) -> int:
             runtime_config=args.runtime_config or Path(PROJECT_ROOT) / "abqpilot" / "configs" / "abaqus_runtime.yaml",
             baseline_odb=args.baseline_odb or Path(PROJECT_ROOT) / "CAE_model" / "sanity_base" / "sanity_base_power_1x.odb",
         )
+        write_result_json(result, args.result_json)
+    elif args.command == "prepare-dflux-guarded-solver-run":
+        result = prepare_dflux_guarded_solver_run(
+            preview_inp=args.preview_inp,
+            validation_json=args.validation_json,
+            output_root=args.output_root or Path(PROJECT_ROOT) / "runs" / "stage4_4_dflux_deactivated_controlled_solver_validation",
+            cpus=args.cpus,
+            abaqus_command=args.abaqus_command or r"D:\ABAQUS2024\Commands\abq2024.bat",
+        )
+        write_result_json(result, args.result_json)
+    elif args.command == "approve-dflux-guarded-solver-run":
+        result = approve_dflux_guarded_solver_run(
+            solver_run_dir=args.solver_run_dir,
+            approval_phrase=args.approval_phrase,
+            approved_by=args.approved_by,
+            expires_hours=args.expires_hours,
+        )
+        write_result_json(result, args.result_json)
+    elif args.command == "run-dflux-guarded-solver-approved":
+        result = run_dflux_guarded_solver_approved(
+            solver_run_dir=args.solver_run_dir,
+            approval_token=args.approval_token,
+            timeout_s=args.timeout_seconds,
+        )
+        write_result_json(result, args.result_json)
+    elif args.command == "monitor-dflux-guarded-solver-run":
+        result = monitor_dflux_guarded_solver_run(args.solver_run_dir)
+        write_result_json(result, args.result_json)
+    elif args.command == "intake-dflux-guarded-solver-output":
+        result = intake_dflux_guarded_solver_output(args.solver_run_dir)
+        write_result_json(result, args.result_json)
+    elif args.command == "report-dflux-guarded-solver-run":
+        result = report_dflux_guarded_solver_run(args.solver_run_dir)
         write_result_json(result, args.result_json)
     elif args.command == "diagnose-job-output":
         result = command_diagnose_job_output(
@@ -1836,6 +2005,28 @@ def _print_result(result: dict[str, Any]) -> None:
         print(f"solver_submitted={details.get('solver_submitted')}")
         print(f"job_enqueued={details.get('job_enqueued')}")
         print(f"artifact_dir={result.get('output_paths', {}).get('artifact_dir')}")
+    elif command == "preview-dflux-deactivation-patch":
+        print(f"preview_status={details.get('verdict')}")
+        print(f"inserted_keyword={details.get('inserted_keyword')}")
+        print(f"source_inp_unchanged={details.get('source_inp_unchanged')}")
+        print(f"cooling_step_has_dflux_op_new={details.get('cooling_step_has_dflux_op_new')}")
+        print(f"scan_step_bf_preserved={details.get('scan_step_bf_preserved')}")
+        print(f"unrelated_changes_count={details.get('unrelated_changes_count')}")
+        print(f"run_solver_now={details.get('run_solver_now')}")
+        print(f"artifact_dir={result.get('output_paths', {}).get('artifact_dir')}")
+    elif command == "run-model-condition-guard":
+        print(f"guard_status={details.get('guard_status')}")
+        print(f"eligible_for_solver={details.get('eligible_for_solver')}")
+        print(f"target_patch_isolation={details.get('target_patch_isolation', {}).get('status')}")
+        for finding in details.get("condition_findings", [])[:10]:
+            print(
+                "finding="
+                f"category={finding.get('category')} "
+                f"condition={finding.get('condition_name')} "
+                f"status={finding.get('status')} "
+                f"code={finding.get('finding_code')}"
+            )
+        print(f"artifact_dir={result.get('output_paths', {}).get('artifact_dir')}")
     elif command == "queue-patch-preview":
         print(f"workflow_status={details.get('workflow_status')}")
         print(f"patch_type={details.get('patch_type')}")
@@ -1987,6 +2178,61 @@ def _print_result(result: dict[str, Any]) -> None:
         print(f"comparison_available={details.get('comparison_available')}")
         print(f"opened_odb_only_via_gated_extractor={details.get('opened_odb_only_via_gated_extractor')}")
         print(f"submitted_solver={details.get('submitted_solver')}")
+        print(f"queue_runner_launched={details.get('queue_runner_launched')}")
+        print(f"artifact_dir={result.get('output_paths', {}).get('artifact_dir')}")
+    elif command == "prepare-dflux-guarded-solver-run":
+        print(f"dflux_lifecycle_gate={details.get('dflux_lifecycle_guard')}")
+        print(f"solver_run_dir={details.get('solver_run_dir')}")
+        print(f"preview_inp={details.get('preview_inp')}")
+        print(f"solver_inp={details.get('solver_inp')}")
+        print(f"job_name={details.get('job_name')}")
+        print(f"expected_odb_path={details.get('expected_odb_path')}")
+        print(f"eligible_for_solver_after_human_approval={details.get('eligible_for_solver_after_human_approval')}")
+        print(f"solver_run_allowed_without_approval={details.get('solver_run_allowed_without_approval')}")
+        print(f"static_validator={details.get('static_validator')}")
+        print(f"diff_guard={details.get('diff_guard')}")
+        print(f"physics_guard={details.get('physics_guard')}")
+        print(f"dflux_lifecycle_validator={details.get('dflux_lifecycle_validator')}")
+        print(f"cooling_step_has_dflux_op_new={details.get('cooling_step_has_dflux_op_new')}")
+        print(f"unrelated_changes_count={details.get('unrelated_changes_count')}")
+        print(f"artifact_dir={result.get('output_paths', {}).get('artifact_dir')}")
+    elif command == "approve-dflux-guarded-solver-run":
+        print(f"approval_status={details.get('approval_status')}")
+        print(f"approval_token_path={details.get('approval_token_path')}")
+    elif command == "run-dflux-guarded-solver-approved":
+        print(f"solver_launched={details.get('solver_launched')}")
+        print(f"solver_run={details.get('solver_run')}")
+        print(f"return_code={details.get('return_code')}")
+        print(f"monitor_status={details.get('monitor_status')}")
+        print(f"diagnosis_status={details.get('diagnosis_status')}")
+        print(f"odb_acceptable_for_metrics={details.get('odb_acceptable_for_metrics')}")
+        print(f"expected_odb_exists={details.get('expected_odb_exists')}")
+        print(f"queue_runner_launched={details.get('queue_runner_launched')}")
+        print(f"odb_opened={details.get('odb_opened')}")
+        print(f"artifact_dir={result.get('output_paths', {}).get('artifact_dir')}")
+    elif command == "monitor-dflux-guarded-solver-run":
+        print(f"monitor_status={details.get('status')}")
+        print(f"diagnosis_status={details.get('diagnosis_status')}")
+        print(f"failure_category={details.get('failure_category')}")
+        print(f"odb_acceptable_for_metrics={details.get('odb_acceptable_for_metrics')}")
+        print(f"expected_odb_exists={details.get('odb_exists')}")
+        print(f"lock_exists={details.get('lock_exists')}")
+        print(f"artifact_dir={result.get('output_paths', {}).get('artifact_dir')}")
+    elif command == "intake-dflux-guarded-solver-output":
+        print(f"monitor_status={details.get('monitor_status')}")
+        print(f"diagnosis_status={details.get('diagnosis_status')}")
+        print(f"odb_acceptable_for_metrics={details.get('odb_acceptable_for_metrics')}")
+        print(f"solver_output_accepted={details.get('solver_output_accepted')}")
+        print(f"accepted_odb_path={details.get('accepted_odb_path')}")
+        print(f"opened_odb={details.get('opened_odb')}")
+        print(f"queue_runner_launched={details.get('queue_runner_launched')}")
+        print(f"artifact_dir={result.get('output_paths', {}).get('artifact_dir')}")
+    elif command == "report-dflux-guarded-solver-run":
+        print(f"evaluation_verdict={details.get('evaluation_verdict') or details.get('verdict')}")
+        print(f"solver_metrics_available={details.get('solver_metrics_available')}")
+        print(f"reference_metrics_available={details.get('reference_metrics_available')}")
+        print(f"comparison_available={details.get('comparison_available')}")
+        print(f"opened_odb_only_via_gated_extractor={details.get('opened_odb_only_via_gated_extractor')}")
         print(f"queue_runner_launched={details.get('queue_runner_launched')}")
         print(f"artifact_dir={result.get('output_paths', {}).get('artifact_dir')}")
     elif command == "diagnose-job-output":

@@ -71,26 +71,7 @@ def run_solver_approved(
         "lock_exists_after_completion": False,
         "errors": [],
     }
-    try:
-        completed = subprocess.run(
-            command,
-            cwd=run_dir,
-            capture_output=True,
-            text=True,
-            timeout=timeout_s,
-            shell=False,
-        )
-        run_report["return_code"] = completed.returncode
-        run_report["stdout_tail"] = _tail(completed.stdout)
-        run_report["stderr_tail"] = _tail(completed.stderr)
-    except subprocess.TimeoutExpired as exc:
-        run_report["return_code"] = None
-        run_report["stdout_tail"] = _tail(exc.stdout or "")
-        run_report["stderr_tail"] = _tail(exc.stderr or "")
-        run_report["errors"].append(f"timeout after {timeout_s}s")
-    except OSError as exc:
-        run_report["solver_launched"] = False
-        run_report["errors"].append(str(exc))
+    run_report.update(execute_controlled_abaqus_command(command, run_dir, timeout_s))
 
     monitor = classify_solver_run(run_dir)
     run_report["monitor_status"] = monitor["status"]
@@ -110,3 +91,34 @@ def run_solver_approved(
 
 def _tail(text: str, limit: int = 4000) -> str:
     return text[-limit:] if len(text) > limit else text
+
+
+def execute_controlled_abaqus_command(command: list[str], cwd: str | Path, timeout_s: int) -> dict[str, Any]:
+    report: dict[str, Any] = {
+        "return_code": None,
+        "stdout_tail": "",
+        "stderr_tail": "",
+        "solver_launched": True,
+        "errors": [],
+    }
+    try:
+        completed = subprocess.run(
+            command,
+            cwd=Path(cwd),
+            capture_output=True,
+            text=True,
+            timeout=timeout_s,
+            shell=False,
+        )
+        report["return_code"] = completed.returncode
+        report["stdout_tail"] = _tail(completed.stdout)
+        report["stderr_tail"] = _tail(completed.stderr)
+    except subprocess.TimeoutExpired as exc:
+        report["return_code"] = None
+        report["stdout_tail"] = _tail(exc.stdout or "")
+        report["stderr_tail"] = _tail(exc.stderr or "")
+        report["errors"].append(f"timeout after {timeout_s}s")
+    except OSError as exc:
+        report["solver_launched"] = False
+        report["errors"].append(str(exc))
+    return report

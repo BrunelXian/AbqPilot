@@ -161,6 +161,12 @@ Stage 4.2 adds `Propose Solver Failure Repair`. It consumes the Stage 4.1 diagno
 
 Stage 4.1B adds safe abqjobpilot record diagnosis actions. `List abqjobpilot Job Records` reads the runtime record files without mutation. `Diagnose from abqjobpilot Record` uses abqjobpilot's structured job paths as the execution record authority, then lets AbqPilot apply ODB validity and failure diagnosis. These actions do not launch QueueRunner, do not open the abqjobpilot GUI, do not submit Abaqus, and do not open ODB files directly.
 
+Stage 4.3 adds `Preview DFLUX Deactivation Patch`. It creates a preview INP copy with explicit `*Dflux, OP=NEW` in `Step_cool_00`, displays validation status, unrelated changes, human-review requirement, and next allowed action. It does not apply patches in place, run solver, queue jobs, launch Abaqus/CAE, launch QueueRunner, or open ODB files.
+
+Stage 4.4 adds DFLUX-guarded solver actions: `Prepare DFLUX-Guarded Solver Run`, `Approve DFLUX-Guarded Solver Run`, `Run Approved DFLUX-Guarded Solver`, `Monitor DFLUX-Guarded Solver`, `Intake DFLUX-Guarded Solver Output`, and `Report DFLUX-Guarded Solver Run`. Preparation enforces the Stage 4.3 DFLUX lifecycle guard before creating the solver run directory. The run action still requires a DFLUX-specific approval token and does not expose arbitrary Abaqus commands, QueueRunner launch, abqjobpilot GUI launch, uncontrolled ODB opening, auto retry, or LLM execution authority.
+
+Stage 4.5 adds `Run Model Condition Preservation Guard`. It displays source JNL, source INP, candidate INP, solver INP, declared target change, guard status, condition findings, target patch isolation, solver eligibility, and recommended actions. It does not run solver, open ODB, auto-repair, or auto-retry.
+
 ## Workflow Presets
 
 GUI Beta provides safe preset descriptions:

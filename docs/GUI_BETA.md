@@ -40,6 +40,14 @@ Visible safe actions:
 - Preview Patch Context
 - Propose Patch with Real LLM
 - Preview Guarded Patch
+- Prepare Controlled Solver Run
+- Approve Controlled Solver Run
+- Run Approved Solver
+- Monitor Solver Run
+- Diagnose Job / ODB Output
+- Propose Solver Failure Repair
+- Intake Solver Output
+- Report Solver Run
 
 Each action goes through `GuiActionController`, catches exceptions, and returns a structured result dictionary. The controller calls existing AbqPilot functions rather than introducing new runtime paths.
 
@@ -47,11 +55,13 @@ Each action goes through `GuiActionController`, catches exceptions, and returns 
 
 Dangerous workflow actions remain disabled in GUI Beta:
 
-- Abaqus solver execution
+- arbitrary Abaqus solver execution
 - external queue-worker launch
 - LLM agent execution
 - automatic INP repair
 - patch application
+- batch auto loops
+- arbitrary command execution
 
 Disabled actions return `ACTION_BLOCKED_BY_SAFETY_BOUNDARY`.
 
@@ -123,6 +133,34 @@ Stage 3.8 adds safe patch-to-queue actions:
 
 These actions operate only on validated Stage 3.7 preview artifacts. The approval token is candidate-specific and is not interchangeable with the original task enqueue token. Real queue-only enqueue remains guarded by the existing abqjobpilot adapter and approval checks. The GUI does not provide solver execution, external queue-worker launch, ODB opening, LLM execution authority, or automatic closed-loop repair.
 
+Stage 3.9 adds patched-job continuation actions:
+
+- Poll Patched Job Status
+- Intake Patched Job Output
+- Extract Patched Job Metrics
+- Report Patched Job
+
+These actions read patch queue workflow artifacts and existing output evidence. Output intake accepts only an existing unlocked `.odb` path and records it without opening the file. Metrics extraction remains blocked until output is accepted and then uses only the existing gated metrics extractor. The GUI still does not start solver execution, launch QueueRunner, or open ODB files directly.
+
+Stage 4.0 adds controlled solver automation actions:
+
+- Prepare Controlled Solver Run
+- Approve Controlled Solver Run
+- Run Approved Solver
+- Monitor Solver Run
+- Diagnose Job / ODB Output
+- Propose Solver Failure Repair
+- Intake Solver Output
+- Report Solver Run
+
+These actions operate only on a validated sanity-base-derived candidate INP. The preparation step writes a fixed command preview for one Abaqus job and checks traceability, hashes, changed-line counts, StaticValidator, DiffGuard, PhysicsGuard, CPU limit, and run-directory safety. Solver launch requires the exact solver approval phrase and a token bound to the candidate, source, command preview, expected ODB, guard results, and CPU count. The GUI does not expose arbitrary command text, extra Abaqus flags, batch loops, QueueRunner launch, abqjobpilot GUI launch, or LLM execution authority.
+
+Stage 4.1 adds `Diagnose Job / ODB Output`. It reads Abaqus text logs/status files and ODB/lock metadata, displays diagnosis status, failure category, ODB acceptability, completion evidence, failure evidence, important error lines, and the recommended next action. It does not launch solver execution and does not open ODB files.
+
+Stage 4.2 adds `Propose Solver Failure Repair`. It consumes the Stage 4.1 diagnosis artifact and displays diagnosis status, failure category, recommended repair type, allowed and forbidden patch scopes, human-review requirement, and next allowed action. It does not apply repairs, mutate INP files, run solvers, enqueue jobs, open ODB files, or use LLM execution authority.
+
+Stage 4.1B adds safe abqjobpilot record diagnosis actions. `List abqjobpilot Job Records` reads the runtime record files without mutation. `Diagnose from abqjobpilot Record` uses abqjobpilot's structured job paths as the execution record authority, then lets AbqPilot apply ODB validity and failure diagnosis. These actions do not launch QueueRunner, do not open the abqjobpilot GUI, do not submit Abaqus, and do not open ODB files directly.
+
 ## Workflow Presets
 
 GUI Beta provides safe preset descriptions:
@@ -138,4 +176,4 @@ Presets describe recommended next actions. They do not automatically execute an 
 
 ## Safety Boundary
 
-GUI Beta does not submit Abaqus jobs, does not start external queue workers, does not open the abqjobpilot GUI, does not add LangGraph/Codex runtime integration, and does not mutate INP files from repair plans or LLM patch proposals. Patch-to-queue supports preflight and dry-run preview by default; real queue-only enqueue requires a candidate approval token. Real LLM reasoning and patch proposal review are optional, explicitly confirmed, read-only, and advisory.
+GUI Beta does not expose arbitrary Abaqus commands, does not start external queue workers, does not open the abqjobpilot GUI, does not add LangGraph/Codex runtime integration, and does not mutate INP files from repair plans or LLM patch proposals. Stage 4.0 controlled solver launch is limited to one validated sanity-base-derived candidate with a solver-specific approval token and a fixed command preview. Patch-to-queue supports preflight and dry-run preview by default; real queue-only enqueue requires a candidate approval token. Real LLM reasoning and patch proposal review are optional, explicitly confirmed, read-only, and advisory.

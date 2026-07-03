@@ -248,6 +248,102 @@ D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli poll-patch
 
 Stage 3.8A production patch queue smoke confirmed a controlled real queue-only enqueue for a validated heat-flux patch candidate. The result showed `queue_only=True`, `queue_file_mutated=True`, `solver_started=False`, `runner_started=False`, `gui_required=False`, and `forbidden_mutations_detected=False`. Runtime snapshots showed only `D:\Projects\abqjobpilot_dev\runtime\queue.json` changed; `live_status.json`, `runtime\reports`, and solver output files remained unchanged. Status polling returned `JOB_QUEUED` without opening ODB.
 
+Stage 3.9 patched job status and completed-output intake:
+
+```powershell
+D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli poll-patch-queue --workflow-dir D:\Projects\AbqPilot-v2\runs\stage3_7_heat_flux_fixture_task\patch_queue_workflows\queue_20260630_224336_749584
+```
+
+```powershell
+D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli intake-patched-job-output --workflow-dir D:\Projects\AbqPilot-v2\runs\stage3_7_heat_flux_fixture_task\patch_queue_workflows\queue_20260630_224336_749584
+```
+
+```powershell
+D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli intake-patched-job-output --workflow-dir <patch_queue_workflow_dir> --manual-odb-path <existing_unlocked_patched.odb>
+```
+
+```powershell
+D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli extract-patched-job-metrics --workflow-dir <patch_queue_workflow_dir>
+```
+
+```powershell
+D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli report-patched-job --workflow-dir <patch_queue_workflow_dir>
+```
+
+`poll-patch-queue` remains read-only and normalizes patch queue status to `JOB_QUEUED`, `JOB_RUNNING`, `JOB_OUTPUTS_READY`, `JOB_ODB_MISSING`, `JOB_FAILED`, `JOB_LOCKED`, `JOB_UNKNOWN`, or `ABQJOBPILOT_UNAVAILABLE`. `intake-patched-job-output` accepts only existing unlocked `.odb` files and records evidence without opening ODB. `extract-patched-job-metrics` is blocked until the intake gate accepts an output and then uses only the existing gated metrics extractor. `report-patched-job` writes a safe report even when the job is still queued or metrics/reference data are unavailable.
+
+Stage 3.9B real sanity-base candidate recovery:
+
+```powershell
+D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli recover-sanity-base-patch-candidate
+```
+
+This command reclassifies the Stage 3.7/3.8/3.8A tiny patch candidate as workflow-only evidence, copies the real Stage 1.6A sanity-base exported INP into `runs\stage3_9b_real_sanity_base_patch_candidate\source_sanity_base_export.inp`, writes `candidate_sanity_base_power_x2.inp`, and changes only `inst_plate.set-body-1, BF, 1e+10` to `inst_plate.set-body-1, BF, 2e+10`. It runs StaticValidator, DiffGuard, and PhysicsGuard, writes classification and summary artifacts, and does not submit a solver, enqueue a job, launch QueueRunner, or open ODB.
+
+Stage 3.9C equivalent real ODB intake, metrics, and report:
+
+```powershell
+D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli run-stage3-9c-equivalent-odb
+```
+
+Stage 3.9C uses an existing manually completed, evidence-equivalent 2x ODB as the real sanity-base-derived candidate output. This is not a new solver run. This is not a new queue job. The ODB is accepted only because Stage 3.9B established traceability and equivalence. Metrics are extracted only through the existing gated ODB metrics extractor, and the report compares the equivalent 2x result against the existing 1x baseline when both metrics are available.
+
+Stage 4.0 controlled single-job Abaqus solver automation:
+
+```powershell
+D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli prepare-solver-run --candidate-inp D:\Projects\AbqPilot-v2\runs\stage3_9b_real_sanity_base_patch_candidate\candidate_sanity_base_power_x2.inp --source-inp D:\Projects\AbqPilot-v2\runs\stage3_9b_real_sanity_base_patch_candidate\source_sanity_base_export.inp --evidence-dir D:\Projects\AbqPilot-v2\runs\stage3_9b_real_sanity_base_patch_candidate --cpus 14
+```
+
+```powershell
+D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli approve-solver-run --solver-run-dir <solver_run_dir> --approved-by human --approval-phrase I_APPROVE_ABQPILOT_CONTROLLED_ABAQUS_SOLVER_RUN --expires-hours 24
+```
+
+```powershell
+D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli run-solver-approved --solver-run-dir <solver_run_dir> --approval-token <solver_run_dir>\approvals\solver_run_approval_token.json
+```
+
+```powershell
+D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli monitor-solver-run --solver-run-dir <solver_run_dir>
+D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli intake-solver-run-output --solver-run-dir <solver_run_dir>
+D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli report-solver-run --solver-run-dir <solver_run_dir>
+```
+
+Stage 4.0 accepts only validated sanity-base-derived candidate INPs with StaticValidator, DiffGuard, and PhysicsGuard all passing and zero unrelated changes. The command preview is fixed to the approved Abaqus executable and exact argument shape, with `cpus` capped at 14, no arbitrary extra flags, and no `shell=True`. Solver launch requires the exact approval phrase and a token bound to the candidate hash, source hash, command preview, run directory, expected ODB, guard results, and CPU count. It does not launch QueueRunner, does not run abqjobpilot GUI, does not let an LLM execute actions, and still uses the existing gated ODB metrics extractor after a completed ODB is accepted.
+
+Stage 4.1 planned Abaqus job/ODB failure diagnosis will use the taxonomy at `docs\diagnostics\ABQPILOT_ABAQUS_JOB_ODB_FAILURE_DIAGNOSIS_TAXONOMY.md` as its design reference for job failure modes, completion evidence, partial ODB handling, and ODB validity classification.
+
+Stage 4.1 deterministic job/ODB diagnosis:
+
+```powershell
+D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli diagnose-job-output --job-dir <solver_run_dir> --job-name <job_name>
+```
+
+`diagnose-job-output` reads `.sta`, `.dat`, `.msg`, `.log`, `.com`, `.prt`, `.lck`, and ODB file metadata only. It does not open ODB files. ODB existence alone is not sufficient for metrics intake; `JOB_COMPLETED_ODB_ACCEPTABLE` requires an existing ODB, no active lock, completion evidence, and no terminal failure evidence. Failed or partial ODBs are blocked from metrics extraction. `monitor-solver-run` and `intake-solver-run-output` use this diagnosis result.
+
+Stage 4.2 deterministic solver-failure repair proposal:
+
+```powershell
+D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli propose-solver-repair --solver-run-dir <solver_run_dir>
+```
+
+`propose-solver-repair` consumes `job_odb_diagnosis_result.json` and writes a schema-bound proposal under `<solver_run_dir>\solver_failure_repair_proposal\`. For convergence failures such as too many attempts, it may recommend solver-control repair types such as `step_increment_relaxation`, `minimum_increment_reduction`, or load-ramp smoothing for later guarded preview. It does not apply the repair, mutate INP, open ODB, enqueue jobs, run Abaqus, or use LLM execution authority.
+
+Stage 4.1B abqjobpilot-backed diagnosis:
+
+```powershell
+D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli list-abqjobpilot-records --abqjobpilot-runtime-dir D:\Projects\abqjobpilot_dev\runtime --max-results 20
+```
+
+```powershell
+D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli diagnose-job-output --abqjobpilot-report <report_json>
+```
+
+```powershell
+D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli diagnose-job-output --abqjobpilot-job-id <job_id> --abqjobpilot-runtime-dir D:\Projects\abqjobpilot_dev\runtime
+```
+
+Stage 4.1B treats abqjobpilot as the execution-record, lifecycle, and file-path authority. AbqPilot reads abqjobpilot records and referenced text logs read-only, inspects ODB existence/size/timestamps only, and then applies the deterministic Stage 4.1 ODB acceptability taxonomy. The command does not mutate `queue.json`, `live_status.json`, or `runtime\reports`, and ODB existence alone is never accepted as proof of successful completion.
+
 ```powershell
 D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli run-sanity-demo --config configs\sanity_demo_task.json --task-id demo_001 --resume
 ```
@@ -265,8 +361,7 @@ Every command prints a human-readable summary. Add `--result-json PATH` to write
 ## Safety Principles
 
 - The CLI does not call an LLM.
-- The CLI does not submit solver jobs.
-- Solver execution remains manual or a future approved backend.
+- Solver execution is unavailable through the ordinary pipeline and is only available in Stage 4.0 through the solver-specific approval-token gate for one validated sanity-base-derived candidate.
 - abqjobpilot dry-run enqueue is not real queue mutation and does not submit Abaqus.
 - Stage 2.6 is queue enqueue only; solver execution remains separate.
 - Stage 2.7 status polling and output discovery are read-only.
@@ -279,6 +374,12 @@ Every command prints a human-readable summary. Add `--result-json PATH` to write
 - Stage 3.6 LLM patch proposal is advisory only, requires confirmation for real providers, and cannot apply patches.
 - Stage 3.7 PatchBuilder preview is deterministic, validator-gated, and cannot submit/enqueue/run solvers.
 - Stage 3.8 Patch-to-queue reuses the existing guarded JobPilot adapter and requires candidate-specific approval before real queue-only enqueue.
+- Stage 3.9 patched-job intake reads status/output evidence only and blocks metrics until an existing unlocked ODB is accepted.
+- Stage 3.9B real candidate recovery uses the actual sanity-base export, not the toy fixture, and changes only the allowed BF heat-flux magnitude.
+- Stage 3.9C equivalent ODB intake accepts the existing manually completed 2x ODB only because Stage 3.9B traceability/equivalence evidence is present.
+- Stage 4.0 controlled solver automation supports one approved Abaqus job with a fixed command preview, no arbitrary flags, no QueueRunner, no LLM execution authority, and no uncontrolled ODB opening.
+- Stage 4.1 job/ODB diagnosis blocks partial ODBs and requires completion evidence before metrics extraction.
+- Stage 4.2 solver-failure repair proposal is advisory and deterministic; it does not apply repairs or run solvers.
 - ODB read is gated and metrics-only.
 - CAE export is allowed only through the existing writeInput gate.
 - GUI and reports consume CLI/task result JSON instead of reimplementing simulation-critical workflows.

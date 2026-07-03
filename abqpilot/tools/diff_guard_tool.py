@@ -56,6 +56,9 @@ class DiffGuard:
         base_marker = locate_single_heat_flux_marker(base_lines)
         gen_marker = locate_single_heat_flux_marker(gen_lines)
         if not base_marker["ok"] or not gen_marker["ok"]:
+            unmarked_report = _compare_single_unmarked_heat_flux_change(base_lines, gen_lines, report)
+            if unmarked_report is not None:
+                return unmarked_report
             report["errors"].append("missing or ambiguous editable heat flux marker")
             report["uncertainty"] = True
             return report
@@ -136,3 +139,68 @@ def _normalize_allowed_magnitude(lines: list[str], data_idx: int) -> list[str]:
         normalized[data_idx] = f"{match.group('prefix')}<ABQPILOT_HEAT_FLUX_MAGNITUDE>{match.group('suffix')}{newline}"
     return normalized
 
+
+def _compare_single_unmarked_heat_flux_change(
+    base_lines: list[str], gen_lines: list[str], report: dict
+) -> dict | None:
+    base_data_indices = _single_heat_flux_data_indices(base_lines)
+    gen_data_indices = _single_heat_flux_data_indices(gen_lines)
+    if len(base_data_indices) != 1 or len(gen_data_indices) != 1:
+        return None
+    if base_data_indices[0] != gen_data_indices[0]:
+        report["errors"].append("unmarked heat flux data line alignment changed")
+        report["uncertainty"] = True
+        return report
+
+    data_idx = base_data_indices[0]
+    forbidden_base = _forbidden_ranges(base_lines)
+    forbidden_gen = _forbidden_ranges(gen_lines)
+    normalized_base = _normalize_allowed_magnitude(base_lines, data_idx)
+    normalized_gen = _normalize_allowed_magnitude(gen_lines, data_idx)
+
+    for idx, (base_line, gen_line) in enumerate(zip(base_lines, gen_lines, strict=True)):
+        if base_line != gen_line:
+            in_forbidden = idx in forbidden_base or idx in forbidden_gen
+            if in_forbidden:
+                report["forbidden_changed"] = True
+            report["changed_lines"].append(
+                {
+                    "line_index": idx,
+                    "base": base_line.rstrip("\r\n"),
+                    "generated": gen_line.rstrip("\r\n"),
+                    "forbidden_section": in_forbidden,
+                }
+            )
+
+    if normalized_base != normalized_gen:
+        report["errors"].append("changes exceed the allowed unmarked heat flux magnitude token")
+
+    report["allowed"] = (
+        normalized_base == normalized_gen
+        and len(report["changed_lines"]) == 1
+        and report["changed_lines"][0]["line_index"] == data_idx
+        and not report["forbidden_changed"]
+        and not report["uncertainty"]
+        and not report["errors"]
+    )
+    report["unmarked_heat_flux_change"] = True
+    report["allowed_data_line_index"] = data_idx
+    return report
+
+
+def _single_heat_flux_data_indices(lines: list[str]) -> list[int]:
+    heat_keywords = {"*dsflux", "*cflux", "*dflux"}
+    indices: list[int] = []
+    for idx, line in enumerate(lines):
+        if _keyword_name(line) not in heat_keywords:
+            continue
+        for data_idx in range(idx + 1, len(lines)):
+            stripped = lines[data_idx].strip()
+            if stripped.startswith("*"):
+                break
+            if not stripped or stripped.startswith("**"):
+                continue
+            if NUMBER_RE.match(lines[data_idx].rstrip("\r\n")):
+                indices.append(data_idx)
+            break
+    return indices

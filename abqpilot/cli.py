@@ -13,7 +13,25 @@ from abqpilot.cae import CaeInpExporter
 from abqpilot.core.approval import APPROVAL_PHRASE, create_approval_token
 from abqpilot.core.task_config import load_task_config, safety_flags
 from abqpilot.core.task_result import make_task_result, write_json, write_result_json
+from abqpilot.diagnostics import (
+    diagnose_abqjobpilot_record,
+    diagnose_job_output,
+    list_abqjobpilot_records,
+    load_abqjobpilot_record_by_job_id,
+    load_abqjobpilot_report,
+)
 from abqpilot.odb import OdbMetricsExtractor
+from abqpilot.patching.equivalent_real_odb_stage import run_stage3_9c_equivalent_odb
+from abqpilot.patching.real_sanity_base_candidate import create_real_sanity_base_patch_candidate
+from abqpilot.repair import propose_solver_failure_repair
+from abqpilot.solver import (
+    approve_solver_run,
+    intake_solver_run_output,
+    monitor_solver_run,
+    prepare_solver_run,
+    report_solver_run,
+    run_solver_approved,
+)
 from abqpilot.tools.diff_guard_tool import DiffGuard
 from abqpilot.tools.odb_metrics_contract import write_odb_metrics_contract
 from abqpilot.tools.physics_guard_tool import PhysicsGuard
@@ -62,6 +80,104 @@ def command_status(config_path: str | Path | None = None, result_json: str | Pat
     )
     write_result_json(result, result_json)
     return result
+
+
+def command_diagnose_job_output(
+    job_dir: str | Path | None = None,
+    job_name: str | None = None,
+    dat: str | Path | None = None,
+    msg: str | Path | None = None,
+    sta: str | Path | None = None,
+    log: str | Path | None = None,
+    odb: str | Path | None = None,
+    lck: str | Path | None = None,
+    abqjobpilot_report: str | Path | None = None,
+    abqjobpilot_job_id: str | None = None,
+    abqjobpilot_runtime_dir: str | Path | None = None,
+    result_json: str | Path | None = None,
+) -> dict[str, Any]:
+    if abqjobpilot_report:
+        record = load_abqjobpilot_report(abqjobpilot_report)
+        artifact_dir = _abqjobpilot_diagnosis_artifact_dir(record)
+        diagnosis = diagnose_abqjobpilot_record(record, artifact_dir=artifact_dir, write_artifacts=True)
+    elif abqjobpilot_job_id and abqjobpilot_runtime_dir:
+        record = load_abqjobpilot_record_by_job_id(abqjobpilot_job_id, abqjobpilot_runtime_dir)
+        artifact_dir = _abqjobpilot_diagnosis_artifact_dir(record)
+        diagnosis = diagnose_abqjobpilot_record(record, artifact_dir=artifact_dir, write_artifacts=True)
+    else:
+        if not job_dir or not job_name:
+            raise SystemExit("diagnose-job-output requires --job-dir/--job-name or abqjobpilot record options")
+        diagnosis = diagnose_job_output(
+            job_dir=job_dir,
+            job_name=job_name,
+            dat=dat,
+            msg=msg,
+            sta=sta,
+            log=log,
+            odb=odb,
+            lck=lck,
+            write_artifacts=True,
+        )
+    result = make_task_result(
+        command="diagnose-job-output",
+        verdict=diagnosis["diagnosis_status"],
+        success=True,
+        details=diagnosis,
+        output_paths=diagnosis.get("artifact_paths", {}),
+    )
+    write_result_json(result, result_json)
+    return result
+
+
+def command_list_abqjobpilot_records(
+    abqjobpilot_runtime_dir: str | Path,
+    status: str | None = None,
+    job_name: str | None = None,
+    max_results: int | None = None,
+    result_json: str | Path | None = None,
+) -> dict[str, Any]:
+    records = list_abqjobpilot_records(
+        abqjobpilot_runtime_dir,
+        status=status,
+        job_name=job_name,
+        max_results=max_results,
+    )
+    details = {
+        "abqjobpilot_runtime_dir": str(abqjobpilot_runtime_dir),
+        "status_filter": status,
+        "job_name_filter": job_name,
+        "max_results": max_results,
+        "record_count": len(records),
+        "records": [
+            {
+                "job_id": record.get("job_id"),
+                "status": record.get("status"),
+                "record_kind": record.get("record_kind"),
+                "job_name": record.get("job_name"),
+                "inp_path": record.get("inp_path"),
+                "work_dir": record.get("work_dir"),
+                "report_path": record.get("record_path"),
+                "return_code": record.get("return_code"),
+                "fatal_reason": record.get("fatal_reason"),
+            }
+            for record in records
+        ],
+        "mutated_runtime": False,
+    }
+    result = make_task_result(
+        command="list-abqjobpilot-records",
+        verdict="ABQJOBPILOT_RECORDS_LISTED",
+        success=True,
+        details=details,
+    )
+    write_result_json(result, result_json)
+    return result
+
+
+def _abqjobpilot_diagnosis_artifact_dir(record: dict[str, Any]) -> Path:
+    job_key = record.get("job_id") or record.get("job_name") or "unknown_job"
+    safe = "".join(ch if ch.isalnum() or ch in {"_", "-"} else "_" for ch in str(job_key))
+    return PROJECT_ROOT / "runs" / "abqjobpilot_diagnoses" / safe
 
 
 def command_export_cae(
@@ -927,14 +1043,113 @@ def command_poll_patch_queue(
     abqjobpilot_root: str | Path | None = None,
     result_json: str | Path | None = None,
 ) -> dict[str, Any]:
-    from abqpilot.patching.patch_queue_workflow import poll_patch_queue
+    from abqpilot.patching.patched_job_intake import poll_patched_job_status
 
-    result = poll_patch_queue(workflow_dir=workflow_dir, abqjobpilot_root=abqjobpilot_root)
+    result = poll_patched_job_status(workflow_dir=workflow_dir, abqjobpilot_root=abqjobpilot_root)
     result["safety_flags"] = _stage2_safe_flags() | {
         "solver_submitted": False,
         "queue_runner_launched": False,
         "opened_odb": False,
     }
+    write_result_json(result, result_json)
+    return result
+
+
+def command_intake_patched_job_output(
+    workflow_dir: str | Path,
+    manual_odb_path: str | Path | None = None,
+    force_status_completed: bool = False,
+    result_json: str | Path | None = None,
+) -> dict[str, Any]:
+    from abqpilot.patching.patched_job_intake import intake_patched_job_output
+
+    result = intake_patched_job_output(
+        workflow_dir=workflow_dir,
+        manual_odb_path=manual_odb_path,
+        force_status_completed=force_status_completed,
+    )
+    result["safety_flags"] = _stage2_safe_flags() | {
+        "solver_submitted": False,
+        "queue_runner_launched": False,
+        "opened_odb": False,
+        "abqjobpilot_runtime_mutated": False,
+    }
+    write_result_json(result, result_json)
+    return result
+
+
+def command_extract_patched_job_metrics(
+    workflow_dir: str | Path,
+    config_path: str | Path | None = None,
+    result_json: str | Path | None = None,
+) -> dict[str, Any]:
+    from abqpilot.patching.patched_job_metrics import extract_patched_job_metrics
+
+    result = extract_patched_job_metrics(workflow_dir=workflow_dir, config_path=config_path)
+    result["safety_flags"] = _stage2_safe_flags() | {
+        "solver_submitted": False,
+        "queue_runner_launched": False,
+        "opened_odb_directly": False,
+        "uses_existing_gated_odb_extractor": True,
+    }
+    write_result_json(result, result_json)
+    return result
+
+
+def command_report_patched_job(
+    workflow_dir: str | Path,
+    result_json: str | Path | None = None,
+) -> dict[str, Any]:
+    from abqpilot.patching.patched_job_report import report_patched_job
+
+    result = report_patched_job(workflow_dir=workflow_dir)
+    result["safety_flags"] = _stage2_safe_flags() | {
+        "solver_submitted": False,
+        "queue_runner_launched": False,
+        "opened_odb_directly": False,
+    }
+    write_result_json(result, result_json)
+    return result
+
+
+def command_recover_sanity_base_patch_candidate(
+    out_dir: str | Path | None = None,
+    source_inp: str | Path | None = None,
+    result_json: str | Path | None = None,
+) -> dict[str, Any]:
+    summary = create_real_sanity_base_patch_candidate(
+        out_dir=out_dir or Path(PROJECT_ROOT) / "runs" / "stage3_9b_real_sanity_base_patch_candidate",
+        source_inp=source_inp
+        or Path(PROJECT_ROOT) / "runs" / "stage1_6a_cae_to_inp_export" / "sanity_base_v01_export.inp",
+    )
+    target_dir = Path(summary["source_inp_path"]).parent
+    success = summary.get("verdict") == "PASS_ABQPILOT_V2_STAGE3_9B_REAL_SANITY_BASE_PATCH_CANDIDATE_READY"
+    result = make_task_result(
+        command="recover-sanity-base-patch-candidate",
+        verdict=summary.get("verdict", "WARNING_STAGE3_9B_REAL_SANITY_BASE_SOURCE_NOT_FOUND"),
+        success=success,
+        output_paths={
+            "artifact_dir": str(target_dir),
+            "source_inp": summary.get("source_inp_path"),
+            "candidate_inp": summary.get("candidate_inp_path"),
+            "summary_json": str(target_dir / "real_sanity_base_patch_candidate_summary.json"),
+            "summary_md": str(target_dir / "real_sanity_base_patch_candidate_summary.md"),
+            "source_classification_report": str(target_dir / "source_classification_report.json"),
+            "patch_diff_report": str(target_dir / "patch_diff_report.json"),
+            "static_validation_report": str(target_dir / "static_validation_report.json"),
+            "diff_guard_report": str(target_dir / "diff_guard_report.json"),
+            "physics_guard_report": str(target_dir / "physics_guard_report.json"),
+        },
+        safety_flags=_stage2_safe_flags()
+        | {
+            "solver_submitted": False,
+            "queue_runner_launched": False,
+            "job_enqueued": False,
+            "opened_odb": False,
+        },
+        details=summary,
+        errors=[] if success else [summary.get("verdict", "Stage 3.9B did not pass")],
+    )
     write_result_json(result, result_json)
     return result
 
@@ -1121,6 +1336,103 @@ def build_parser() -> argparse.ArgumentParser:
     poll_patch_queue.add_argument("--abqjobpilot-root", default=None)
     poll_patch_queue.add_argument("--result-json", default=None)
 
+    patched_intake = subparsers.add_parser("intake-patched-job-output", help="Validate completed patched job output evidence")
+    patched_intake.add_argument("--workflow-dir", required=True)
+    patched_intake.add_argument("--manual-odb-path", default=None)
+    patched_intake.add_argument("--force-status-completed", action="store_true")
+    patched_intake.add_argument("--result-json", default=None)
+
+    patched_metrics = subparsers.add_parser("extract-patched-job-metrics", help="Run gated metrics path for accepted patched job output")
+    patched_metrics.add_argument("--workflow-dir", required=True)
+    patched_metrics.add_argument("--config", default=None)
+    patched_metrics.add_argument("--result-json", default=None)
+
+    patched_report = subparsers.add_parser("report-patched-job", help="Write patched job status/metrics report")
+    patched_report.add_argument("--workflow-dir", required=True)
+    patched_report.add_argument("--result-json", default=None)
+
+    recover_real_candidate = subparsers.add_parser(
+        "recover-sanity-base-patch-candidate",
+        help="Create a real sanity-base-derived heat-flux patch candidate and guard evidence",
+    )
+    recover_real_candidate.add_argument("--out-dir", default=None)
+    recover_real_candidate.add_argument("--source-inp", default=None)
+    recover_real_candidate.add_argument("--result-json", default=None)
+
+    stage3_9c = subparsers.add_parser(
+        "run-stage3-9c-equivalent-odb",
+        help="Accept equivalent sanity-base 2x ODB and run gated metrics/report artifacts",
+    )
+    stage3_9c.add_argument("--stage3-9b-dir", default=None)
+    stage3_9c.add_argument("--out-dir", default=None)
+    stage3_9c.add_argument("--equivalent-odb", default=None)
+    stage3_9c.add_argument("--reference-odb", default=None)
+    stage3_9c.add_argument("--runtime-config", default=None)
+    stage3_9c.add_argument("--result-json", default=None)
+
+    prepare_solver = subparsers.add_parser("prepare-solver-run", help="Prepare a controlled single-job Abaqus solver run")
+    prepare_solver.add_argument("--candidate-inp", required=True)
+    prepare_solver.add_argument("--source-inp", required=True)
+    prepare_solver.add_argument("--evidence-dir", required=True)
+    prepare_solver.add_argument("--cpus", type=int, default=14)
+    prepare_solver.add_argument("--run-root", default=None)
+    prepare_solver.add_argument("--abaqus-command", default=None)
+    prepare_solver.add_argument("--result-json", default=None)
+
+    approve_solver = subparsers.add_parser("approve-solver-run", help="Create approval token for a controlled solver run")
+    approve_solver.add_argument("--solver-run-dir", required=True)
+    approve_solver.add_argument("--approved-by", required=True)
+    approve_solver.add_argument("--approval-phrase", required=True)
+    approve_solver.add_argument("--expires-hours", type=float, default=24)
+    approve_solver.add_argument("--result-json", default=None)
+
+    run_solver = subparsers.add_parser("run-solver-approved", help="Run the approved controlled solver command")
+    run_solver.add_argument("--solver-run-dir", required=True)
+    run_solver.add_argument("--approval-token", default=None)
+    run_solver.add_argument("--timeout-seconds", type=int, default=7200)
+    run_solver.add_argument("--result-json", default=None)
+
+    monitor_solver = subparsers.add_parser("monitor-solver-run", help="Monitor a controlled solver run directory")
+    monitor_solver.add_argument("--solver-run-dir", required=True)
+    monitor_solver.add_argument("--result-json", default=None)
+
+    intake_solver_output = subparsers.add_parser("intake-solver-run-output", help="Accept completed controlled solver ODB output")
+    intake_solver_output.add_argument("--solver-run-dir", required=True)
+    intake_solver_output.add_argument("--result-json", default=None)
+
+    report_solver = subparsers.add_parser("report-solver-run", help="Extract gated metrics and report controlled solver output")
+    report_solver.add_argument("--solver-run-dir", required=True)
+    report_solver.add_argument("--runtime-config", default=None)
+    report_solver.add_argument("--baseline-odb", default=None)
+    report_solver.add_argument("--result-json", default=None)
+
+    diagnose_job = subparsers.add_parser("diagnose-job-output", help="Diagnose Abaqus job logs and ODB acceptability")
+    diagnose_job.add_argument("--job-dir", default=None)
+    diagnose_job.add_argument("--job-name", default=None)
+    diagnose_job.add_argument("--dat", default=None)
+    diagnose_job.add_argument("--msg", default=None)
+    diagnose_job.add_argument("--sta", default=None)
+    diagnose_job.add_argument("--log", default=None)
+    diagnose_job.add_argument("--odb", default=None)
+    diagnose_job.add_argument("--lck", default=None)
+    diagnose_job.add_argument("--abqjobpilot-report", default=None)
+    diagnose_job.add_argument("--abqjobpilot-job-id", default=None)
+    diagnose_job.add_argument("--abqjobpilot-runtime-dir", default=None)
+    diagnose_job.add_argument("--result-json", default=None)
+
+    list_abq_records = subparsers.add_parser("list-abqjobpilot-records", help="List abqjobpilot runtime job records read-only")
+    list_abq_records.add_argument("--abqjobpilot-runtime-dir", required=True)
+    list_abq_records.add_argument("--status", default=None)
+    list_abq_records.add_argument("--job-name", default=None)
+    list_abq_records.add_argument("--max-results", type=int, default=None)
+    list_abq_records.add_argument("--result-json", default=None)
+
+    solver_repair = subparsers.add_parser("propose-solver-repair", help="Create deterministic solver failure repair proposal")
+    solver_repair.add_argument("--solver-run-dir", required=True)
+    solver_repair.add_argument("--diagnosis-path", default=None)
+    solver_repair.add_argument("--output-dir", default=None)
+    solver_repair.add_argument("--result-json", default=None)
+
     probe_llm = subparsers.add_parser("probe-llm", help="Probe configured OpenAI-compatible LLM provider")
     probe_llm.add_argument("--provider", default="chatanywhere")
     probe_llm.add_argument("--model", default=None)
@@ -1252,6 +1564,112 @@ def main(argv: list[str] | None = None) -> int:
             abqjobpilot_root=args.abqjobpilot_root,
             result_json=args.result_json,
         )
+    elif args.command == "intake-patched-job-output":
+        result = command_intake_patched_job_output(
+            workflow_dir=args.workflow_dir,
+            manual_odb_path=args.manual_odb_path,
+            force_status_completed=args.force_status_completed,
+            result_json=args.result_json,
+        )
+    elif args.command == "extract-patched-job-metrics":
+        result = command_extract_patched_job_metrics(
+            workflow_dir=args.workflow_dir,
+            config_path=args.config,
+            result_json=args.result_json,
+        )
+    elif args.command == "report-patched-job":
+        result = command_report_patched_job(
+            workflow_dir=args.workflow_dir,
+            result_json=args.result_json,
+        )
+    elif args.command == "recover-sanity-base-patch-candidate":
+        result = command_recover_sanity_base_patch_candidate(
+            out_dir=args.out_dir,
+            source_inp=args.source_inp,
+            result_json=args.result_json,
+        )
+    elif args.command == "run-stage3-9c-equivalent-odb":
+        result = run_stage3_9c_equivalent_odb(
+            stage3_9b_dir=args.stage3_9b_dir
+            or Path(PROJECT_ROOT) / "runs" / "stage3_9b_real_sanity_base_patch_candidate",
+            out_dir=args.out_dir
+            or Path(PROJECT_ROOT) / "runs" / "stage3_9c_equivalent_real_odb_intake_metrics_report",
+            equivalent_odb=args.equivalent_odb
+            or Path(PROJECT_ROOT) / "CAE_model" / "sanity_base" / "sanity_base_power_2x.odb",
+            reference_odb=args.reference_odb
+            or Path(PROJECT_ROOT) / "CAE_model" / "sanity_base" / "sanity_base_power_1x.odb",
+            runtime_config=args.runtime_config
+            or Path(PROJECT_ROOT) / "abqpilot" / "configs" / "abaqus_runtime.yaml",
+        )
+        write_result_json(result, args.result_json)
+    elif args.command == "prepare-solver-run":
+        result = prepare_solver_run(
+            candidate_inp=args.candidate_inp,
+            source_inp=args.source_inp,
+            evidence_dir=args.evidence_dir,
+            cpus=args.cpus,
+            run_root=args.run_root or Path(PROJECT_ROOT) / "runs" / "stage4_0_controlled_solver_automation",
+            abaqus_command=args.abaqus_command or r"D:\ABAQUS2024\Commands\abq2024.bat",
+        )
+        write_result_json(result, args.result_json)
+    elif args.command == "approve-solver-run":
+        result = approve_solver_run(
+            solver_run_dir=args.solver_run_dir,
+            approved_by=args.approved_by,
+            approval_phrase=args.approval_phrase,
+            expires_hours=args.expires_hours,
+        )
+        write_result_json(result, args.result_json)
+    elif args.command == "run-solver-approved":
+        result = run_solver_approved(
+            solver_run_dir=args.solver_run_dir,
+            approval_token=args.approval_token,
+            timeout_s=args.timeout_seconds,
+        )
+        write_result_json(result, args.result_json)
+    elif args.command == "monitor-solver-run":
+        result = monitor_solver_run(args.solver_run_dir)
+        write_result_json(result, args.result_json)
+    elif args.command == "intake-solver-run-output":
+        result = intake_solver_run_output(args.solver_run_dir)
+        write_result_json(result, args.result_json)
+    elif args.command == "report-solver-run":
+        result = report_solver_run(
+            solver_run_dir=args.solver_run_dir,
+            runtime_config=args.runtime_config or Path(PROJECT_ROOT) / "abqpilot" / "configs" / "abaqus_runtime.yaml",
+            baseline_odb=args.baseline_odb or Path(PROJECT_ROOT) / "CAE_model" / "sanity_base" / "sanity_base_power_1x.odb",
+        )
+        write_result_json(result, args.result_json)
+    elif args.command == "diagnose-job-output":
+        result = command_diagnose_job_output(
+            job_dir=args.job_dir,
+            job_name=args.job_name,
+            dat=args.dat,
+            msg=args.msg,
+            sta=args.sta,
+            log=args.log,
+            odb=args.odb,
+            lck=args.lck,
+            abqjobpilot_report=args.abqjobpilot_report,
+            abqjobpilot_job_id=args.abqjobpilot_job_id,
+            abqjobpilot_runtime_dir=args.abqjobpilot_runtime_dir,
+            result_json=args.result_json,
+        )
+    elif args.command == "list-abqjobpilot-records":
+        result = command_list_abqjobpilot_records(
+            abqjobpilot_runtime_dir=args.abqjobpilot_runtime_dir,
+            status=args.status,
+            job_name=args.job_name,
+            max_results=args.max_results,
+            result_json=args.result_json,
+        )
+    elif args.command == "propose-solver-repair":
+        result = propose_solver_failure_repair(
+            solver_run_dir=args.solver_run_dir,
+            diagnosis_path=args.diagnosis_path,
+            output_dir=args.output_dir,
+        )
+        write_result_json(result, args.result_json)
     elif args.command == "probe-llm":
         result = command_probe_llm(
             provider=args.provider,
@@ -1447,6 +1865,7 @@ def _print_result(result: dict[str, Any]) -> None:
         print(f"job_id={details.get('job_id')}")
         print(f"raw_status={details.get('raw_status')}")
         print(f"normalized_status={details.get('normalized_status')}")
+        print(f"final_status={details.get('final_status')}")
         print(f"expected_odb_path={details.get('expected_odb_path')}")
         print(f"odb_exists={details.get('odb_exists')}")
         print(f"lock_exists={details.get('lock_exists')}")
@@ -1454,6 +1873,162 @@ def _print_result(result: dict[str, Any]) -> None:
         print(f"solver_submitted={details.get('solver_submitted')}")
         print(f"queue_runner_launched={details.get('queue_runner_launched')}")
         print(f"opened_odb={details.get('opened_odb')}")
+    elif command == "intake-patched-job-output":
+        print(f"job_id={details.get('job_id')}")
+        print(f"latest_normalized_status={details.get('latest_normalized_status')}")
+        print(f"manual_odb_path={details.get('manual_odb_path')}")
+        print(f"accepted_odb_path={details.get('accepted_odb_path')}")
+        print(f"output_accepted={details.get('output_accepted')}")
+        print(f"opened_odb={details.get('opened_odb')}")
+        print(f"submitted_solver={details.get('submitted_solver')}")
+        print(f"queue_runner_launched={details.get('queue_runner_launched')}")
+        print(f"artifact_dir={result.get('output_paths', {}).get('artifact_dir')}")
+    elif command == "extract-patched-job-metrics":
+        print(f"metrics_status={details.get('verdict')}")
+        print(f"accepted_odb_path={details.get('accepted_odb_path')}")
+        print(f"metrics_available={details.get('metrics_available')}")
+        print(f"metrics_json_path={details.get('metrics_json_path')}")
+        print(f"gated_extractor_verdict={details.get('gated_extractor_verdict')}")
+        print(f"submitted_solver={details.get('submitted_solver')}")
+        print(f"queue_runner_launched={details.get('queue_runner_launched')}")
+        print(f"opened_odb_directly={details.get('opened_odb_directly')}")
+        print(f"artifact_dir={result.get('output_paths', {}).get('artifact_dir')}")
+    elif command == "report-patched-job":
+        print(f"job_id={details.get('job_id')}")
+        print(f"patch_type={details.get('patch_type')}")
+        print(f"normalized_status={details.get('normalized_status')}")
+        print(f"output_accepted={details.get('output_accepted')}")
+        print(f"patched_metrics_available={details.get('patched_metrics_available')}")
+        print(f"reference_metrics_available={details.get('reference_metrics_available')}")
+        print(f"comparison_available={details.get('comparison_available')}")
+        print(f"evaluation_verdict={details.get('evaluation_verdict')}")
+        print(f"submitted_solver={details.get('submitted_solver')}")
+        print(f"queue_runner_launched={details.get('queue_runner_launched')}")
+        print(f"opened_odb_directly={details.get('opened_odb_directly')}")
+        print(f"artifact_dir={result.get('output_paths', {}).get('artifact_dir')}")
+    elif command == "recover-sanity-base-patch-candidate":
+        print(f"fixture_inp_solver_ready={details.get('classification', {}).get('fixture_inp', {}).get('solver_ready')}")
+        print(f"real_exported_inp_path={details.get('classification', {}).get('real_exported_inp', {}).get('path')}")
+        print(f"candidate_inp_path={details.get('candidate_inp_path')}")
+        print(f"source_size_bytes={details.get('source_size_bytes')}")
+        print(f"candidate_size_bytes={details.get('candidate_size_bytes')}")
+        print(f"changed_lines_count={details.get('changed_lines_count')}")
+        print(f"unrelated_changes_count={details.get('unrelated_changes_count')}")
+        print(f"static_validator_status={details.get('static_validator_status')}")
+        print(f"diff_guard_status={details.get('diff_guard_status')}")
+        print(f"physics_guard_status={details.get('physics_guard_status')}")
+        print(f"existing_power_2x_odb_equivalent_candidate_output={details.get('existing_power_2x_odb_equivalent_candidate_output')}")
+        print(f"solver_submitted={details.get('solver_submitted')}")
+        print(f"job_enqueued={details.get('job_enqueued')}")
+        print(f"opened_odb={details.get('opened_odb')}")
+        print(f"artifact_dir={result.get('output_paths', {}).get('artifact_dir')}")
+    elif command == "run-stage3-9c-equivalent-odb":
+        print(f"accepted_odb_path={details.get('accepted_odb_path')}")
+        print(f"odb_exists={details.get('odb_exists')}")
+        print(f"lock_exists={details.get('lock_exists')}")
+        print(f"output_accepted={details.get('output_accepted')}")
+        print(f"patched_metrics_available={details.get('patched_metrics_available')}")
+        print(f"reference_metrics_available={details.get('reference_metrics_available')}")
+        print(f"comparison_available={details.get('comparison_available')}")
+        print(f"evaluation_verdict={details.get('evaluation_verdict')}")
+        print(f"opened_odb_only_via_gated_extractor={details.get('opened_odb_only_via_gated_extractor')}")
+        print(f"submitted_solver={details.get('submitted_solver')}")
+        print(f"queue_runner_launched={details.get('queue_runner_launched')}")
+        print(f"created_new_queue_job={details.get('created_new_queue_job')}")
+        print(f"artifact_dir={result.get('output_paths', {}).get('artifact_dir')}")
+    elif command == "prepare-solver-run":
+        print(f"candidate_traceability={details.get('candidate_traceability')}")
+        print(f"solver_run_dir={details.get('solver_run_dir')}")
+        print(f"job_name={details.get('job_name')}")
+        print(f"expected_odb_path={details.get('expected_odb_path')}")
+        print(f"cpus={details.get('cpus')}")
+        print(f"eligible_for_solver={details.get('eligible_for_solver')}")
+        print(f"requires_human_approval={details.get('requires_human_approval')}")
+        print(f"static_validator_status={details.get('static_validator_status')}")
+        print(f"diff_guard_status={details.get('diff_guard_status')}")
+        print(f"physics_guard_status={details.get('physics_guard_status')}")
+        print(f"unrelated_changes_count={details.get('unrelated_changes_count')}")
+        print(f"artifact_dir={result.get('output_paths', {}).get('artifact_dir')}")
+    elif command == "approve-solver-run":
+        print(f"approval_token_path={details.get('approval_token_path')}")
+        print(f"token_status={result.get('verdict')}")
+    elif command == "run-solver-approved":
+        print(f"solver_launched={details.get('solver_launched')}")
+        print(f"return_code={details.get('return_code')}")
+        print(f"monitor_status={details.get('monitor_status')}")
+        print(f"expected_odb_exists={details.get('expected_odb_exists')}")
+        print(f"lock_exists_after_completion={details.get('lock_exists_after_completion')}")
+        print(f"queue_runner_launched={details.get('queue_runner_launched')}")
+        print(f"llm_execution_authority={details.get('llm_execution_authority')}")
+        print(f"artifact_dir={result.get('output_paths', {}).get('artifact_dir')}")
+    elif command == "monitor-solver-run":
+        print(f"monitor_status={details.get('status')}")
+        print(f"diagnosis_status={details.get('diagnosis_status')}")
+        print(f"odb_acceptable_for_metrics={details.get('odb_acceptable_for_metrics')}")
+        print(f"expected_odb_path={details.get('odb_path')}")
+        print(f"expected_odb_exists={details.get('odb_exists')}")
+        print(f"lock_exists={details.get('lock_exists')}")
+        print(f"return_code={details.get('return_code')}")
+        print(f"artifact_dir={result.get('output_paths', {}).get('artifact_dir')}")
+    elif command == "intake-solver-run-output":
+        print(f"monitor_status={details.get('monitor_status')}")
+        print(f"diagnosis_status={details.get('diagnosis_status')}")
+        print(f"odb_acceptable_for_metrics={details.get('odb_acceptable_for_metrics')}")
+        print(f"accepted_odb_path={details.get('accepted_odb_path')}")
+        print(f"solver_output_accepted={details.get('solver_output_accepted')}")
+        print(f"opened_odb={details.get('opened_odb')}")
+        print(f"submitted_solver={details.get('submitted_solver')}")
+        print(f"queue_runner_launched={details.get('queue_runner_launched')}")
+        print(f"artifact_dir={result.get('output_paths', {}).get('artifact_dir')}")
+    elif command == "report-solver-run":
+        print(f"evaluation_verdict={details.get('evaluation_verdict')}")
+        print(f"solver_metrics_available={details.get('solver_metrics_available')}")
+        print(f"reference_metrics_available={details.get('reference_metrics_available')}")
+        print(f"comparison_available={details.get('comparison_available')}")
+        print(f"opened_odb_only_via_gated_extractor={details.get('opened_odb_only_via_gated_extractor')}")
+        print(f"submitted_solver={details.get('submitted_solver')}")
+        print(f"queue_runner_launched={details.get('queue_runner_launched')}")
+        print(f"artifact_dir={result.get('output_paths', {}).get('artifact_dir')}")
+    elif command == "diagnose-job-output":
+        evidence = details.get("evidence", {})
+        print(f"diagnosis_status={details.get('diagnosis_status')}")
+        print(f"diagnosis_input_mode={details.get('diagnosis_input_mode')}")
+        print(f"failure_category={details.get('failure_category')}")
+        print(f"odb_acceptable_for_metrics={details.get('odb_acceptable_for_metrics')}")
+        abq_record = details.get("abqjobpilot_record") or {}
+        if abq_record:
+            print(f"abqjobpilot_job_id={abq_record.get('job_id')}")
+            print(f"abqjobpilot_raw_status={abq_record.get('raw_status')}")
+            print(f"abqjobpilot_record_path={abq_record.get('record_path')}")
+        print(f"odb_exists={evidence.get('odb_exists')}")
+        print(f"lock_exists={evidence.get('lock_exists')}")
+        print(f"analysis_completed={evidence.get('analysis_completed')}")
+        print(f"analysis_not_completed={evidence.get('analysis_not_completed')}")
+        print(f"too_many_attempts={evidence.get('too_many_attempts')}")
+        print(f"terminated_due_to_errors={evidence.get('terminated_due_to_errors')}")
+        print(f"diagnosis_result_path={result.get('output_paths', {}).get('result')}")
+    elif command == "list-abqjobpilot-records":
+        print(f"record_count={details.get('record_count')}")
+        for record in details.get("records", [])[:20]:
+            print(
+                "record="
+                f"job_id={record.get('job_id')} "
+                f"status={record.get('status')} "
+                f"record_kind={record.get('record_kind')} "
+                f"job_name={record.get('job_name')} "
+                f"return_code={record.get('return_code')} "
+                f"report_path={record.get('report_path')}"
+            )
+    elif command == "propose-solver-repair":
+        print(f"repair_proposal_status={details.get('repair_proposal_status')}")
+        print(f"diagnosis_status={details.get('diagnosis_status')}")
+        print(f"failure_category={details.get('failure_category')}")
+        print(f"recommended_repair_type={details.get('recommended_repair_type')}")
+        print(f"secondary_repair_types={details.get('secondary_repair_types')}")
+        print(f"requires_human_review={details.get('requires_human_review')}")
+        print(f"apply_repair_now={details.get('apply_repair_now')}")
+        print(f"run_solver_now={details.get('run_solver_now')}")
+        print(f"artifact_dir={result.get('output_paths', {}).get('artifact_dir')}")
 
 
 def _finish_audit_result(

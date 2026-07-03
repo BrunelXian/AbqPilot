@@ -230,6 +230,144 @@ class GuiActionController:
     def poll_patch_queue_status(self, workflow_dir: str | Path) -> dict[str, Any]:
         return self._safe("poll_patch_queue_status", lambda: cli.command_poll_patch_queue(workflow_dir=workflow_dir))
 
+    def intake_patched_job_output(
+        self,
+        workflow_dir: str | Path,
+        manual_odb_path: str | Path | None = None,
+    ) -> dict[str, Any]:
+        return self._safe(
+            "intake_patched_job_output",
+            lambda: cli.command_intake_patched_job_output(
+                workflow_dir=workflow_dir,
+                manual_odb_path=manual_odb_path,
+            ),
+        )
+
+    def extract_patched_job_metrics(self, workflow_dir: str | Path) -> dict[str, Any]:
+        return self._safe(
+            "extract_patched_job_metrics",
+            lambda: cli.command_extract_patched_job_metrics(workflow_dir=workflow_dir),
+        )
+
+    def report_patched_job(self, workflow_dir: str | Path) -> dict[str, Any]:
+        return self._safe(
+            "report_patched_job",
+            lambda: cli.command_report_patched_job(workflow_dir=workflow_dir),
+        )
+
+    def prepare_controlled_solver_run(
+        self,
+        candidate_inp: str | Path,
+        source_inp: str | Path,
+        evidence_dir: str | Path,
+        cpus: int = 14,
+    ) -> dict[str, Any]:
+        from abqpilot.solver import prepare_solver_run
+
+        return self._safe(
+            "prepare_controlled_solver_run",
+            lambda: prepare_solver_run(
+                candidate_inp=candidate_inp,
+                source_inp=source_inp,
+                evidence_dir=evidence_dir,
+                cpus=cpus,
+            ),
+        )
+
+    def approve_controlled_solver_run(
+        self,
+        solver_run_dir: str | Path,
+        approved_by: str,
+        approval_phrase: str,
+        expires_hours: int = 24,
+    ) -> dict[str, Any]:
+        from abqpilot.solver import approve_solver_run
+
+        return self._safe(
+            "approve_controlled_solver_run",
+            lambda: approve_solver_run(
+                solver_run_dir=solver_run_dir,
+                approved_by=approved_by,
+                approval_phrase=approval_phrase,
+                expires_hours=expires_hours,
+            ),
+        )
+
+    def run_approved_solver(self, solver_run_dir: str | Path, approval_token: str | Path) -> dict[str, Any]:
+        from abqpilot.solver import run_solver_approved
+
+        return self._safe(
+            "run_approved_solver",
+            lambda: run_solver_approved(solver_run_dir=solver_run_dir, approval_token=approval_token),
+        )
+
+    def monitor_solver_run(self, solver_run_dir: str | Path) -> dict[str, Any]:
+        from abqpilot.solver import monitor_solver_run
+
+        return self._safe("monitor_solver_run", lambda: monitor_solver_run(solver_run_dir=solver_run_dir))
+
+    def diagnose_job_output(self, solver_run_dir: str | Path, job_name: str) -> dict[str, Any]:
+        from abqpilot.diagnostics import diagnose_job_output
+
+        return self._safe(
+            "diagnose_job_output",
+            lambda: {
+                "command": "diagnose_job_output",
+                "verdict": "JOB_ODB_DIAGNOSIS_READY",
+                "success": True,
+                "details": diagnose_job_output(job_dir=solver_run_dir, job_name=job_name, write_artifacts=True),
+                "errors": [],
+                "warnings": [],
+            },
+        )
+
+    def list_abqjobpilot_job_records(
+        self,
+        runtime_dir: str | Path,
+        status: str | None = None,
+        job_name: str | None = None,
+        max_results: int | None = 20,
+    ) -> dict[str, Any]:
+        return self._safe(
+            "list_abqjobpilot_job_records",
+            lambda: cli.command_list_abqjobpilot_records(
+                abqjobpilot_runtime_dir=runtime_dir,
+                status=status,
+                job_name=job_name,
+                max_results=max_results,
+            ),
+        )
+
+    def diagnose_from_abqjobpilot_record(
+        self,
+        report_json: str | Path | None = None,
+        job_id: str | None = None,
+        runtime_dir: str | Path | None = None,
+    ) -> dict[str, Any]:
+        return self._safe(
+            "diagnose_from_abqjobpilot_record",
+            lambda: cli.command_diagnose_job_output(
+                abqjobpilot_report=report_json,
+                abqjobpilot_job_id=job_id,
+                abqjobpilot_runtime_dir=runtime_dir,
+            ),
+        )
+
+    def propose_solver_failure_repair(self, solver_run_dir: str | Path) -> dict[str, Any]:
+        from abqpilot.repair import propose_solver_failure_repair
+
+        return self._safe("propose_solver_failure_repair", lambda: propose_solver_failure_repair(solver_run_dir=solver_run_dir))
+
+    def intake_solver_output(self, solver_run_dir: str | Path) -> dict[str, Any]:
+        from abqpilot.solver import intake_solver_run_output
+
+        return self._safe("intake_solver_output", lambda: intake_solver_run_output(solver_run_dir=solver_run_dir))
+
+    def report_solver_run(self, solver_run_dir: str | Path) -> dict[str, Any]:
+        from abqpilot.solver import report_solver_run
+
+        return self._safe("report_solver_run", lambda: report_solver_run(solver_run_dir=solver_run_dir))
+
     def open_artifact_folder(self, path: str | Path) -> dict[str, Any]:
         target = Path(path)
         folder = target if target.is_dir() else target.parent

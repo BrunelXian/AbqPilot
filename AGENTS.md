@@ -16,6 +16,71 @@ AbqPilot is a closed-loop CAE-ODB automation system for controlled Abaqus simula
 6. Do not bypass StaticValidator, DiffGuard, PhysicsGuard, or ODB status checks.
 7. Do not let Codex, LLMs, GUI, or CLI bypass deterministic AbqPilot tools.
 
+## Hard Rule: SanityBase-Derived Simulation Candidates Only
+
+AbqPilot must not create arbitrary new Abaqus models for production or evidence workflows.
+
+The canonical simulation baseline is the user-provided sanity base model:
+
+```text
+D:\Projects\AbqPilot-v2\CAE_model\sanity_base\sanity_base_v01.cae
+```
+
+and the real Abaqus INP files exported from that sanity base through the gated CAE export path.
+
+The agent's role is not to invent geometry, mesh, material definitions, boundary conditions, contact definitions, or step topology. The agent's role is to perform controlled, auditable modifications to the existing sanity base model or to an INP deterministically exported from it.
+
+Allowed production candidate path:
+
+```text
+sanity_base_v01.cae
+-> gated CAE writeInput export
+-> real source INP
+-> deterministic allowed patch
+-> candidate INP
+-> StaticValidator
+-> DiffGuard
+-> PhysicsGuard
+-> solver / queue / ODB intake only through gated workflow
+```
+
+Acceptable fallback production candidate path:
+
+```text
+previously frozen real sanity-base exported INP
+-> deterministic allowed patch
+-> candidate INP
+-> StaticValidator
+-> DiffGuard
+-> PhysicsGuard
+```
+
+Fixture INP files used by tests or workflow smoke checks must never be treated as solver-ready production evidence unless explicitly classified as real sanity-base-derived Abaqus exports.
+
+In particular, tiny fixture files such as 1 KB INP snippets may be used to test PatchBuilder, DiffGuard, PhysicsGuard, queue workflow, or CLI behavior, but they must not be used as real Abaqus solver candidates or as evidence of physical simulation success.
+
+For any production or demo claim involving Abaqus solver output, the candidate INP must be traceable to the user-provided sanity base model or to a frozen real INP exported from it.
+
+The agent must record this traceability in evidence artifacts:
+
+* source CAE path or frozen exported INP path
+* source INP SHA256
+* candidate INP SHA256
+* exact allowed patch operation
+* changed lines
+* unrelated changes count
+* StaticValidator result
+* DiffGuard result
+* PhysicsGuard result
+
+If the source candidate is not traceable to the sanity base model, the workflow must stop with a warning rather than continue to solver, queue, ODB intake, metrics extraction, or physical interpretation.
+
+Recommended warning verdict:
+
+```text
+WARNING_ABQPILOT_SIMULATION_SOURCE_NOT_SANITY_BASE_DERIVED
+```
+
 ## Codex policy
 
 Use Codex to build AbqPilot. Do not make Codex the agent.

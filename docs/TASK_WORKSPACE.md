@@ -176,6 +176,140 @@ Stage 3.2 run report export writes:
 - `reports/ABQPILOT_RUN_REPORT.json`
 - `reports/ABQPILOT_RUN_REPORT.md`
 
+## Stage 3.9 Patched Job Intake
+
+Patch queue workflows can be continued without starting solver execution:
+
+- `poll-patch-queue` updates `patch_queue_status_request.json`, `patch_queue_status_result.json`, `patch_queue_output_locator_result.json`, `patch_queue_status_summary.json`, and `patch_queue_status_summary.md`.
+- `intake-patched-job-output` writes `patched_job_output_intake_request.json`, `patched_job_output_intake_result.json`, `patched_job_output_intake_summary.json`, and `patched_job_output_intake_summary.md`.
+- `extract-patched-job-metrics` writes `patched_job_metrics_request.json`, `patched_job_metrics_result.json`, `patched_job_metrics_summary.json`, and `patched_job_metrics_summary.md`.
+- `report-patched-job` writes `patched_job_report.json` and `patched_job_report.md`.
+
+`JOB_QUEUED` and `JOB_RUNNING` remain `WAITING_FOR_PATCHED_JOB`. `JOB_FAILED` becomes `PATCHED_JOB_FAILED`. `JOB_ODB_MISSING` becomes `WAITING_FOR_PATCHED_JOB_OUTPUTS`. `JOB_OUTPUTS_READY` or an explicitly supplied unlocked `.odb` path can be accepted by the intake gate. The intake gate does not open ODB files. Metrics extraction is blocked until accepted output exists and then uses only the existing gated ODB metrics extractor.
+
+## Stage 3.9B Real Sanity-Base Candidate Recovery
+
+Stage 3.7 / 3.8 / 3.8A fixture workflow evidence is workflow-only. It proves guard and queue mechanics, but it is not production solver-ready simulation evidence. Real candidate evidence must derive from the user-provided sanity base model or an INP exported from it.
+
+Stage 3.9B writes real sanity-base-derived evidence under:
+
+```text
+runs\stage3_9b_real_sanity_base_patch_candidate\
+```
+
+Required artifacts include:
+
+- `source_sanity_base_export.inp`
+- `candidate_sanity_base_power_x2.inp`
+- `source_classification_report.json`
+- `real_sanity_base_patch_candidate_summary.json`
+- `real_sanity_base_patch_candidate_summary.md`
+- `patch_diff_report.json`
+- `diff_guard_report.json`
+- `static_validation_report.json`
+- `physics_guard_report.json`
+
+The source is the real Stage 1.6A exported sanity-base INP. The candidate changes only:
+
+```text
+inst_plate.set-body-1, BF, 1e+10
+```
+
+to:
+
+```text
+inst_plate.set-body-1, BF, 2e+10
+```
+
+The original source INP is copied into the evidence directory and remains unchanged. StaticValidator, DiffGuard, and PhysicsGuard must all pass before this candidate can be considered ready for later human-reviewed solver or queue workflows.
+
+## Stage 3.9C Equivalent Real ODB Intake
+
+Stage 3.9C writes equivalent real ODB intake, metrics, and report artifacts under:
+
+```text
+runs\stage3_9c_equivalent_real_odb_intake_metrics_report\
+```
+
+This stage uses an existing manually completed, evidence-equivalent 2x ODB as the real sanity-base-derived candidate output. This is not a new solver run. This is not a new queue job. The ODB is accepted only because Stage 3.9B established traceability and equivalence.
+
+Required artifacts include:
+
+- `equivalent_odb_intake_request.json`
+- `equivalent_odb_intake_result.json`
+- `equivalent_odb_intake_summary.json`
+- `equivalent_odb_intake_summary.md`
+- `equivalent_odb_metrics_request.json`
+- `equivalent_odb_metrics_result.json`
+- `equivalent_odb_metrics_summary.json`
+- `equivalent_odb_metrics_summary.md`
+- `equivalent_odb_report.json`
+- `equivalent_odb_report.md`
+- `stage3_9c_equivalent_real_odb_smoke_summary.json`
+- `stage3_9c_equivalent_real_odb_smoke_summary.md`
+
+Before ODB intake, Stage 3.9C verifies that the Stage 3.9B candidate hash still matches, the source has `1e+10`, the candidate has `2e+10`, changed lines are exactly one, unrelated changes are zero, StaticValidator/DiffGuard/PhysicsGuard passed, the equivalent ODB exists, no sibling lock exists, and Stage 3.9B equivalence evidence is `YES`. Metrics are extracted only through the existing gated ODB metrics extractor.
+
+## Stage 4.0 Controlled Solver Automation
+
+Controlled solver run artifacts live under:
+
+```text
+runs\stage4_0_controlled_solver_automation\run_<timestamp>\
+```
+
+Required artifacts include:
+
+- `solver_candidate_manifest.json`
+- `solver_preflight_request.json`
+- `solver_preflight_result.json`
+- `solver_command_preview.txt`
+- `solver_command_preview.json`
+- `solver_approval_request.json`
+- `approvals\solver_run_approval_token.json`
+- `solver_run_request.json`
+- `solver_run_result.json`
+- `solver_monitor_result.json`
+- `solver_output_intake_result.json`
+- `solver_metrics_result.json`
+- `solver_report.json`
+- `solver_report.md`
+- `stage4_0_controlled_solver_automation_summary.json`
+- `stage4_0_controlled_solver_automation_summary.md`
+
+Stage 4.0 only accepts a validated sanity-base-derived candidate INP. The preflight gate checks traceability, source and candidate hashes, exact allowed patch operation, zero unrelated changes, StaticValidator, DiffGuard, PhysicsGuard, job-name safety, CPU limit, and dedicated run-directory state. Solver launch requires `approvals\solver_run_approval_token.json`, created with the exact phrase `I_APPROVE_ABQPILOT_CONTROLLED_ABAQUS_SOLVER_RUN`. The token binds the candidate hash, source hash, command preview hash, expected ODB, run directory, guard results, and CPU count.
+
+The runner is narrow: it invokes only the approved Abaqus executable with the fixed command shape for a single job, does not use `shell=True`, does not accept arbitrary extra flags, does not launch QueueRunner, does not run abqjobpilot GUI, and gives LLMs no execution authority. Monitoring reads `.lck`, `.sta`, `.msg`, `.dat`, `.log`, and `.odb` file state without opening ODB files. Completed ODB output is routed through the existing intake and gated metrics/report path.
+
+Stage 4.1 planned Abaqus job/ODB failure diagnosis uses `docs\diagnostics\ABQPILOT_ABAQUS_JOB_ODB_FAILURE_DIAGNOSIS_TAXONOMY.md` as the design reference for job failure mode classification, completion evidence, partial ODB handling, and ODB acceptability gates.
+
+Stage 4.1 writes diagnosis artifacts into the diagnosed job directory:
+
+- `job_odb_diagnosis_request.json`
+- `job_odb_diagnosis_result.json`
+- `job_odb_diagnosis_summary.md`
+
+The diagnosis module reads text logs/status files and ODB/lock metadata only. It never opens an ODB. `JOB_COMPLETED_ODB_ACCEPTABLE` is the only diagnosis status that allows solver-output intake for metrics extraction; ODB files produced by failed or incomplete jobs are treated as partial evidence and remain blocked.
+
+Stage 4.1B can create the same diagnosis artifacts from abqjobpilot execution records. In that mode, abqjobpilot remains the job lifecycle and path authority, and AbqPilot writes its own diagnosis artifacts under `runs\abqjobpilot_diagnoses\<job_id>\` rather than mutating `runtime\queue.json`, `runtime\live_status.json`, or `runtime\reports\*.json`.
+
+## Stage 4.2 Solver Failure Repair Proposal
+
+Solver failure repair proposal artifacts live under:
+
+```text
+<solver_run_dir>\solver_failure_repair_proposal\
+```
+
+Required artifacts include:
+
+- `solver_failure_repair_context.json`
+- `solver_failure_repair_proposal.json`
+- `solver_failure_repair_validation.json`
+- `solver_failure_repair_summary.md`
+
+Stage 4.2 consumes Stage 4.1 diagnosis evidence and produces a deterministic proposal only. It may recommend later guarded solver-control patch preview types for convergence failures, but it does not apply repairs, mutate INP files, open ODB files, enqueue jobs, run Abaqus, or use LLM execution authority.
+
 Stage 3.3 alpha freeze export writes:
 
 - `ALPHA_FREEZE_REPORT.json`

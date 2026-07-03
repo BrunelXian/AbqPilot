@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 import tkinter as tk
 from tkinter import filedialog, messagebox, simpledialog, ttk
@@ -135,6 +136,20 @@ class AbqPilotGui(BaseWindow):
             ("Create Patch Queue Approval Token", self._create_patch_queue_approval),
             ("Queue Patch Preview: Real Queue-Only Enqueue", self._queue_patch_real),
             ("Poll Patch Queue Status", self._poll_patch_queue),
+            ("Poll Patched Job Status", self._poll_patch_queue),
+            ("Intake Patched Job Output", self._intake_patched_job_output),
+            ("Extract Patched Job Metrics", self._extract_patched_job_metrics),
+            ("Report Patched Job", self._report_patched_job),
+            ("Prepare Controlled Solver Run", self._prepare_controlled_solver_run),
+            ("Approve Controlled Solver Run", self._approve_controlled_solver_run),
+            ("Run Approved Solver", self._run_approved_solver),
+            ("Monitor Solver Run", self._monitor_controlled_solver_run),
+            ("Diagnose Job / ODB Output", self._diagnose_job_output),
+            ("List abqjobpilot Job Records", self._list_abqjobpilot_records),
+            ("Diagnose from abqjobpilot Record", self._diagnose_from_abqjobpilot_record),
+            ("Propose Solver Failure Repair", self._propose_solver_failure_repair),
+            ("Intake Solver Output", self._intake_solver_output),
+            ("Report Solver Run", self._report_solver_run),
         ]:
             make_button(buttons, label, command).pack(fill="x", pady=3)
 
@@ -146,6 +161,9 @@ class AbqPilotGui(BaseWindow):
             "Auto Repair INP [DISABLED]",
             "Apply Patch [DISABLED]",
             "Run Patched Solver [DISABLED]",
+            "Batch Auto Loop [DISABLED]",
+            "LLM Run Solver [DISABLED]",
+            "Arbitrary Command [DISABLED]",
         ]:
             make_button(buttons, label, lambda name=label: self._blocked_action(name), danger=True).pack(fill="x", pady=3)
 
@@ -436,6 +454,131 @@ class AbqPilotGui(BaseWindow):
         result = self.controller.poll_patch_queue_status(workflow)
         self._handle_action_result(result, "Patch queue status poll complete")
 
+    def _intake_patched_job_output(self) -> None:
+        if not self.task_dir:
+            self._set_status("Load a task first")
+            return
+        workflow = _latest_patch_queue_workflow(self.task_dir)
+        if workflow is None:
+            self._set_status("No patch queue workflow found")
+            return
+        result = self.controller.intake_patched_job_output(workflow)
+        self._handle_action_result(result, "Patched job output intake complete")
+
+    def _extract_patched_job_metrics(self) -> None:
+        if not self.task_dir:
+            self._set_status("Load a task first")
+            return
+        workflow = _latest_patch_queue_workflow(self.task_dir)
+        if workflow is None:
+            self._set_status("No patch queue workflow found")
+            return
+        result = self.controller.extract_patched_job_metrics(workflow)
+        self._handle_action_result(result, "Patched job metrics gate complete")
+
+    def _report_patched_job(self) -> None:
+        if not self.task_dir:
+            self._set_status("Load a task first")
+            return
+        workflow = _latest_patch_queue_workflow(self.task_dir)
+        if workflow is None:
+            self._set_status("No patch queue workflow found")
+            return
+        result = self.controller.report_patched_job(workflow)
+        self._handle_action_result(result, "Patched job report complete")
+
+    def _prepare_controlled_solver_run(self) -> None:
+        candidate = Path("D:/Projects/AbqPilot-v2/runs/stage3_9b_real_sanity_base_patch_candidate/candidate_sanity_base_power_x2.inp")
+        source = Path("D:/Projects/AbqPilot-v2/runs/stage3_9b_real_sanity_base_patch_candidate/source_sanity_base_export.inp")
+        evidence = Path("D:/Projects/AbqPilot-v2/runs/stage3_9b_real_sanity_base_patch_candidate")
+        result = self.controller.prepare_controlled_solver_run(candidate, source, evidence, cpus=14)
+        self._handle_action_result(result, "Controlled solver run prepared")
+
+    def _approve_controlled_solver_run(self) -> None:
+        solver_run = _latest_solver_run_dir()
+        if solver_run is None:
+            self._set_status("No controlled solver run found")
+            return
+        phrase = simpledialog.askstring("Controlled Solver Approval", "Enter the controlled solver approval phrase:", show=None)
+        if not phrase:
+            self._set_status("Controlled solver approval cancelled")
+            return
+        result = self.controller.approve_controlled_solver_run(solver_run, "human", phrase)
+        self._handle_action_result(result, "Controlled solver approval token created")
+
+    def _run_approved_solver(self) -> None:
+        solver_run = _latest_solver_run_dir()
+        if solver_run is None:
+            self._set_status("No controlled solver run found")
+            return
+        confirmed = messagebox.askyesno(
+            "Confirm Controlled Solver Run",
+            "Run the approved single Abaqus solver job?\n\n"
+            "Only the fixed command preview will be used. No external queue worker, no LLM, no arbitrary command.",
+        )
+        if not confirmed:
+            self._set_status("Controlled solver run cancelled")
+            return
+        token = solver_run / "approvals" / "solver_run_approval_token.json"
+        result = self.controller.run_approved_solver(solver_run, token)
+        self._handle_action_result(result, "Controlled solver run finished")
+
+    def _monitor_controlled_solver_run(self) -> None:
+        solver_run = _latest_solver_run_dir()
+        if solver_run is None:
+            self._set_status("No controlled solver run found")
+            return
+        result = self.controller.monitor_solver_run(solver_run)
+        self._handle_action_result(result, "Controlled solver monitor complete")
+
+    def _diagnose_job_output(self) -> None:
+        solver_run = _latest_solver_run_dir()
+        if solver_run is None:
+            self._set_status("No controlled solver run found")
+            return
+        result = self.controller.diagnose_job_output(solver_run, _latest_solver_job_name(solver_run))
+        self._handle_action_result(result, "Job / ODB diagnosis complete")
+
+    def _list_abqjobpilot_records(self) -> None:
+        runtime = Path("D:/Projects/abqjobpilot_dev/runtime")
+        result = self.controller.list_abqjobpilot_job_records(runtime)
+        self._handle_action_result(result, "abqjobpilot records listed")
+
+    def _diagnose_from_abqjobpilot_record(self) -> None:
+        runtime = Path("D:/Projects/abqjobpilot_dev/runtime")
+        result = self.controller.list_abqjobpilot_job_records(runtime)
+        records = result.get("details", {}).get("records", []) if isinstance(result.get("details"), dict) else []
+        if not records:
+            self._set_status("No abqjobpilot records found")
+            return
+        job_id = records[0].get("job_id")
+        result = self.controller.diagnose_from_abqjobpilot_record(job_id=job_id, runtime_dir=runtime)
+        self._handle_action_result(result, "abqjobpilot-backed diagnosis complete")
+
+    def _propose_solver_failure_repair(self) -> None:
+        solver_run = _latest_solver_run_dir()
+        if solver_run is None:
+            self._set_status("No controlled solver run found")
+            return
+        result = self.controller.propose_solver_failure_repair(solver_run)
+        self._handle_action_result(result, "Solver failure repair proposal ready")
+
+    def _intake_solver_output(self) -> None:
+        solver_run = _latest_solver_run_dir()
+        if solver_run is None:
+            self._set_status("No controlled solver run found")
+            return
+        result = self.controller.intake_solver_output(solver_run)
+        self._handle_action_result(result, "Controlled solver output intake complete")
+
+    def _report_solver_run(self) -> None:
+        solver_run = _latest_solver_run_dir()
+        if solver_run is None:
+            self._set_status("No controlled solver run found")
+            return
+        result = self.controller.report_solver_run(solver_run)
+        self._handle_action_result(result, "Controlled solver report complete")
+
     def _blocked_action(self, name: str) -> None:
         result = self.controller.blocked_action(name)
         messagebox.showwarning("Disabled", DISABLED_ACTION_MESSAGE)
@@ -495,6 +638,26 @@ def _latest_patch_queue_workflow(task_dir: Path) -> Path | None:
         return None
     candidates = sorted(root.glob("queue_*"), key=lambda path: path.stat().st_mtime, reverse=True)
     return candidates[0] if candidates else None
+
+
+def _latest_solver_run_dir() -> Path | None:
+    root = Path("D:/Projects/AbqPilot-v2/runs/stage4_0_controlled_solver_automation")
+    if not root.exists():
+        return None
+    candidates = sorted(root.glob("run_*"), key=lambda path: path.stat().st_mtime, reverse=True)
+    return candidates[0] if candidates else None
+
+
+def _latest_solver_job_name(solver_run: Path) -> str:
+    preflight = solver_run / "solver_preflight_result.json"
+    if preflight.exists():
+        try:
+            payload = json.loads(preflight.read_text(encoding="utf-8"))
+            if payload.get("job_name"):
+                return str(payload["job_name"])
+        except json.JSONDecodeError:
+            pass
+    return "candidate_sanity_base_power_x2_stage4"
 
 
 if __name__ == "__main__":

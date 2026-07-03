@@ -1,7 +1,7 @@
 # AbqPilot Project Status
 
-Latest verdict: `PASS_ABQPILOT_V2_STAGE3_8A_PATCH_QUEUE_PRODUCTION_REAL_ENQUEUE_SMOKE_READY`
-Generated at: `2026-06-30T22:45:33`
+Latest verdict: `PASS_ABQPILOT_V2_STAGE4_1B_ABQJOBPILOT_BACKED_DIAGNOSIS_INTEGRATION_READY`
+Generated at: `2026-07-03T18:13:05`
 
 ## Capabilities
 
@@ -36,6 +36,20 @@ Generated at: `2026-06-30T22:45:33`
 - guarded patch-to-queue workflow
 - candidate-specific patch queue approval token
 - patch queue production queue-only enqueue smoke
+- patched job status poll and completed output intake gate
+- patched job gated metrics continuation gate
+- patched job report
+- real sanity-base-derived patch candidate recovery
+- fixture workflow evidence reclassified as non-production evidence
+- equivalent real ODB intake, gated metrics extraction, and mixed metrics report
+- controlled single-job Abaqus solver automation framework
+- solver-specific approval token
+- controlled solver monitor, output intake, and report gates
+- Abaqus job/ODB failure diagnosis taxonomy reference
+- deterministic Abaqus job/ODB failure diagnosis module
+- deterministic solver-failure repair proposal
+- abqjobpilot-backed job/ODB diagnosis integration
+- abqjobpilot runtime/report record reader
 
 ## Safety Boundary Matrix
 
@@ -55,6 +69,16 @@ Generated at: `2026-06-30T22:45:33`
 | PatchBuilder preview | candidate INP copy only, validator-gated, no solver/enqueue |
 | Patch-to-queue workflow | validated preview only, candidate approval-token gated, no solver/QueueRunner/ODB open |
 | Patch queue production smoke | queue-only proof confirmed; only runtime/queue.json changed |
+| Patched job intake | read-only status/output evidence gate; no solver/QueueRunner/ODB direct open |
+| Patched job metrics | requires accepted existing ODB and uses the existing gated metrics extractor only |
+| Real patch candidates | must derive from sanity-base CAE/exported INP; toy fixtures are workflow-only |
+| Equivalent ODB intake | requires Stage 3.9B traceability/equivalence evidence and uses existing ODBs only |
+| Controlled solver automation | single validated sanity-base-derived candidate only; solver-specific approval-token gated; fixed Abaqus command shape; no batch loop |
+| Job/ODB diagnosis | read-only log and metadata parser; ODB existence alone is not accepted |
+| Solver-failure repair proposal | diagnosis-driven and proposal-only; no INP mutation, no solver run, no ODB open |
+| abqjobpilot execution records | abqjobpilot remains execution-record/path authority; AbqPilot consumes records read-only for diagnosis and repair context |
+| Arbitrary solver commands | not accepted |
+| LLM solver authority | not integrated |
 | API key display | masked only |
 
 ## Main CLI Commands
@@ -76,6 +100,21 @@ Generated at: `2026-06-30T22:45:33`
 - `python -m abqpilot.cli approve-patch-queue --workflow-dir <workflow_dir> --approved-by human --approval-phrase I_APPROVE_ABQPILOT_PATCH_CANDIDATE_QUEUE_ONLY_ENQUEUE`
 - `python -m abqpilot.cli queue-patch-preview --workflow-dir <workflow_dir> --mode real-queue-only --approval-token <token_path>`
 - `python -m abqpilot.cli poll-patch-queue --workflow-dir <workflow_dir>`
+- `python -m abqpilot.cli intake-patched-job-output --workflow-dir <workflow_dir>`
+- `python -m abqpilot.cli extract-patched-job-metrics --workflow-dir <workflow_dir>`
+- `python -m abqpilot.cli report-patched-job --workflow-dir <workflow_dir>`
+- `python -m abqpilot.cli recover-sanity-base-patch-candidate`
+- `python -m abqpilot.cli run-stage3-9c-equivalent-odb`
+- `python -m abqpilot.cli prepare-solver-run --candidate-inp <candidate_inp> --source-inp <source_inp> --evidence-dir <stage3_9b_dir> --cpus 14`
+- `python -m abqpilot.cli approve-solver-run --solver-run-dir <solver_run_dir> --approved-by human --approval-phrase I_APPROVE_ABQPILOT_CONTROLLED_ABAQUS_SOLVER_RUN`
+- `python -m abqpilot.cli run-solver-approved --solver-run-dir <solver_run_dir> --approval-token <token_path>`
+- `python -m abqpilot.cli monitor-solver-run --solver-run-dir <solver_run_dir>`
+- `python -m abqpilot.cli diagnose-job-output --job-dir <job_dir> --job-name <job_name>`
+- `python -m abqpilot.cli diagnose-job-output --abqjobpilot-report <report_json>`
+- `python -m abqpilot.cli diagnose-job-output --abqjobpilot-job-id <job_id> --abqjobpilot-runtime-dir D:\Projects\abqjobpilot_dev\runtime`
+- `python -m abqpilot.cli list-abqjobpilot-records --abqjobpilot-runtime-dir D:\Projects\abqjobpilot_dev\runtime --max-results 20`
+- `python -m abqpilot.cli intake-solver-run-output --solver-run-dir <solver_run_dir>`
+- `python -m abqpilot.cli report-solver-run --solver-run-dir <solver_run_dir>`
 - `python -c "from abqpilot.patching.patch_queue_smoke import write_stage3_8a_smoke_summary; write_stage3_8a_smoke_summary(<workflow_dir>)"`
 - `python -m abqpilot.cli probe-llm --provider chatanywhere --model deepseek-chat --confirm-send-test-request`
 - `python -m abqpilot.cli gui`
@@ -95,7 +134,7 @@ Generated at: `2026-06-30T22:45:33`
 
 ## Known Limitations
 
-- Solver execution remains external/manual.
+- The controlled solver automation framework exists, but the first real Stage 4.0 smoke failed safely because Abaqus terminated the analysis before completion.
 - Queue worker launch remains outside AbqPilot GUI authority.
 - ODB opening remains limited to the existing gated metrics extractor.
 - Repair plans are deterministic reports and do not mutate INP files.
@@ -103,10 +142,19 @@ Generated at: `2026-06-30T22:45:33`
 - LLM patch proposals are advisory and cannot apply patches.
 - Patch preview supports heat_flux_magnitude_adjustment only in Stage 3.7.
 - Patch-to-queue does not run production real enqueue unless a candidate-specific token is supplied.
-- Stage 3.8A proves queue-only enqueue, but solver execution and completed patched-job intake remain future/manual boundaries.
+- Stage 3.9 can poll and intake completed patched-job outputs, but solver execution remains external/manual.
+- Patched-job metrics remain blocked until an existing unlocked ODB is accepted by the intake gate.
+- Stage 3.7/3.8 fixture patch candidates are workflow-only and not production solver-ready evidence.
+- Stage 3.9B recovered a real sanity-base-derived candidate from the Stage 1.6A exported INP.
+- Stage 3.9C accepted an existing manually completed equivalent 2x ODB and extracted metrics through the gated extractor.
+- Stage 4.0 does not support batch loops, arbitrary solver commands, LLM-controlled execution, or QueueRunner launch.
+- Stage 4.1 diagnosis implementation should use docs/diagnostics/ABQPILOT_ABAQUS_JOB_ODB_FAILURE_DIAGNOSIS_TAXONOMY.md as the design reference.
+- Stage 4.1 blocks metrics extraction unless diagnosis_status is JOB_COMPLETED_ODB_ACCEPTABLE.
+- Stage 4.2 creates repair proposals only and does not apply solver-control patches.
+- Stage 4.1B consumes abqjobpilot records read-only; abqjobpilot remains the execution lifecycle and path authority.
+- Attempt-block parsing is intentionally minimal and supports START/END marker styles used by abqjobpilot logs.
 
 ## Recommended Next Stages
 
-- Stage 3.5 GUI usability hardening and persistence polish
-- Stage 3.6 completed-job metrics continuation smoke when ODB outputs exist
-- Stage 4.x optional schema-bound advisory layer after deterministic cockpit maturity
+- Stage 4.3 guarded solver-control patch preview for approved Stage 4.2 proposals
+- GUI persistence and usability hardening

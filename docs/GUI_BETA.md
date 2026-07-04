@@ -48,8 +48,14 @@ Visible safe actions:
 - Propose Solver Failure Repair
 - Intake Solver Output
 - Report Solver Run
+- Generate Codex Handoff
+- Validate Codex Handoff
+- Intake Codex Result
+- Report Codex Handoff
 
 Each action goes through `GuiActionController`, catches exceptions, and returns a structured result dictionary. The controller calls existing AbqPilot functions rather than introducing new runtime paths.
+
+Stage 5.0A GUI actions support ACOM handoff package generation, validation, structured result intake, and reporting. They do not run Codex CLI, run solver, queue jobs, open ODB files, or auto-execute returned work. Codex summaries are not final evidence; AbqPilot deterministic revalidation remains required.
 
 ## Disabled Actions
 
@@ -62,6 +68,7 @@ Dangerous workflow actions remain disabled in GUI Beta:
 - patch application
 - batch auto loops
 - arbitrary command execution
+- Codex auto execution
 
 Disabled actions return `ACTION_BLOCKED_BY_SAFETY_BOUNDARY`.
 
@@ -183,3 +190,33 @@ Presets describe recommended next actions. They do not automatically execute an 
 ## Safety Boundary
 
 GUI Beta does not expose arbitrary Abaqus commands, does not start external queue workers, does not open the abqjobpilot GUI, does not add LangGraph/Codex runtime integration, and does not mutate INP files from repair plans or LLM patch proposals. Stage 4.0 controlled solver launch is limited to one validated sanity-base-derived candidate with a solver-specific approval token and a fixed command preview. Patch-to-queue supports preflight and dry-run preview by default; real queue-only enqueue requires a candidate approval token. Real LLM reasoning and patch proposal review are optional, explicitly confirmed, read-only, and advisory.
+## Pipeline Protocol GUI Actions
+
+GUI Beta may expose safe protocol actions:
+
+- List Pipeline Agents
+- Scaffold Pipeline Task
+- Validate Pipeline Protocol
+- Report Pipeline Protocol
+
+These actions display agent lists, task directories, trace files, handoff files, gate files, validation status, and report paths. They must not provide Run Agent, Auto Schedule Pipeline, Run Codex, Run Solver, Open ODB, or Queue Job actions.
+
+## ACOM Template GUI Actions
+
+GUI Beta may expose safe ACOM template actions:
+
+- List ACOM Templates
+- Describe ACOM Template
+- Generate Pipeline ACOM Handoff
+- Validate ACOM Template Pack
+
+These actions display template ID, risk level, MCPGuard requirement, producer/receiver agents, RUN/HANDOFF requirement, gate requirement, Codex auto-execution status, and AbqPilot revalidation requirement. They do not run Codex, auto-execute Codex, run solver, open ODB, queue jobs, or auto-schedule the pipeline.
+
+## ACOM Result Intake GUI Actions
+
+GUI Beta may expose safe Stage 5.0D actions:
+
+- Intake ACOM Result
+- Report ACOM Result Intake
+
+These actions display task ID, handoff ID, template ID, result status, safety flags, artifact review, downstream agent, gate decision, AbqPilot revalidation requirement, and report path. They do not run Codex, auto-execute Codex, run solver, open ODB, queue jobs, or auto-schedule downstream agents.

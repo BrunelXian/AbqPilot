@@ -8,6 +8,17 @@ from typing import Any
 
 from abqpilot.analysis import build_agent_observation, build_comparison_report
 from abqpilot.analysis.metrics_comparator import render_markdown_report
+from abqpilot.acom import (
+    generate_codex_handoff,
+    get_template,
+    intake_codex_result,
+    list_templates,
+    render_pipeline_acom_handoff,
+    validate_codex_handoff,
+    validate_template_pack,
+    write_acom_result_intake_report,
+    write_handoff_report,
+)
 from abqpilot.builders.heat_flux_patch_builder import HeatFluxPatchBuilder
 from abqpilot.cae import CaeInpExporter
 from abqpilot.core.approval import APPROVAL_PHRASE, create_approval_token
@@ -26,6 +37,13 @@ from abqpilot.odb import OdbMetricsExtractor
 from abqpilot.patching.equivalent_real_odb_stage import run_stage3_9c_equivalent_odb
 from abqpilot.patching.dflux_lifecycle_preview import preview_dflux_deactivation_patch_stage
 from abqpilot.patching.real_sanity_base_candidate import create_real_sanity_base_patch_candidate
+from abqpilot.pipeline_protocol import (
+    agent_names,
+    generate_protocol_report,
+    scaffold_pipeline_task,
+    validate_task_protocol,
+)
+from abqpilot.pipeline_protocol.agent_registry import validate_agent_contracts
 from abqpilot.repair import propose_solver_failure_repair
 from abqpilot.solver import (
     DFLUX_APPROVAL_PHRASE,
@@ -225,6 +243,225 @@ def command_run_model_condition_guard(
     )
     write_result_json(result, result_json)
     return result
+
+
+def command_generate_codex_handoff(
+    task_id: str,
+    task_type: str | None = None,
+    template_id: str | None = None,
+    output_dir: str | Path | None = None,
+    title: str | None = None,
+    objective: str | None = None,
+    context: str | None = None,
+    allowed_path: list[str] | None = None,
+    forbidden_path: list[str] | None = None,
+    allowed_command: list[str] | None = None,
+    forbidden_command: list[str] | None = None,
+    params: list[str] | None = None,
+    params_json: str | Path | None = None,
+    run_id: str | None = None,
+    handoff_id: str | None = None,
+    result_json: str | Path | None = None,
+) -> dict[str, Any]:
+    context_text = _load_context_text(context)
+    if template_id:
+        result = render_pipeline_acom_handoff(
+            task_id=task_id,
+            template_id=template_id,
+            project_root=PROJECT_ROOT,
+            title=title,
+            objective=objective,
+            context=context_text,
+            params=_load_template_params(params, params_json),
+            allowed_paths=allowed_path,
+            forbidden_paths=forbidden_path,
+            allowed_commands=allowed_command,
+            forbidden_commands=forbidden_command,
+            run_id=run_id,
+            handoff_id=handoff_id,
+        )
+    else:
+        if not task_type:
+            raise SystemExit("generate-codex-handoff requires --task-type or --template-id")
+        result = generate_codex_handoff(
+            task_id=task_id,
+            task_type=task_type,
+            output_dir=output_dir,
+            title=title,
+            objective=objective,
+            context=context_text,
+            allowed_paths=allowed_path,
+            forbidden_paths=forbidden_path,
+            allowed_commands=allowed_command,
+            forbidden_commands=forbidden_command,
+        )
+    write_result_json(result, result_json)
+    return result
+
+
+def command_list_acom_templates(result_json: str | Path | None = None) -> dict[str, Any]:
+    templates = [template.to_dict() for template in list_templates()]
+    result = make_task_result(
+        command="list-acom-templates",
+        verdict="ACOM_TEMPLATES_LISTED",
+        success=True,
+        details={"template_count": len(templates), "templates": templates},
+    )
+    write_result_json(result, result_json)
+    return result
+
+
+def command_describe_acom_template(template_id: str, result_json: str | Path | None = None) -> dict[str, Any]:
+    template = get_template(template_id)
+    result = make_task_result(
+        command="describe-acom-template",
+        verdict="ACOM_TEMPLATE_DESCRIBED",
+        success=True,
+        details=template.to_dict(),
+    )
+    write_result_json(result, result_json)
+    return result
+
+
+def command_validate_acom_template_pack(result_json: str | Path | None = None) -> dict[str, Any]:
+    validation = validate_template_pack()
+    result = make_task_result(
+        command="validate-acom-template-pack",
+        verdict=validation["verdict"],
+        success=validation["success"],
+        details=validation,
+        errors=validation.get("errors", []),
+    )
+    write_result_json(result, result_json)
+    return result
+
+
+def command_validate_codex_handoff(
+    handoff_dir: str | Path,
+    result_json: str | Path | None = None,
+) -> dict[str, Any]:
+    result = validate_codex_handoff(handoff_dir)
+    write_result_json(result, result_json)
+    return result
+
+
+def command_intake_codex_result(
+    handoff_dir: str | Path,
+    result_json_path: str | Path,
+    result_json: str | Path | None = None,
+) -> dict[str, Any]:
+    result = intake_codex_result(handoff_dir, result_json_path)
+    write_result_json(result, result_json)
+    return result
+
+
+def command_report_codex_handoff(
+    handoff_dir: str | Path,
+    result_json: str | Path | None = None,
+) -> dict[str, Any]:
+    result = write_handoff_report(handoff_dir)
+    write_result_json(result, result_json)
+    return result
+
+
+def command_report_acom_result_intake(
+    task_dir: str | Path,
+    result_json: str | Path | None = None,
+) -> dict[str, Any]:
+    result = write_acom_result_intake_report(task_dir)
+    write_result_json(result, result_json)
+    return result
+
+
+def command_list_pipeline_agents(result_json: str | Path | None = None) -> dict[str, Any]:
+    contract_validation = validate_agent_contracts(PROJECT_ROOT)
+    result = make_task_result(
+        command="list-pipeline-agents",
+        verdict=contract_validation["verdict"],
+        success=contract_validation["success"],
+        details={
+            "agents": agent_names(),
+            "agent_count": len(agent_names()),
+            "contract_validation": contract_validation,
+            "automatic_scheduling_added": False,
+        },
+    )
+    write_result_json(result, result_json)
+    return result
+
+
+def command_scaffold_pipeline_task(
+    task_id: str,
+    root: str | Path | None = None,
+    overwrite: bool = False,
+    result_json: str | Path | None = None,
+) -> dict[str, Any]:
+    details = scaffold_pipeline_task(task_id=task_id, root=root or PROJECT_ROOT, overwrite=overwrite)
+    result = make_task_result(
+        command="scaffold-pipeline-task",
+        verdict=details["verdict"],
+        success=details["success"],
+        output_paths={"task_dir": details["task_dir"]},
+        details=details | {"automatic_scheduling_added": False},
+    )
+    write_result_json(result, result_json)
+    return result
+
+
+def command_validate_pipeline_protocol(
+    task_dir: str | Path,
+    result_json: str | Path | None = None,
+) -> dict[str, Any]:
+    validation = validate_task_protocol(task_dir)
+    result = make_task_result(
+        command="validate-pipeline-protocol",
+        verdict=validation["verdict"],
+        success=validation["success"],
+        details=validation,
+        errors=validation.get("errors", []),
+        warnings=validation.get("warnings", []),
+    )
+    write_result_json(result, result_json)
+    return result
+
+
+def command_report_pipeline_protocol(
+    task_dir: str | Path,
+    result_json: str | Path | None = None,
+) -> dict[str, Any]:
+    report = generate_protocol_report(task_dir)
+    result = make_task_result(
+        command="report-pipeline-protocol",
+        verdict=report["verdict"],
+        success=report["success"],
+        output_paths={"report_path": report["report_path"]},
+        details=report,
+        errors=report.get("errors", []),
+        warnings=report.get("warnings", []),
+    )
+    write_result_json(result, result_json)
+    return result
+
+
+def _load_context_text(context: str | None) -> str | None:
+    if not context:
+        return None
+    path = Path(context)
+    if path.exists() and path.is_file():
+        return path.read_text(encoding="utf-8")
+    return context
+
+
+def _load_template_params(params: list[str] | None, params_json: str | Path | None) -> dict[str, Any]:
+    loaded: dict[str, Any] = {}
+    if params_json:
+        loaded.update(json.loads(Path(params_json).read_text(encoding="utf-8")))
+    for item in params or []:
+        if "=" not in item:
+            raise SystemExit(f"--param must be key=value, got: {item}")
+        key, value = item.split("=", 1)
+        loaded[key] = value
+    return loaded
 
 
 def _abqjobpilot_diagnosis_artifact_dir(record: dict[str, Any]) -> Path:
@@ -1391,6 +1628,104 @@ def build_parser() -> argparse.ArgumentParser:
     mcp_guard.add_argument("--target-change", default=None)
     mcp_guard.add_argument("--result-json", default=None)
 
+    generate_handoff = subparsers.add_parser(
+        "generate-codex-handoff",
+        help="Generate a bounded ACOM Codex handoff package without executing Codex",
+    )
+    generate_handoff.add_argument("--task-id", required=True)
+    generate_handoff.add_argument("--task-type", default=None)
+    generate_handoff.add_argument("--template-id", default=None)
+    generate_handoff.add_argument("--output-dir", default=None)
+    generate_handoff.add_argument("--title", default=None)
+    generate_handoff.add_argument("--objective", default=None)
+    generate_handoff.add_argument("--context", default=None)
+    generate_handoff.add_argument("--allowed-path", action="append", default=None)
+    generate_handoff.add_argument("--forbidden-path", action="append", default=None)
+    generate_handoff.add_argument("--allowed-command", action="append", default=None)
+    generate_handoff.add_argument("--forbidden-command", action="append", default=None)
+    generate_handoff.add_argument("--param", action="append", default=None)
+    generate_handoff.add_argument("--params-json", default=None)
+    generate_handoff.add_argument("--run-id", default=None)
+    generate_handoff.add_argument("--handoff-id", default=None)
+    generate_handoff.add_argument("--result-json", default=None)
+
+    list_acom_templates = subparsers.add_parser(
+        "list-acom-templates",
+        help="List Stage 5.0C ACOM templates",
+    )
+    list_acom_templates.add_argument("--result-json", default=None)
+
+    describe_acom_template = subparsers.add_parser(
+        "describe-acom-template",
+        help="Describe one Stage 5.0C ACOM template",
+    )
+    describe_acom_template.add_argument("--template-id", required=True)
+    describe_acom_template.add_argument("--result-json", default=None)
+
+    validate_acom_templates = subparsers.add_parser(
+        "validate-acom-template-pack",
+        help="Validate the Stage 5.0C ACOM template registry",
+    )
+    validate_acom_templates.add_argument("--result-json", default=None)
+
+    validate_handoff = subparsers.add_parser(
+        "validate-codex-handoff",
+        help="Validate an ACOM Codex handoff package",
+    )
+    validate_handoff.add_argument("--handoff-dir", required=True)
+    validate_handoff.add_argument("--result-json", default=None)
+
+    intake_codex = subparsers.add_parser(
+        "intake-codex-result",
+        help="Validate a structured ACOM Codex result placeholder",
+    )
+    intake_codex.add_argument("--handoff-dir", required=True)
+    intake_codex.add_argument("--result-json", required=True)
+    intake_codex.add_argument("--out-result-json", default=None)
+
+    report_handoff = subparsers.add_parser(
+        "report-codex-handoff",
+        help="Write a Markdown report for an ACOM Codex handoff package",
+    )
+    report_handoff.add_argument("--handoff-dir", required=True)
+    report_handoff.add_argument("--result-json", default=None)
+
+    report_acom_intake = subparsers.add_parser(
+        "report-acom-result-intake",
+        help="Write a Markdown report for a pipeline-integrated ACOM result intake",
+    )
+    report_acom_intake.add_argument("--task-dir", required=True)
+    report_acom_intake.add_argument("--result-json", default=None)
+
+    list_pipeline_agents = subparsers.add_parser(
+        "list-pipeline-agents",
+        help="List registered pipeline protocol agents without scheduling or executing them",
+    )
+    list_pipeline_agents.add_argument("--result-json", default=None)
+
+    scaffold_pipeline = subparsers.add_parser(
+        "scaffold-pipeline-task",
+        help="Create a flat RUN/HANDOFF/GATE protocol scaffold for a task",
+    )
+    scaffold_pipeline.add_argument("--task-id", required=True)
+    scaffold_pipeline.add_argument("--root", default=str(PROJECT_ROOT))
+    scaffold_pipeline.add_argument("--overwrite", action="store_true")
+    scaffold_pipeline.add_argument("--result-json", default=None)
+
+    validate_pipeline = subparsers.add_parser(
+        "validate-pipeline-protocol",
+        help="Validate a pipeline protocol task scaffold",
+    )
+    validate_pipeline.add_argument("--task-dir", required=True)
+    validate_pipeline.add_argument("--result-json", default=None)
+
+    report_pipeline = subparsers.add_parser(
+        "report-pipeline-protocol",
+        help="Write a Markdown report for a pipeline protocol task scaffold",
+    )
+    report_pipeline.add_argument("--task-dir", required=True)
+    report_pipeline.add_argument("--result-json", default=None)
+
     queue_patch = subparsers.add_parser("queue-patch-preview", help="Run guarded patch candidate JobPilot queue workflow")
     queue_patch.add_argument("--task-dir", default=None)
     queue_patch.add_argument("--patch-preview-dir", default=None)
@@ -1675,6 +2010,74 @@ def main(argv: list[str] | None = None) -> int:
             target_change=args.target_change,
             result_json=args.result_json,
         )
+    elif args.command == "generate-codex-handoff":
+        result = command_generate_codex_handoff(
+            task_id=args.task_id,
+            task_type=args.task_type,
+            template_id=args.template_id,
+            output_dir=args.output_dir,
+            title=args.title,
+            objective=args.objective,
+            context=args.context,
+            allowed_path=args.allowed_path,
+            forbidden_path=args.forbidden_path,
+            allowed_command=args.allowed_command,
+            forbidden_command=args.forbidden_command,
+            params=args.param,
+            params_json=args.params_json,
+            run_id=args.run_id,
+            handoff_id=args.handoff_id,
+            result_json=args.result_json,
+        )
+    elif args.command == "list-acom-templates":
+        result = command_list_acom_templates(result_json=args.result_json)
+    elif args.command == "describe-acom-template":
+        result = command_describe_acom_template(
+            template_id=args.template_id,
+            result_json=args.result_json,
+        )
+    elif args.command == "validate-acom-template-pack":
+        result = command_validate_acom_template_pack(result_json=args.result_json)
+    elif args.command == "validate-codex-handoff":
+        result = command_validate_codex_handoff(
+            handoff_dir=args.handoff_dir,
+            result_json=args.result_json,
+        )
+    elif args.command == "intake-codex-result":
+        result = command_intake_codex_result(
+            handoff_dir=args.handoff_dir,
+            result_json_path=args.result_json,
+            result_json=args.out_result_json,
+        )
+    elif args.command == "report-codex-handoff":
+        result = command_report_codex_handoff(
+            handoff_dir=args.handoff_dir,
+            result_json=args.result_json,
+        )
+    elif args.command == "report-acom-result-intake":
+        result = command_report_acom_result_intake(
+            task_dir=args.task_dir,
+            result_json=args.result_json,
+        )
+    elif args.command == "list-pipeline-agents":
+        result = command_list_pipeline_agents(result_json=args.result_json)
+    elif args.command == "scaffold-pipeline-task":
+        result = command_scaffold_pipeline_task(
+            task_id=args.task_id,
+            root=args.root,
+            overwrite=args.overwrite,
+            result_json=args.result_json,
+        )
+    elif args.command == "validate-pipeline-protocol":
+        result = command_validate_pipeline_protocol(
+            task_dir=args.task_dir,
+            result_json=args.result_json,
+        )
+    elif args.command == "report-pipeline-protocol":
+        result = command_report_pipeline_protocol(
+            task_dir=args.task_dir,
+            result_json=args.result_json,
+        )
     elif args.command == "queue-patch-preview":
         result = command_queue_patch_preview(
             task_dir=args.task_dir,
@@ -1876,6 +2279,20 @@ def _print_result(result: dict[str, Any]) -> None:
             "allow_llm",
         ):
             print(f"{key}={details.get(key)}")
+    elif command == "list-pipeline-agents":
+        for agent in details.get("agents", []):
+            print(agent)
+    elif command == "scaffold-pipeline-task":
+        print(f"task_id={details.get('task_id')}")
+        print(f"task_dir={details.get('task_dir')}")
+        print(f"created_count={len(details.get('created_paths', []))}")
+    elif command == "validate-pipeline-protocol":
+        print(result["verdict"])
+        print(f"task_dir={details.get('task_dir')}")
+    elif command == "report-pipeline-protocol":
+        print(result["verdict"])
+        print(f"task_dir={details.get('task_dir')}")
+        print(f"report_path={result.get('output_paths', {}).get('report_path')}")
     elif command == "export-cae":
         print(f"expected_inp_path={result['output_paths'].get('expected_inp_path')}")
     elif command == "audit-heat-x2":
@@ -2027,6 +2444,64 @@ def _print_result(result: dict[str, Any]) -> None:
                 f"code={finding.get('finding_code')}"
             )
         print(f"artifact_dir={result.get('output_paths', {}).get('artifact_dir')}")
+    elif command == "generate-codex-handoff":
+        print(f"task_id={result.get('task_id')}")
+        print(f"task_type={result.get('task_type')}")
+        print(f"template_id={result.get('template_id')}")
+        print(f"handoff_id={result.get('handoff_id')}")
+        print(f"execution_mode={details.get('execution_mode')}")
+        print(f"codex_auto_execution_allowed={details.get('codex_auto_execution_allowed')}")
+        print(f"codex_summary_is_final_evidence={details.get('codex_summary_is_final_evidence')}")
+        print(f"handoff_dir={result.get('handoff_dir')}")
+        if result.get("run_record_path"):
+            print(f"run_record_path={result.get('run_record_path')}")
+        if result.get("pipeline_handoff_path"):
+            print(f"pipeline_handoff_path={result.get('pipeline_handoff_path')}")
+    elif command == "list-acom-templates":
+        for template in details.get("templates", []):
+            print(template.get("template_id"))
+    elif command == "describe-acom-template":
+        mapping = details.get("pipeline_mapping", {})
+        print(f"template_id={details.get('template_id')}")
+        print(f"risk_level={details.get('risk_level')}")
+        print(f"requires_mcpguard={details.get('requires_mcpguard')}")
+        print(f"requires_pipeline_protocol={details.get('requires_pipeline_protocol')}")
+        print(f"producer_agent={mapping.get('producer_agent')}")
+        print(f"receiver_agent={mapping.get('expected_receiver_agent')}")
+        print(f"codex_auto_execution_allowed={details.get('codex_auto_execution_allowed')}")
+        print(f"codex_summary_is_final_evidence={details.get('codex_summary_is_final_evidence')}")
+    elif command == "validate-acom-template-pack":
+        print(result["verdict"])
+        print(f"template_count={details.get('template_count')}")
+    elif command == "validate-codex-handoff":
+        print(f"validation_status={result.get('verdict')}")
+        print(f"handoff_dir={result.get('handoff_dir')}")
+        print(f"task_id={details.get('task_id')}")
+        print(f"task_type={details.get('task_type')}")
+        print(f"codex_auto_execution_allowed={details.get('codex_auto_execution_allowed')}")
+    elif command == "intake-codex-result":
+        print(f"intake_status={result.get('verdict')}")
+        print(f"handoff_dir={result.get('handoff_dir')}")
+        print(f"result_json={result.get('result_json')}")
+        print(f"abqpilot_revalidation_required={details.get('abqpilot_revalidation_required')}")
+        print(f"codex_summary_is_final_evidence={details.get('codex_summary_is_final_evidence')}")
+        if details.get("downstream_agent"):
+            print(f"downstream_agent={details.get('downstream_agent')}")
+        if details.get("gate_decision"):
+            print(f"gate_decision={details.get('gate_decision')}")
+        if result.get("report_path"):
+            print(f"report_path={result.get('report_path')}")
+        unsafe = details.get("unsafe_safety_flags")
+        if unsafe:
+            print(f"unsafe_safety_flags={','.join(unsafe)}")
+    elif command == "report-codex-handoff":
+        print(f"report_status={result.get('verdict')}")
+        print(f"handoff_dir={result.get('handoff_dir')}")
+        print(f"report_path={result.get('report_path')}")
+    elif command == "report-acom-result-intake":
+        print(result.get("verdict"))
+        print(f"task_dir={result.get('task_dir')}")
+        print(f"report_path={result.get('report_path')}")
     elif command == "queue-patch-preview":
         print(f"workflow_status={details.get('workflow_status')}")
         print(f"patch_type={details.get('patch_type')}")

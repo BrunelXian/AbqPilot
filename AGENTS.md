@@ -87,6 +87,12 @@ WARNING_ABQPILOT_SIMULATION_SOURCE_NOT_SANITY_BASE_DERIVED
 
 ## Codex policy
 
+Default execution direction is ACOM, AbqPilot Codex Operator Mode. Codex may execute bounded handoff packages as an external human-operated operator, but AbqPilot remains the planner, validator, and evidence authority.
+
+Codex summaries are not final evidence. AbqPilot must validate returned artifacts through deterministic schemas, guards, artifact hashes, tests, safety audits, secret audits, StaticValidator, DiffGuard, PhysicsGuard, MCPGuard when applicable, and Job/ODB diagnosis when applicable.
+
+NARM, Native Agent Runtime Mode, is optional and must preserve the same safety and evidence contracts.
+
 Use Codex to build AbqPilot. Do not make Codex the agent.
 
 Codex is allowed as a development assistant.
@@ -95,11 +101,28 @@ Codex must not directly submit Abaqus jobs.
 Codex must not directly mutate simulation-critical files outside AbqPilot tool contracts.
 Codex must not freeze evidence or decide final physical claims.
 
+ACOM templates must integrate with pipeline RUN/HANDOFF/GATE protocol. Do not generate isolated Codex prompts without pipeline trace. Do not auto-call Codex. Do not treat Codex natural-language summaries as evidence. Model-condition / INP-patch templates require MCPGuard or a documented not-applicable reason.
+
+ACOM result intake must never directly approve evidence. It must classify Codex structured output, reject unsafe safety flags, reject task or handoff mismatch, and route accepted results to the appropriate downstream AbqPilot agent for deterministic revalidation. Codex summaries are not evidence. Accepted ACOM intake means pending revalidation only, not solver approval, ODB metrics approval, or final evidence freeze.
+
 ## Runtime Boundary
 
 MVP-01 and Stage 2 remain deterministic Python orchestration with structured schemas, controlled builders, static validation, diff guard, physics guard, gated CAE export, gated ODB metrics extraction, trace writing, and rollback placeholders.
 
 LLM nodes are placeholders only and must not be invoked in the current accepted stage.
+
+## Pipeline-style agent protocol
+
+Pipeline-style agent architecture is the default. Subagents are bounded pipeline stations, not a hierarchy of leads. The default station order is:
+
+```text
+PipelineSupervisor observes / gates / freezes
+IntakeAgent -> AuditAgent -> CandidateBuilderAgent -> GuardAgent -> ExecutionAgent -> DiagnosisAgent -> MetricsAgent -> EvidenceReportAgent
+```
+
+Support agents are ACOMAgent, SoftwareQAAgent, and DocsStatusAgent.
+
+Agent-to-agent handoff is allowed only through `HANDOFF_XXX.md`. Each step must produce `RUN_XXX.md`. High-risk transitions require `GATE_XXX.md`. No subagent may bypass validators, MCPGuard, diagnosis, approval tokens, or human gates. Do not validate only target edits; also validate original model-condition preservation across export, patching, candidate generation, and solver-run copies. Codex/LLM summary is not final evidence.
 
 ## Allowed development commands
 

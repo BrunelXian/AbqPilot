@@ -214,6 +214,100 @@ class GuiActionController:
             ),
         )
 
+    def generate_codex_handoff(
+        self,
+        task_id: str,
+        task_type: str,
+        title: str | None = None,
+        objective: str | None = None,
+    ) -> dict[str, Any]:
+        return self._safe(
+            "generate_codex_handoff",
+            lambda: cli.command_generate_codex_handoff(
+                task_id=task_id,
+                task_type=task_type,
+                title=title,
+                objective=objective,
+            ),
+        )
+
+    def validate_codex_handoff(self, handoff_dir: str | Path) -> dict[str, Any]:
+        return self._safe(
+            "validate_codex_handoff",
+            lambda: cli.command_validate_codex_handoff(handoff_dir=handoff_dir),
+        )
+
+    def intake_codex_result(self, handoff_dir: str | Path, result_json: str | Path) -> dict[str, Any]:
+        return self._safe(
+            "intake_codex_result",
+            lambda: cli.command_intake_codex_result(handoff_dir=handoff_dir, result_json_path=result_json),
+        )
+
+    def report_acom_result_intake(self, task_dir: str | Path) -> dict[str, Any]:
+        return self._safe(
+            "report_acom_result_intake",
+            lambda: cli.command_report_acom_result_intake(task_dir=task_dir),
+        )
+
+    def report_codex_handoff(self, handoff_dir: str | Path) -> dict[str, Any]:
+        return self._safe(
+            "report_codex_handoff",
+            lambda: cli.command_report_codex_handoff(handoff_dir=handoff_dir),
+        )
+
+    def list_acom_templates(self) -> dict[str, Any]:
+        return self._safe("list_acom_templates", lambda: cli.command_list_acom_templates())
+
+    def describe_acom_template(self, template_id: str) -> dict[str, Any]:
+        return self._safe(
+            "describe_acom_template",
+            lambda: cli.command_describe_acom_template(template_id=template_id),
+        )
+
+    def generate_pipeline_acom_handoff(
+        self,
+        task_id: str,
+        template_id: str,
+        title: str | None = None,
+        objective: str | None = None,
+    ) -> dict[str, Any]:
+        return self._safe(
+            "generate_pipeline_acom_handoff",
+            lambda: cli.command_generate_codex_handoff(
+                task_id=task_id,
+                template_id=template_id,
+                title=title,
+                objective=objective,
+            ),
+        )
+
+    def validate_acom_template_pack(self) -> dict[str, Any]:
+        return self._safe(
+            "validate_acom_template_pack",
+            lambda: cli.command_validate_acom_template_pack(),
+        )
+
+    def list_pipeline_agents(self) -> dict[str, Any]:
+        return self._safe("list_pipeline_agents", lambda: cli.command_list_pipeline_agents())
+
+    def scaffold_pipeline_task(self, task_id: str) -> dict[str, Any]:
+        return self._safe(
+            "scaffold_pipeline_task",
+            lambda: cli.command_scaffold_pipeline_task(task_id=task_id, root=self.project_root),
+        )
+
+    def validate_pipeline_protocol(self, task_dir: str | Path) -> dict[str, Any]:
+        return self._safe(
+            "validate_pipeline_protocol",
+            lambda: cli.command_validate_pipeline_protocol(task_dir=task_dir),
+        )
+
+    def report_pipeline_protocol(self, task_dir: str | Path) -> dict[str, Any]:
+        return self._safe(
+            "report_pipeline_protocol",
+            lambda: cli.command_report_pipeline_protocol(task_dir=task_dir),
+        )
+
     def queue_patch_preview_preflight(self, task_dir: str | Path, patch_preview_dir: str | Path | None = None) -> dict[str, Any]:
         return self._safe(
             "queue_patch_preview_preflight",

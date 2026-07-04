@@ -4,7 +4,7 @@
 
 AbqPilot shall not embed the Codex desktop application as a runtime dependency.
 Codex CLI may be used as an optional development assistant.
-Production runtime must use OpenAI API / Agents SDK plus AbqPilot-owned deterministic tools.
+Current Stage 5.0B policy supersedes earlier native-agent planning: do not add Agents SDK, LangGraph, Codex runtime bridge, automatic Codex CLI execution, or automatic multi-agent scheduling in this stage.
 
 Use Codex to build AbqPilot. Do not make Codex the agent.
 
@@ -12,9 +12,9 @@ Use Codex to build AbqPilot. Do not make Codex the agent.
 
 Development phase: Codex CLI may be used manually as an external engineering assistant.
 
-Prototype phase: AbqPilot Supervisor may later call Codex CLI or Codex MCP only for software-development assistance tasks.
+Prototype phase: AbqPilot may package support-agent handoffs for human-operated Codex assistance, but must not automatically call Codex CLI or Codex MCP in Stage 5.0B.
 
-Production and paper-grade runtime phase: use OpenAI API / Agents SDK plus AbqPilot-owned deterministic Abaqus tools. Do not rely on Codex CLI as the core Abaqus execution engine.
+Production and paper-grade runtime phase: use AbqPilot-owned deterministic Abaqus tools and artifact-backed evidence. Any future OpenAI API or Agents SDK design would require a separate gated stage and is not part of the Stage 5.0B pipeline protocol.
 
 ## Runtime Responsibility Boundary
 

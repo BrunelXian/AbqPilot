@@ -2,6 +2,22 @@
 
 Stage 2.1 adds a deterministic task workspace and pipeline runner around the existing CLI commands. It does not add a GUI, LLM runtime, Codex runtime, solver submission, or new Abaqus execution path.
 
+## Stage 5.0A ACOM Workspace Artifacts
+
+ACOM handoff packages are written under:
+
+```text
+runs/tasks/<task_id>/codex_handoff/
+```
+
+Structured Codex result placeholders are expected under:
+
+```text
+runs/tasks/<task_id>/codex_result/structured_result.json
+```
+
+ACOM is the default practical Codex-assisted mode. Codex is an external bounded operator and its natural-language summary is not final evidence. AbqPilot validates returned artifacts through structured schemas, hashes, safety flags, tests, safety/secret audits, and deterministic guards including MCPGuard when model conditions or INP patches may be affected. NARM remains the optional native runtime mode and must preserve the same contracts.
+
 ## Structure
 
 Each task run writes:
@@ -412,3 +428,14 @@ GUI Beta actions are routed through `GuiActionController`. Every action returns 
 ## Safety Policy
 
 The task workspace does not submit solver jobs. Stage 2.6 may enqueue to abqjobpilot queue only after all gates pass, but it does not launch QueueRunner, does not call Abaqus, does not open a GUI, and does not open ODB files. Stage 2.7 reads queue/status/output metadata only. Stage 2.8 validates already-existing output evidence only. Stage 2.9 creates deterministic reports only. Stage 2.4 dry-run enqueue is preview-only and guarded against runtime mutation. Stage 2.5 creates and validates human approval artifacts. It does not call LLMs. It does not call Codex as a runtime agent. CAE export and ODB metrics extraction remain gated through the existing Stage 1 tools.
+## Pipeline Task Workspace
+
+Pipeline protocol task workspaces live under `runs/tasks/<task_id>/`. The `trace/` directory is flat and Markdown-only. `RUN_XXX.md` files are execution traces plus supervisor step reports. `HANDOFF_XXX.md` files are station-to-station input contracts. `GATE_XXX.md` files are high-risk transition decisions. Evidence bodies belong under `artifacts/`.
+
+All key Markdown files use YAML frontmatter with a `doc_type` field. Codex/LLM summary is not final evidence; final claims require artifact-backed evidence and the final evidence ledger.
+
+## ACOM Template Workspace Outputs
+
+Stage 5.0C ACOM template generation adds `codex_handoff/` and `codex_result/` beside the pipeline trace. The generated ACOM RUN/HANDOFF files remain flat Markdown records. Codex output must return through `codex_result/structured_result.json` and AbqPilot revalidation before any evidence claim.
+
+Stage 5.0D ACOM result intake writes `codex_result/acom_result_intake.json`, `codex_result/acom_result_intake_report.md`, `trace/RUN_XXX_ACOM_RESULT_INTAKE.md`, `gates/GATE_XXX_ACOM_RESULT_REVALIDATION.md`, and a downstream handoff. Accepted intake remains pending revalidation; it is not final evidence.

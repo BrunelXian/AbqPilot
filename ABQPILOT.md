@@ -35,3 +35,27 @@ Stage 4.4 validates the Stage 4.3 DFLUX-deactivated preview candidate through th
 ## Stage 4.5 Model Condition Preservation Guard
 
 Stage 4.5 generalizes the Stage 4.3 DFLUX lifecycle bug into the Model Condition Preservation Guard, or MCPGuard. The guard checks whether original CAE/JNL condition intent is preserved across source export, candidate patching, and solver-run INP copies. It distinguishes declared target edits, such as `BodyHeatFlux BF 1e+10 -> 2e+10`, from unintended condition loss or semantic drift. The Stage 4.3 DFLUX/BF lifecycle check is now one specialized sub-check: `MCPGuard.load_lifecycle.body_heat_flux_dflux_bf`. Future solver eligibility should require StaticValidator, DiffGuard, PhysicsGuard, and MCPGuard. MCPGuard is read-only: it does not mutate CAE/JNL/INP/ODB files, run Abaqus, launch QueueRunner, enqueue jobs, open ODB files, or call LLM providers.
+
+## Stage 5.0A ACOM Handoff Infrastructure
+
+Stage 5.0A introduces ACOM, AbqPilot Codex Operator Mode, as the default practical Codex-assisted execution direction. ACOM is planner -> operator -> validator: AbqPilot generates bounded Codex handoff packages, Codex may act externally as a human-operated bounded operator, and AbqPilot intakes structured artifacts for deterministic validation. AbqPilot does not call Codex CLI in this stage, and Codex natural-language summaries are not final evidence.
+
+NARM, Native Agent Runtime Mode, remains the optional advanced native Python execution mode. Both ACOM and NARM must satisfy the same evidence and safety contracts. ACOM result intake accepts a safe structured placeholder result only as pending AbqPilot revalidation, and rejects unsafe safety flags such as solver start, QueueRunner launch, ODB direct open, `.env` read, source sanity-base mutation, `shell=True`, generic subprocess addition, or automatic Codex CLI call. MCPGuard is included in the ACOM evidence contract when model conditions or INP patches may be affected.
+
+## Stage 5.0B Pipeline Agent Communication Protocol
+
+Stage 5.0B defines AbqPilot's pipeline-style multi-agent architecture. The system is not organized as a PI with hierarchical leads. It is a gated linear workflow: PipelineSupervisor observes, gates, and freezes, while IntakeAgent, AuditAgent, CandidateBuilderAgent, GuardAgent, ExecutionAgent, DiagnosisAgent, MetricsAgent, and EvidenceReportAgent act as bounded pipeline stations. ACOMAgent, SoftwareQAAgent, and DocsStatusAgent are support agents.
+
+`RUN_XXX.md` is the execution trace plus supervisor step report. `HANDOFF_XXX.md` is the station-to-station input contract. `GATE_XXX.md` is the high-risk transition decision. `trace/` is flat and Markdown-only; evidence files live under `artifacts/`. All key Markdown files use YAML frontmatter. Codex/LLM summary is not final evidence. Stage 5.0B adds protocol files, templates, validation, scaffold CLI commands, and safe GUI actions only; it does not add automatic scheduling, Codex CLI execution, solver execution, QueueRunner launch, enqueue, or ODB opening.
+
+## Stage 5.0C ACOM Template Pack on Pipeline Protocol
+
+Stage 5.0C adds real ACOM task templates on top of the pipeline protocol. ACOM templates generate pipeline `RUN_XXX.md` and `HANDOFF_XXX.md` records plus a bounded `codex_handoff/` package. They are no longer isolated prompt files. Codex still executes externally and manually; AbqPilot does not call Codex CLI, and Codex summaries are not final evidence.
+
+The registered templates are `stage_implementation`, `read_only_audit`, `guarded_candidate_preview`, `controlled_execution_planning`, `job_odb_diagnosis_review`, `mcpguard_review`, `abqjobpilot_record_audit`, `docs_status_update`, `test_expansion`, and `safety_secret_audit`. High-risk execution templates are not enabled. MCPGuard is required for model-condition or INP-patch related templates. AbqPilot revalidation remains required for all returned Codex results.
+
+## Stage 5.0D ACOM Result Intake to Revalidation Gate
+
+Stage 5.0D implements the return path from `codex_result/structured_result.json` into the pipeline protocol. ACOMAgent validates schema, task/handoff identity, safety flags, and claimed artifacts, then writes `RUN_XXX_ACOM_RESULT_INTAKE.md`, `GATE_XXX_ACOM_RESULT_REVALIDATION.md`, and `HANDOFF_XXX_ACOM_RESULT_TO_<DOWNSTREAM_AGENT>.md`.
+
+`ACOM_RESULT_ACCEPTED_PENDING_REVALIDATION` means accepted as structured input for downstream deterministic AbqPilot revalidation only. It is not final evidence, does not approve solver execution, and does not approve ODB metrics. Unsafe safety flags block intake, and downstream agents must revalidate before any evidence claim.

@@ -133,6 +133,20 @@ class AbqPilotGui(BaseWindow):
             ("Preview Guarded Patch", self._preview_guarded_patch),
             ("Preview DFLUX Deactivation Patch", self._preview_dflux_deactivation_patch),
             ("Run Model Condition Preservation Guard", self._run_model_condition_guard),
+            ("Generate Codex Handoff", self._generate_codex_handoff),
+            ("Validate Codex Handoff", self._validate_codex_handoff),
+            ("Intake Codex Result", self._intake_codex_result),
+            ("Report Codex Handoff", self._report_codex_handoff),
+            ("List ACOM Templates", self._list_acom_templates),
+            ("Describe ACOM Template", self._describe_acom_template),
+            ("Generate Pipeline ACOM Handoff", self._generate_pipeline_acom_handoff),
+            ("Validate ACOM Template Pack", self._validate_acom_template_pack),
+            ("Intake ACOM Result", self._intake_acom_result),
+            ("Report ACOM Result Intake", self._report_acom_result_intake),
+            ("List Pipeline Agents", self._list_pipeline_agents),
+            ("Scaffold Pipeline Task", self._scaffold_pipeline_task),
+            ("Validate Pipeline Protocol", self._validate_pipeline_protocol),
+            ("Report Pipeline Protocol", self._report_pipeline_protocol),
             ("Prepare DFLUX-Guarded Solver Run", self._prepare_dflux_guarded_solver_run),
             ("Approve DFLUX-Guarded Solver Run", self._approve_dflux_guarded_solver_run),
             ("Run Approved DFLUX-Guarded Solver", self._run_dflux_guarded_solver),
@@ -173,6 +187,8 @@ class AbqPilotGui(BaseWindow):
             "LLM Run Solver [DISABLED]",
             "Arbitrary Command [DISABLED]",
             "Auto Retry Loop [DISABLED]",
+            "Run Codex [DISABLED]",
+            "Auto Execute Codex [DISABLED]",
         ]:
             make_button(buttons, label, lambda name=label: self._blocked_action(name), danger=True).pack(fill="x", pady=3)
 
@@ -618,6 +634,99 @@ class AbqPilotGui(BaseWindow):
         )
         self._handle_action_result(result, "Model Condition Preservation Guard complete")
 
+    def _generate_codex_handoff(self) -> None:
+        result = self.controller.generate_codex_handoff(
+            task_id="stage5_0a_acom_gui",
+            task_type="model_condition_guard_review",
+            title="ACOM MCPGuard GUI handoff",
+            objective="Generate a bounded Codex handoff package for reviewing MCPGuard artifacts without running solver or mutating model files.",
+        )
+        self._handle_action_result(result, "Codex handoff generated")
+
+    def _validate_codex_handoff(self) -> None:
+        handoff = _default_acom_handoff_dir()
+        result = self.controller.validate_codex_handoff(handoff)
+        self._handle_action_result(result, "Codex handoff validated")
+
+    def _intake_codex_result(self) -> None:
+        handoff = _default_acom_handoff_dir()
+        result_json = handoff.parent / "codex_result" / "structured_result.json"
+        result = self.controller.intake_codex_result(handoff, result_json)
+        self._handle_action_result(result, "Codex result intake checked")
+
+    def _report_codex_handoff(self) -> None:
+        handoff = _default_acom_handoff_dir()
+        result = self.controller.report_codex_handoff(handoff)
+        self._handle_action_result(result, "Codex handoff report ready")
+
+    def _list_acom_templates(self) -> None:
+        result = self.controller.list_acom_templates()
+        self._handle_action_result(result, "ACOM templates listed")
+
+    def _describe_acom_template(self) -> None:
+        template_id = simpledialog.askstring("ACOM Template", "Template id:", initialvalue="mcpguard_review")
+        if not template_id:
+            self._set_status("ACOM template description cancelled")
+            return
+        result = self.controller.describe_acom_template(template_id)
+        self._handle_action_result(result, "ACOM template described")
+
+    def _generate_pipeline_acom_handoff(self) -> None:
+        task_id = simpledialog.askstring("Pipeline ACOM Handoff", "Task id:", initialvalue="stage5_0c_acom_template_gui")
+        if not task_id:
+            self._set_status("Pipeline ACOM handoff cancelled")
+            return
+        template_id = simpledialog.askstring("Pipeline ACOM Handoff", "Template id:", initialvalue="mcpguard_review")
+        if not template_id:
+            self._set_status("Pipeline ACOM handoff cancelled")
+            return
+        result = self.controller.generate_pipeline_acom_handoff(
+            task_id=task_id,
+            template_id=template_id,
+            title="Pipeline ACOM template GUI handoff",
+            objective="Generate a pipeline-integrated Codex handoff package without running solver or opening ODB.",
+        )
+        self._handle_action_result(result, "Pipeline ACOM handoff generated")
+
+    def _validate_acom_template_pack(self) -> None:
+        result = self.controller.validate_acom_template_pack()
+        self._handle_action_result(result, "ACOM template pack validated")
+
+    def _intake_acom_result(self) -> None:
+        task_dir = self.task_dir or self.project_root / "runs" / "tasks" / "stage5_0d_acom_result_intake_smoke"
+        result = self.controller.intake_codex_result(
+            task_dir / "codex_handoff",
+            task_dir / "codex_result" / "structured_result.json",
+        )
+        self._handle_action_result(result, "ACOM result intake checked")
+
+    def _report_acom_result_intake(self) -> None:
+        task_dir = self.task_dir or self.project_root / "runs" / "tasks" / "stage5_0d_acom_result_intake_smoke"
+        result = self.controller.report_acom_result_intake(task_dir)
+        self._handle_action_result(result, "ACOM result intake report ready")
+
+    def _list_pipeline_agents(self) -> None:
+        result = self.controller.list_pipeline_agents()
+        self._handle_action_result(result, "Pipeline agents listed")
+
+    def _scaffold_pipeline_task(self) -> None:
+        task_id = simpledialog.askstring("Pipeline Task", "Task id:", initialvalue="stage5_0b_pipeline_protocol_gui")
+        if not task_id:
+            self._set_status("Pipeline scaffold cancelled")
+            return
+        result = self.controller.scaffold_pipeline_task(task_id)
+        self._handle_action_result(result, "Pipeline task scaffold created")
+
+    def _validate_pipeline_protocol(self) -> None:
+        task_dir = self.task_dir or self.project_root / "runs" / "tasks" / "stage5_0b_pipeline_protocol_smoke"
+        result = self.controller.validate_pipeline_protocol(task_dir)
+        self._handle_action_result(result, "Pipeline protocol validated")
+
+    def _report_pipeline_protocol(self) -> None:
+        task_dir = self.task_dir or self.project_root / "runs" / "tasks" / "stage5_0b_pipeline_protocol_smoke"
+        result = self.controller.report_pipeline_protocol(task_dir)
+        self._handle_action_result(result, "Pipeline protocol report ready")
+
     def _approve_dflux_guarded_solver_run(self) -> None:
         solver_run = _latest_dflux_solver_run_dir()
         if solver_run is None:
@@ -745,6 +854,10 @@ def _latest_dflux_solver_run_dir() -> Path | None:
         return None
     candidates = sorted(root.glob("run_*"), key=lambda path: path.stat().st_mtime, reverse=True)
     return candidates[0] if candidates else None
+
+
+def _default_acom_handoff_dir() -> Path:
+    return Path("D:/Projects/AbqPilot-v2/runs/tasks/stage5_0a_acom_gui/codex_handoff")
 
 
 def _latest_solver_job_name(solver_run: Path) -> str:

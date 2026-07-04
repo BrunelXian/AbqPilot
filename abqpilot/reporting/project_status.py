@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any
 
 
-LATEST_VERDICT = "PASS_ABQPILOT_V2_STAGE4_5_MODEL_CONDITION_PRESERVATION_GUARD_READY"
+LATEST_VERDICT = "PASS_ABQPILOT_V2_STAGE5_0D_ACOM_RESULT_PIPELINE_REVALIDATION_GATE_READY"
 
 PIPELINE_ORDER = [
     "01_export_cae",
@@ -71,6 +71,19 @@ CAPABILITIES = [
     "DFLUX lifecycle guarded controlled solver validation",
     "Model Condition Preservation Guard",
     "generalized source-intent to INP condition preservation checks",
+    "ACOM handoff package infrastructure",
+    "ACOM structured result intake placeholder validation",
+    "dual execution-mode documentation: ACOM and NARM",
+    "pipeline-style multi-agent protocol",
+    "RUN/HANDOFF/GATE frontmatter validation",
+    "flat pipeline task scaffold generation",
+    "pipeline protocol CLI and GUI-safe actions",
+    "ACOM template pack on pipeline protocol",
+    "pipeline-integrated ACOM RUN/HANDOFF generation",
+    "ACOM template registry and validation",
+    "ACOM result pipeline revalidation gate",
+    "pipeline-integrated ACOM result RUN/HANDOFF/GATE generation",
+    "ACOM result routing to downstream AbqPilot revalidation agents",
 ]
 
 SAFETY_BOUNDARIES = {
@@ -99,6 +112,11 @@ SAFETY_BOUNDARIES = {
     "DFLUX deactivation preview": "copied candidate INP only; inserts explicit cooling-step DFLUX reset, validator-gated, no solver/enqueue/ODB open",
     "DFLUX guarded solver validation": "requires Stage 4.3 DFLUX lifecycle guard PASS plus solver-specific approval token before a fixed single-job Abaqus run",
     "Model Condition Preservation Guard": "checks original CAE/JNL model-condition intent against exported, patched, and solver-run INPs; no solver/ODB/runtime mutation",
+    "ACOM handoff": "bounded Codex operator packages only; AbqPilot does not call Codex CLI and Codex summaries are not final evidence",
+    "ACOM result intake": "Codex structured results are accepted only pending downstream AbqPilot revalidation; unsafe safety flags, task mismatch, and handoff mismatch are rejected",
+    "ACOM templates": "pipeline RUN/HANDOFF plus bounded codex_handoff packages only; Codex executes externally and manually",
+    "Pipeline agents": "bounded station protocol only; no automatic scheduling, no Codex bridge, no solver, no QueueRunner, no ODB open",
+    "NARM": "optional native runtime mode and must preserve the same evidence and safety contracts",
     "Arbitrary solver commands": "not accepted",
     "LLM solver authority": "not integrated",
     "API key display": "masked only",
@@ -125,6 +143,15 @@ MAIN_COMMANDS = [
     "python -m abqpilot.cli intake-dflux-guarded-solver-output --solver-run-dir <solver_run_dir>",
     "python -m abqpilot.cli report-dflux-guarded-solver-run --solver-run-dir <solver_run_dir>",
     "python -m abqpilot.cli run-model-condition-guard --source-jnl <jnl> --source-inp <source_inp> --candidate-inp <candidate_inp> --solver-inp <solver_inp> --target-change body_heat_flux_magnitude:load_body_hflux_00:step_scan_00:1e+10:2e+10",
+    "python -m abqpilot.cli generate-codex-handoff --task-id <task_id> --task-type model_condition_guard_review",
+    "python -m abqpilot.cli list-acom-templates",
+    "python -m abqpilot.cli describe-acom-template --template-id mcpguard_review",
+    "python -m abqpilot.cli generate-codex-handoff --task-id <task_id> --template-id mcpguard_review",
+    "python -m abqpilot.cli validate-acom-template-pack",
+    "python -m abqpilot.cli validate-codex-handoff --handoff-dir <handoff_dir>",
+    "python -m abqpilot.cli intake-codex-result --handoff-dir <handoff_dir> --result-json <structured_result.json>",
+    "python -m abqpilot.cli report-acom-result-intake --task-dir <task_dir>",
+    "python -m abqpilot.cli report-codex-handoff --handoff-dir <handoff_dir>",
     "python -m abqpilot.cli queue-patch-preview --task-dir <task_dir> --patch-preview-dir <preview_dir> --mode preflight-only",
     "python -m abqpilot.cli queue-patch-preview --task-dir <task_dir> --patch-preview-dir <preview_dir> --mode dry-run-enqueue",
     "python -m abqpilot.cli approve-patch-queue --workflow-dir <workflow_dir> --approved-by human --approval-phrase I_APPROVE_ABQPILOT_PATCH_CANDIDATE_QUEUE_ONLY_ENQUEUE",
@@ -147,6 +174,10 @@ MAIN_COMMANDS = [
     "python -m abqpilot.cli report-solver-run --solver-run-dir <solver_run_dir>",
     "python -c \"from abqpilot.patching.patch_queue_smoke import write_stage3_8a_smoke_summary; write_stage3_8a_smoke_summary(<workflow_dir>)\"",
     "python -m abqpilot.cli probe-llm --provider chatanywhere --model deepseek-chat --confirm-send-test-request",
+    "python -m abqpilot.cli list-pipeline-agents",
+    "python -m abqpilot.cli scaffold-pipeline-task --task-id <task_id>",
+    "python -m abqpilot.cli validate-pipeline-protocol --task-dir <task_dir>",
+    "python -m abqpilot.cli report-pipeline-protocol --task-dir <task_dir>",
     "python -m abqpilot.cli gui",
 ]
 
@@ -198,10 +229,16 @@ def export_project_status(root: str | Path = ".") -> dict[str, Any]:
             "Stage 4.3 creates a preview INP copy with explicit *Dflux, OP=NEW in the cooling step; it does not run solver or open ODB.",
             "Stage 4.4 permits a controlled solver attempt only after the Stage 4.3 DFLUX lifecycle guard passes and a DFLUX-specific approval token validates.",
             "Stage 4.5 generalizes the DFLUX lifecycle bug into MCPGuard; Stage 4.5 currently implements concrete body heat flux DFLUX/BF lifecycle preservation plus schema hooks for other condition categories.",
+            "Stage 5.0A defines ACOM handoff infrastructure only; AbqPilot does not call Codex CLI and structured results remain pending deterministic AbqPilot revalidation.",
+            "Stage 5.0B defines pipeline communication protocol only; it does not add automatic scheduling, Codex runtime bridge, solver execution, QueueRunner launch, enqueue, or ODB opening.",
+            "Stage 5.0C defines ACOM templates on the pipeline protocol; it generates RUN/HANDOFF records and codex_handoff packages but does not call Codex CLI.",
+            "Stage 5.0D intakes Codex structured results into pipeline RUN/HANDOFF/GATE records for downstream AbqPilot revalidation; accepted intake is not final evidence.",
         ],
         "recommended_next_stages": [
+            "Use ACOM result intake to route external Codex artifacts to the correct downstream AbqPilot revalidation agent",
             "Integrate MCPGuard as a mandatory future solver eligibility gate beside StaticValidator, DiffGuard, and PhysicsGuard",
             "GUI persistence and usability hardening",
+            "Use pipeline protocol scaffolds for future task traces before any high-risk execution",
         ],
     }
     json_path = project_root / "PROJECT_STATUS_CURRENT.json"

@@ -8,6 +8,28 @@ Use the project Python:
 D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli status
 ```
 
+## Stage 5.0A ACOM Handoff Commands
+
+ACOM is AbqPilot Codex Operator Mode. It is the default practical Codex-assisted mode. These commands generate and validate bounded handoff artifacts only; AbqPilot does not call Codex CLI.
+
+```powershell
+D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli generate-codex-handoff --task-id stage5_0a_acom_smoke --task-type model_condition_guard_review --title "ACOM MCPGuard review smoke" --objective "Generate a bounded Codex handoff package for reviewing MCPGuard artifacts without running solver or mutating model files."
+```
+
+```powershell
+D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli validate-codex-handoff --handoff-dir D:\Projects\AbqPilot-v2\runs\tasks\stage5_0a_acom_smoke\codex_handoff
+```
+
+```powershell
+D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli intake-codex-result --handoff-dir D:\Projects\AbqPilot-v2\runs\tasks\stage5_0a_acom_smoke\codex_handoff --result-json D:\Projects\AbqPilot-v2\runs\tasks\stage5_0a_acom_smoke\codex_result\structured_result.json
+```
+
+```powershell
+D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli report-codex-handoff --handoff-dir D:\Projects\AbqPilot-v2\runs\tasks\stage5_0a_acom_smoke\codex_handoff
+```
+
+NARM is Native Agent Runtime Mode. It is optional and must satisfy the same evidence and safety contracts. Codex summaries are not final evidence in ACOM; AbqPilot validates returned artifacts deterministically. MCPGuard is required when model conditions or INP patches may be affected.
+
 ## Commands
 
 ```powershell
@@ -418,3 +440,28 @@ Every command prints a human-readable summary. Add `--result-json PATH` to write
 - ODB read is gated and metrics-only.
 - CAE export is allowed only through the existing writeInput gate.
 - GUI and reports consume CLI/task result JSON instead of reimplementing simulation-critical workflows.
+## Pipeline Protocol Commands
+
+```powershell
+python -m abqpilot.cli list-pipeline-agents
+python -m abqpilot.cli scaffold-pipeline-task --task-id <task_id>
+python -m abqpilot.cli validate-pipeline-protocol --task-dir <task_dir>
+python -m abqpilot.cli report-pipeline-protocol --task-dir <task_dir>
+```
+
+These commands list bounded pipeline stations, create a flat RUN/HANDOFF/GATE scaffold, validate YAML frontmatter and required files, and write a protocol report. They do not schedule agents, call Codex CLI, run solvers, enqueue jobs, launch QueueRunner, or open ODB files.
+
+## ACOM Template Commands
+
+```powershell
+python -m abqpilot.cli list-acom-templates
+python -m abqpilot.cli describe-acom-template --template-id mcpguard_review
+python -m abqpilot.cli generate-codex-handoff --task-id <task_id> --template-id mcpguard_review
+python -m abqpilot.cli validate-acom-template-pack
+python -m abqpilot.cli intake-codex-result --handoff-dir runs\tasks\<task_id>\codex_handoff --result-json runs\tasks\<task_id>\codex_result\structured_result.json
+python -m abqpilot.cli report-acom-result-intake --task-dir runs\tasks\<task_id>
+```
+
+Template-based handoffs generate pipeline RUN/HANDOFF records plus `codex_handoff/`. Codex still runs externally and manually. AbqPilot does not call Codex CLI, and Codex summaries are not final evidence.
+
+Stage 5.0D result intake generates pipeline RUN/HANDOFF/GATE revalidation records. `ACOM_RESULT_ACCEPTED_PENDING_REVALIDATION` means accepted for downstream AbqPilot revalidation only, not accepted as evidence.

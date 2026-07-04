@@ -465,3 +465,39 @@ python -m abqpilot.cli report-acom-result-intake --task-dir runs\tasks\<task_id>
 Template-based handoffs generate pipeline RUN/HANDOFF records plus `codex_handoff/`. Codex still runs externally and manually. AbqPilot does not call Codex CLI, and Codex summaries are not final evidence.
 
 Stage 5.0D result intake generates pipeline RUN/HANDOFF/GATE revalidation records. `ACOM_RESULT_ACCEPTED_PENDING_REVALIDATION` means accepted for downstream AbqPilot revalidation only, not accepted as evidence.
+
+Stage 5.0E downstream revalidation scaffold:
+
+```powershell
+D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli scaffold-acom-revalidation --task-dir D:\Projects\AbqPilot-v2\runs\tasks\stage5_0d_acom_result_intake_smoke
+```
+
+```powershell
+D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli report-acom-revalidation --task-dir D:\Projects\AbqPilot-v2\runs\tasks\stage5_0d_acom_result_intake_smoke
+```
+
+These commands create scaffold records only. They do not run downstream agents, call Codex CLI, run solver, open ODB, or approve evidence.
+
+Stage 5.0F non-solver revalidation executor:
+
+```powershell
+D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli execute-non-solver-revalidation --task-dir D:\Projects\AbqPilot-v2\runs\tasks\stage5_0f_non_solver_revalidation_smoke
+```
+
+```powershell
+D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli report-non-solver-revalidation --task-dir D:\Projects\AbqPilot-v2\runs\tasks\stage5_0f_non_solver_revalidation_smoke
+```
+
+Stage 5.0F executes deterministic revalidation only for DocsStatusAgent, SoftwareQAAgent, AuditAgent, EvidenceReportAgent, and PipelineSupervisor. GuardAgent, CandidateBuilderAgent, DiagnosisAgent, ExecutionAgent, and MetricsAgent are blocked. `NON_SOLVER_REVALIDATION_PASS_PENDING_SUPERVISOR` means pending PipelineSupervisor review, not final evidence accepted.
+
+Stage 5.0G PipelineSupervisor non-solver review:
+
+```powershell
+D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli supervisor-review-non-solver-revalidation --task-dir D:\Projects\AbqPilot-v2\runs\tasks\stage5_0f_non_solver_revalidation_smoke
+```
+
+```powershell
+D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli report-supervisor-non-solver-review --task-dir D:\Projects\AbqPilot-v2\runs\tasks\stage5_0f_non_solver_revalidation_smoke
+```
+
+Accepted review means accepted for `NON_SOLVER_EVIDENCE_LEDGER` only. It does not approve solver, ODB, metrics, model mutation, final evidence, or final verdict.

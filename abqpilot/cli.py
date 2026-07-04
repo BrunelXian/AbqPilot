@@ -9,11 +9,17 @@ from typing import Any
 from abqpilot.analysis import build_agent_observation, build_comparison_report
 from abqpilot.analysis.metrics_comparator import render_markdown_report
 from abqpilot.acom import (
+    execute_non_solver_revalidation,
     generate_codex_handoff,
     get_template,
     intake_codex_result,
     list_templates,
     render_pipeline_acom_handoff,
+    report_acom_revalidation,
+    report_non_solver_revalidation,
+    report_supervisor_non_solver_review,
+    scaffold_acom_revalidation,
+    supervisor_review_non_solver_revalidation,
     validate_codex_handoff,
     validate_template_pack,
     write_acom_result_intake_report,
@@ -369,6 +375,96 @@ def command_report_acom_result_intake(
     result_json: str | Path | None = None,
 ) -> dict[str, Any]:
     result = write_acom_result_intake_report(task_dir)
+    write_result_json(result, result_json)
+    return result
+
+
+def command_scaffold_acom_revalidation(
+    task_dir: str | Path,
+    downstream_agent: str | None = None,
+    revalidation_id: str | None = None,
+    result_json: str | Path | None = None,
+) -> dict[str, Any]:
+    result = scaffold_acom_revalidation(
+        task_dir=task_dir,
+        downstream_agent=downstream_agent,
+        revalidation_id=revalidation_id,
+    )
+    write_result_json(result, result_json)
+    return result
+
+
+def command_report_acom_revalidation(
+    task_dir: str | Path,
+    downstream_agent: str | None = None,
+    revalidation_id: str | None = None,
+    result_json: str | Path | None = None,
+) -> dict[str, Any]:
+    result = report_acom_revalidation(
+        task_dir=task_dir,
+        downstream_agent=downstream_agent,
+        revalidation_id=revalidation_id,
+    )
+    write_result_json(result, result_json)
+    return result
+
+
+def command_execute_non_solver_revalidation(
+    task_dir: str | Path,
+    revalidation_dir: str | Path | None = None,
+    agent: str | None = None,
+    result_json: str | Path | None = None,
+) -> dict[str, Any]:
+    result = execute_non_solver_revalidation(
+        task_dir=task_dir,
+        revalidation_dir=revalidation_dir,
+        agent=agent,
+    )
+    write_result_json(result, result_json)
+    return result
+
+
+def command_report_non_solver_revalidation(
+    task_dir: str | Path,
+    revalidation_dir: str | Path | None = None,
+    agent: str | None = None,
+    result_json: str | Path | None = None,
+) -> dict[str, Any]:
+    result = report_non_solver_revalidation(
+        task_dir=task_dir,
+        revalidation_dir=revalidation_dir,
+        agent=agent,
+    )
+    write_result_json(result, result_json)
+    return result
+
+
+def command_supervisor_review_non_solver_revalidation(
+    task_dir: str | Path,
+    revalidation_result: str | Path | None = None,
+    review_id: str | None = None,
+    result_json: str | Path | None = None,
+) -> dict[str, Any]:
+    result = supervisor_review_non_solver_revalidation(
+        task_dir=task_dir,
+        revalidation_result=revalidation_result,
+        review_id=review_id,
+    )
+    write_result_json(result, result_json)
+    return result
+
+
+def command_report_supervisor_non_solver_review(
+    task_dir: str | Path,
+    revalidation_result: str | Path | None = None,
+    review_id: str | None = None,
+    result_json: str | Path | None = None,
+) -> dict[str, Any]:
+    result = report_supervisor_non_solver_review(
+        task_dir=task_dir,
+        revalidation_result=revalidation_result,
+        review_id=review_id,
+    )
     write_result_json(result, result_json)
     return result
 
@@ -1697,6 +1793,60 @@ def build_parser() -> argparse.ArgumentParser:
     report_acom_intake.add_argument("--task-dir", required=True)
     report_acom_intake.add_argument("--result-json", default=None)
 
+    scaffold_acom_reval = subparsers.add_parser(
+        "scaffold-acom-revalidation",
+        help="Create a downstream revalidation scaffold for an accepted ACOM result",
+    )
+    scaffold_acom_reval.add_argument("--task-dir", required=True)
+    scaffold_acom_reval.add_argument("--downstream-agent", default=None)
+    scaffold_acom_reval.add_argument("--revalidation-id", default=None)
+    scaffold_acom_reval.add_argument("--result-json", default=None)
+
+    report_acom_reval = subparsers.add_parser(
+        "report-acom-revalidation",
+        help="Write a report for an ACOM downstream revalidation scaffold",
+    )
+    report_acom_reval.add_argument("--task-dir", required=True)
+    report_acom_reval.add_argument("--downstream-agent", default=None)
+    report_acom_reval.add_argument("--revalidation-id", default=None)
+    report_acom_reval.add_argument("--result-json", default=None)
+
+    execute_non_solver_reval = subparsers.add_parser(
+        "execute-non-solver-revalidation",
+        help="Execute deterministic Stage 5.0F non-solver revalidation on an existing scaffold",
+    )
+    execute_non_solver_reval.add_argument("--task-dir", required=True)
+    execute_non_solver_reval.add_argument("--revalidation-dir", default=None)
+    execute_non_solver_reval.add_argument("--agent", default=None)
+    execute_non_solver_reval.add_argument("--result-json", default=None)
+
+    report_non_solver_reval = subparsers.add_parser(
+        "report-non-solver-revalidation",
+        help="Write a report for Stage 5.0F non-solver revalidation",
+    )
+    report_non_solver_reval.add_argument("--task-dir", required=True)
+    report_non_solver_reval.add_argument("--revalidation-dir", default=None)
+    report_non_solver_reval.add_argument("--agent", default=None)
+    report_non_solver_reval.add_argument("--result-json", default=None)
+
+    supervisor_review_non_solver = subparsers.add_parser(
+        "supervisor-review-non-solver-revalidation",
+        help="PipelineSupervisor review for a Stage 5.0F non-solver revalidation result",
+    )
+    supervisor_review_non_solver.add_argument("--task-dir", required=True)
+    supervisor_review_non_solver.add_argument("--revalidation-result", default=None)
+    supervisor_review_non_solver.add_argument("--review-id", default=None)
+    supervisor_review_non_solver.add_argument("--result-json", default=None)
+
+    report_supervisor_non_solver = subparsers.add_parser(
+        "report-supervisor-non-solver-review",
+        help="Write a report for PipelineSupervisor non-solver review",
+    )
+    report_supervisor_non_solver.add_argument("--task-dir", required=True)
+    report_supervisor_non_solver.add_argument("--revalidation-result", default=None)
+    report_supervisor_non_solver.add_argument("--review-id", default=None)
+    report_supervisor_non_solver.add_argument("--result-json", default=None)
+
     list_pipeline_agents = subparsers.add_parser(
         "list-pipeline-agents",
         help="List registered pipeline protocol agents without scheduling or executing them",
@@ -2057,6 +2207,48 @@ def main(argv: list[str] | None = None) -> int:
     elif args.command == "report-acom-result-intake":
         result = command_report_acom_result_intake(
             task_dir=args.task_dir,
+            result_json=args.result_json,
+        )
+    elif args.command == "scaffold-acom-revalidation":
+        result = command_scaffold_acom_revalidation(
+            task_dir=args.task_dir,
+            downstream_agent=args.downstream_agent,
+            revalidation_id=args.revalidation_id,
+            result_json=args.result_json,
+        )
+    elif args.command == "report-acom-revalidation":
+        result = command_report_acom_revalidation(
+            task_dir=args.task_dir,
+            downstream_agent=args.downstream_agent,
+            revalidation_id=args.revalidation_id,
+            result_json=args.result_json,
+        )
+    elif args.command == "execute-non-solver-revalidation":
+        result = command_execute_non_solver_revalidation(
+            task_dir=args.task_dir,
+            revalidation_dir=args.revalidation_dir,
+            agent=args.agent,
+            result_json=args.result_json,
+        )
+    elif args.command == "report-non-solver-revalidation":
+        result = command_report_non_solver_revalidation(
+            task_dir=args.task_dir,
+            revalidation_dir=args.revalidation_dir,
+            agent=args.agent,
+            result_json=args.result_json,
+        )
+    elif args.command == "supervisor-review-non-solver-revalidation":
+        result = command_supervisor_review_non_solver_revalidation(
+            task_dir=args.task_dir,
+            revalidation_result=args.revalidation_result,
+            review_id=args.review_id,
+            result_json=args.result_json,
+        )
+    elif args.command == "report-supervisor-non-solver-review":
+        result = command_report_supervisor_non_solver_review(
+            task_dir=args.task_dir,
+            revalidation_result=args.revalidation_result,
+            review_id=args.review_id,
             result_json=args.result_json,
         )
     elif args.command == "list-pipeline-agents":
@@ -2502,6 +2694,66 @@ def _print_result(result: dict[str, Any]) -> None:
         print(result.get("verdict"))
         print(f"task_dir={result.get('task_dir')}")
         print(f"report_path={result.get('report_path')}")
+    elif command == "scaffold-acom-revalidation":
+        print(f"revalidation_status={result.get('verdict')}")
+        print(f"task_dir={details.get('task_dir')}")
+        print(f"downstream_agent={details.get('downstream_agent')}")
+        print(f"package_dir={result.get('output_paths', {}).get('package_dir')}")
+        print(f"run_record={result.get('output_paths', {}).get('run_record')}")
+        print(f"gate={result.get('output_paths', {}).get('gate')}")
+        print(f"handoff={result.get('output_paths', {}).get('handoff')}")
+        print(f"gate_decision={details.get('gate_decision')}")
+        print(f"automatic_execution_performed={details.get('automatic_execution_performed')}")
+        print(f"protocol_validation={details.get('protocol_validation')}")
+    elif command == "report-acom-revalidation":
+        print(f"report_status={result.get('verdict')}")
+        print(f"task_dir={details.get('task_id') or details.get('task_dir')}")
+        print(f"downstream_agent={details.get('downstream_agent')}")
+        print(f"report_path={result.get('output_paths', {}).get('report_path')}")
+        print(f"protocol_validation={details.get('protocol_validation')}")
+    elif command == "execute-non-solver-revalidation":
+        print(f"revalidation_result_status={result.get('verdict')}")
+        print(f"task_dir={details.get('task_dir')}")
+        print(f"downstream_agent={details.get('downstream_agent')}")
+        print(f"execution_result={result.get('output_paths', {}).get('execution_result')}")
+        print(f"execution_report={result.get('output_paths', {}).get('execution_report')}")
+        print(f"run_record={result.get('output_paths', {}).get('run_record')}")
+        print(f"gate={result.get('output_paths', {}).get('gate')}")
+        print(f"handoff={result.get('output_paths', {}).get('handoff')}")
+        print(f"gate_decision={details.get('gate_decision')}")
+        print(f"final_evidence_approved={details.get('final_evidence_approved')}")
+        print(f"automatic_execution_performed={details.get('automatic_execution_performed')}")
+        print(f"protocol_validation={details.get('protocol_validation')}")
+    elif command == "report-non-solver-revalidation":
+        print(f"report_status={result.get('verdict')}")
+        print(f"task_dir={details.get('task_dir')}")
+        print(f"downstream_agent={details.get('downstream_agent')}")
+        print(f"report_path={result.get('output_paths', {}).get('report_path')}")
+        print(f"protocol_validation={details.get('protocol_validation')}")
+    elif command == "supervisor-review-non-solver-revalidation":
+        print(f"supervisor_review_status={result.get('verdict')}")
+        print(f"task_dir={details.get('task_dir')}")
+        print(f"reviewed_agent={details.get('reviewed_agent')}")
+        print(f"reviewed_status={details.get('reviewed_status')}")
+        print(f"gate_decision={details.get('gate_decision')}")
+        print(f"ledger_entry_created={details.get('non_solver_ledger_entry_created')}")
+        print(f"final_evidence_approved={details.get('final_evidence_approved')}")
+        print(f"final_verdict_frozen={details.get('final_verdict_frozen')}")
+        print(f"solver_approved={details.get('solver_approved')}")
+        print(f"odb_metrics_approved={details.get('odb_metrics_approved')}")
+        print(f"review_result={result.get('output_paths', {}).get('review_result')}")
+        print(f"review_report={result.get('output_paths', {}).get('review_report')}")
+        print(f"run_record={result.get('output_paths', {}).get('run_record')}")
+        print(f"gate={result.get('output_paths', {}).get('gate')}")
+        print(f"handoff={result.get('output_paths', {}).get('handoff')}")
+        print(f"ledger_md={result.get('output_paths', {}).get('ledger_md')}")
+        print(f"protocol_validation={details.get('protocol_validation')}")
+    elif command == "report-supervisor-non-solver-review":
+        print(f"report_status={result.get('verdict')}")
+        print(f"task_dir={details.get('task_dir')}")
+        print(f"reviewed_agent={details.get('reviewed_agent')}")
+        print(f"report_path={result.get('output_paths', {}).get('report_path')}")
+        print(f"protocol_validation={details.get('protocol_validation')}")
     elif command == "queue-patch-preview":
         print(f"workflow_status={details.get('workflow_status')}")
         print(f"patch_type={details.get('patch_type')}")

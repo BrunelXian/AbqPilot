@@ -16,6 +16,10 @@ AbqPilot is a closed-loop CAE-ODB automation system for controlled Abaqus simula
 6. Do not bypass StaticValidator, DiffGuard, PhysicsGuard, or ODB status checks.
 7. Do not let Codex, LLMs, GUI, or CLI bypass deterministic AbqPilot tools.
 8. Do not validate only the target edit. Also validate that non-target original model conditions are preserved across CAE export, INP patching, candidate generation, and solver-run copies.
+9. Non-solver revalidation execution may only run for explicitly supported low-risk agents. High-risk model/solver/ODB agents must be blocked in Stage 5.0F.
+10. A non-solver revalidation PASS only permits PipelineSupervisor review. It does not approve final evidence.
+11. PipelineSupervisor non-solver review may only accept non-solver revalidation results into NON_SOLVER_EVIDENCE_LEDGER.
+12. PipelineSupervisor non-solver review must not freeze final evidence and must not approve solver, ODB, metrics, model mutation, or high-risk agent results.
 
 ## Hard Rule: SanityBase-Derived Simulation Candidates Only
 
@@ -92,6 +96,8 @@ Default execution direction is ACOM, AbqPilot Codex Operator Mode. Codex may exe
 Codex summaries are not final evidence. AbqPilot must validate returned artifacts through deterministic schemas, guards, artifact hashes, tests, safety audits, secret audits, StaticValidator, DiffGuard, PhysicsGuard, MCPGuard when applicable, and Job/ODB diagnosis when applicable.
 
 NARM, Native Agent Runtime Mode, is optional and must preserve the same safety and evidence contracts.
+
+Accepted ACOM result must be routed into a downstream revalidation scaffold. No ACOM result may directly become evidence. No downstream revalidation may be auto-executed unless a future guarded stage explicitly implements it. Downstream revalidation must preserve RUN/HANDOFF/GATE protocol.
 
 Use Codex to build AbqPilot. Do not make Codex the agent.
 

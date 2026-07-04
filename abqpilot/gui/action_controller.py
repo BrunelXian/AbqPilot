@@ -249,6 +249,42 @@ class GuiActionController:
             lambda: cli.command_report_acom_result_intake(task_dir=task_dir),
         )
 
+    def scaffold_acom_revalidation(self, task_dir: str | Path) -> dict[str, Any]:
+        return self._safe(
+            "scaffold_acom_revalidation",
+            lambda: cli.command_scaffold_acom_revalidation(task_dir=task_dir),
+        )
+
+    def report_acom_revalidation(self, task_dir: str | Path) -> dict[str, Any]:
+        return self._safe(
+            "report_acom_revalidation",
+            lambda: cli.command_report_acom_revalidation(task_dir=task_dir),
+        )
+
+    def execute_non_solver_revalidation(self, task_dir: str | Path) -> dict[str, Any]:
+        return self._safe(
+            "execute_non_solver_revalidation",
+            lambda: cli.command_execute_non_solver_revalidation(task_dir=task_dir),
+        )
+
+    def report_non_solver_revalidation(self, task_dir: str | Path) -> dict[str, Any]:
+        return self._safe(
+            "report_non_solver_revalidation",
+            lambda: cli.command_report_non_solver_revalidation(task_dir=task_dir),
+        )
+
+    def supervisor_review_non_solver_revalidation(self, task_dir: str | Path) -> dict[str, Any]:
+        return self._safe(
+            "supervisor_review_non_solver_revalidation",
+            lambda: cli.command_supervisor_review_non_solver_revalidation(task_dir=task_dir),
+        )
+
+    def report_supervisor_non_solver_review(self, task_dir: str | Path) -> dict[str, Any]:
+        return self._safe(
+            "report_supervisor_non_solver_review",
+            lambda: cli.command_report_supervisor_non_solver_review(task_dir=task_dir),
+        )
+
     def report_codex_handoff(self, handoff_dir: str | Path) -> dict[str, Any]:
         return self._safe(
             "report_codex_handoff",

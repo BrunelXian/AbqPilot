@@ -143,6 +143,12 @@ class AbqPilotGui(BaseWindow):
             ("Validate ACOM Template Pack", self._validate_acom_template_pack),
             ("Intake ACOM Result", self._intake_acom_result),
             ("Report ACOM Result Intake", self._report_acom_result_intake),
+            ("Scaffold ACOM Revalidation", self._scaffold_acom_revalidation),
+            ("Report ACOM Revalidation", self._report_acom_revalidation),
+            ("Execute Non-Solver Revalidation", self._execute_non_solver_revalidation),
+            ("Report Non-Solver Revalidation", self._report_non_solver_revalidation),
+            ("Supervisor Review Non-Solver Revalidation", self._supervisor_review_non_solver_revalidation),
+            ("Report Supervisor Non-Solver Review", self._report_supervisor_non_solver_review),
             ("List Pipeline Agents", self._list_pipeline_agents),
             ("Scaffold Pipeline Task", self._scaffold_pipeline_task),
             ("Validate Pipeline Protocol", self._validate_pipeline_protocol),
@@ -189,6 +195,14 @@ class AbqPilotGui(BaseWindow):
             "Auto Retry Loop [DISABLED]",
             "Run Codex [DISABLED]",
             "Auto Execute Codex [DISABLED]",
+            "Run Revalidation Agent [DISABLED]",
+            "Auto Schedule Agent [DISABLED]",
+            "Approve Evidence [DISABLED]",
+            "Approve Final Evidence [DISABLED]",
+            "Freeze Final Verdict [DISABLED]",
+            "Approve Solver [DISABLED]",
+            "Approve ODB [DISABLED]",
+            "Approve Metrics [DISABLED]",
         ]:
             make_button(buttons, label, lambda name=label: self._blocked_action(name), danger=True).pack(fill="x", pady=3)
 
@@ -704,6 +718,36 @@ class AbqPilotGui(BaseWindow):
         task_dir = self.task_dir or self.project_root / "runs" / "tasks" / "stage5_0d_acom_result_intake_smoke"
         result = self.controller.report_acom_result_intake(task_dir)
         self._handle_action_result(result, "ACOM result intake report ready")
+
+    def _scaffold_acom_revalidation(self) -> None:
+        task_dir = self.task_dir or self.project_root / "runs" / "tasks" / "stage5_0d_acom_result_intake_smoke"
+        result = self.controller.scaffold_acom_revalidation(task_dir)
+        self._handle_action_result(result, "ACOM revalidation scaffold ready")
+
+    def _report_acom_revalidation(self) -> None:
+        task_dir = self.task_dir or self.project_root / "runs" / "tasks" / "stage5_0d_acom_result_intake_smoke"
+        result = self.controller.report_acom_revalidation(task_dir)
+        self._handle_action_result(result, "ACOM revalidation report ready")
+
+    def _execute_non_solver_revalidation(self) -> None:
+        task_dir = self.task_dir or self.project_root / "runs" / "tasks" / "stage5_0f_non_solver_revalidation_smoke"
+        result = self.controller.execute_non_solver_revalidation(task_dir)
+        self._handle_action_result(result, "Non-solver revalidation checked")
+
+    def _report_non_solver_revalidation(self) -> None:
+        task_dir = self.task_dir or self.project_root / "runs" / "tasks" / "stage5_0f_non_solver_revalidation_smoke"
+        result = self.controller.report_non_solver_revalidation(task_dir)
+        self._handle_action_result(result, "Non-solver revalidation report ready")
+
+    def _supervisor_review_non_solver_revalidation(self) -> None:
+        task_dir = self.task_dir or self.project_root / "runs" / "tasks" / "stage5_0f_non_solver_revalidation_smoke"
+        result = self.controller.supervisor_review_non_solver_revalidation(task_dir)
+        self._handle_action_result(result, "Supervisor non-solver review checked")
+
+    def _report_supervisor_non_solver_review(self) -> None:
+        task_dir = self.task_dir or self.project_root / "runs" / "tasks" / "stage5_0f_non_solver_revalidation_smoke"
+        result = self.controller.report_supervisor_non_solver_review(task_dir)
+        self._handle_action_result(result, "Supervisor non-solver review report ready")
 
     def _list_pipeline_agents(self) -> None:
         result = self.controller.list_pipeline_agents()

@@ -439,3 +439,15 @@ All key Markdown files use YAML frontmatter with a `doc_type` field. Codex/LLM s
 Stage 5.0C ACOM template generation adds `codex_handoff/` and `codex_result/` beside the pipeline trace. The generated ACOM RUN/HANDOFF files remain flat Markdown records. Codex output must return through `codex_result/structured_result.json` and AbqPilot revalidation before any evidence claim.
 
 Stage 5.0D ACOM result intake writes `codex_result/acom_result_intake.json`, `codex_result/acom_result_intake_report.md`, `trace/RUN_XXX_ACOM_RESULT_INTAKE.md`, `gates/GATE_XXX_ACOM_RESULT_REVALIDATION.md`, and a downstream handoff. Accepted intake remains pending revalidation; it is not final evidence.
+
+Stage 5.0E writes downstream revalidation packages under:
+
+```text
+runs/tasks/<task_id>/revalidation/<downstream_agent>_<id>/
+```
+
+It also writes flat protocol records under `trace/`, `gates/`, and `handoffs/`. These are scaffold records only and preserve `automatic_execution_performed=false`.
+
+Stage 5.0F can execute deterministic non-solver revalidation on an existing scaffold. Supported agents are DocsStatusAgent, SoftwareQAAgent, AuditAgent, EvidenceReportAgent, and PipelineSupervisor. GuardAgent, CandidateBuilderAgent, DiagnosisAgent, ExecutionAgent, and MetricsAgent are blocked in Stage 5.0F. The executor writes `REVALIDATION_EXECUTION_RESULT.json`, `REVALIDATION_EXECUTION_REPORT.md`, and supported RUN/GATE/HANDOFF result records. The gate decision is `PENDING_SUPERVISOR_REVIEW` or `BLOCKED`, never `APPROVED`.
+
+Stage 5.0G writes PipelineSupervisor review artifacts under `supervisor_review/` and may append `NON_SOLVER_EVIDENCE_LEDGER.md/json`. It does not update `TASK_FINAL_EVIDENCE_LEDGER.md` as final proof. The non-solver ledger is non-final and does not approve solver, ODB, metrics, model mutation, final evidence, or final verdict.

@@ -57,6 +57,12 @@ Each action goes through `GuiActionController`, catches exceptions, and returns 
 
 Stage 5.0A GUI actions support ACOM handoff package generation, validation, structured result intake, and reporting. They do not run Codex CLI, run solver, queue jobs, open ODB files, or auto-execute returned work. Codex summaries are not final evidence; AbqPilot deterministic revalidation remains required.
 
+Stage 5.0E adds `Scaffold ACOM Revalidation` and `Report ACOM Revalidation`. These actions create or report downstream revalidation scaffolds only. They do not run revalidation agents, auto-schedule agents, run Codex, run solver, open ODB, queue jobs, or approve evidence.
+
+Stage 5.0F adds `Execute Non-Solver Revalidation` and `Report Non-Solver Revalidation`. These actions are limited to DocsStatusAgent, SoftwareQAAgent, AuditAgent, EvidenceReportAgent, and PipelineSupervisor. GuardAgent, CandidateBuilderAgent, DiagnosisAgent, ExecutionAgent, and MetricsAgent remain blocked. A non-solver pass only creates a pending PipelineSupervisor review result; it does not approve final evidence.
+
+Stage 5.0G adds `Supervisor Review Non-Solver Revalidation` and `Report Supervisor Non-Solver Review`. These actions may accept a completed non-solver revalidation result into `NON_SOLVER_EVIDENCE_LEDGER` only. They do not freeze final evidence, approve solver execution, approve ODB, approve metrics, run Codex, auto-schedule agents, or run high-risk agents.
+
 ## Disabled Actions
 
 Dangerous workflow actions remain disabled in GUI Beta:

@@ -59,3 +59,9 @@ runs/tasks/<task_id>/
 Stage 5.0C ACOM template generation may add extra flat trace files such as `RUN_009_ACOM_MCPGUARD_REVIEW.md` and handoffs such as `HANDOFF_008_ACOM_TO_CODEX_OPERATOR.md`. High-risk or model-condition templates may add `GATE_005_PENDING_ACOM_RESULT_REVALIDATION.md` with `decision: PENDING_REVALIDATION`. This gate does not approve execution.
 
 Stage 5.0D ACOM result intake may add `RUN_010_ACOM_RESULT_INTAKE.md`, `GATE_006_ACOM_RESULT_REVALIDATION.md`, and `HANDOFF_009_ACOM_RESULT_TO_<DOWNSTREAM_AGENT>.md`. These files keep the trace flat and Markdown-only. A safe result gate remains `PENDING_REVALIDATION`; unsafe or malformed results are `BLOCKED`.
+
+Stage 5.0E may add downstream revalidation scaffold records such as `RUN_013_GUARD_AGENT_REVALIDATION.md`, `GATE_009_GUARD_AGENT_REVALIDATION.md`, and `HANDOFF_012_GUARD_AGENT_REVALIDATION_TO_PIPELINE_SUPERVISOR.md`. These keep `automatic_execution_performed: false` and do not approve evidence.
+
+Stage 5.0F may add non-solver revalidation result records such as `RUN_016_DOCS_STATUS_AGENT_REVALIDATION_RESULT.md`, `GATE_012_DOCS_STATUS_AGENT_REVALIDATION_RESULT.md`, and `HANDOFF_015_DOCS_STATUS_AGENT_REVALIDATION_RESULT_TO_PIPELINE_SUPERVISOR.md`. These records are produced only by explicit CLI/GUI invocation for supported low-risk agents and keep `final_evidence_approved: false`.
+
+Stage 5.0G may add supervisor review records such as `RUN_018_PIPELINE_SUPERVISOR_NON_SOLVER_REVIEW.md`, `GATE_014_SUPERVISOR_NON_SOLVER_REVIEW.md`, and `HANDOFF_017_SUPERVISOR_NON_SOLVER_REVIEW_TO_EVIDENCE_REPORT_AGENT.md`. These records may update `NON_SOLVER_EVIDENCE_LEDGER.md/json`, not `TASK_FINAL_EVIDENCE_LEDGER.md`.

@@ -1,7 +1,7 @@
 # AbqPilot Project Status
 
-Latest verdict: `PASS_ABQPILOT_V2_STAGE5_0D_ACOM_RESULT_PIPELINE_REVALIDATION_GATE_READY`
-Generated at: `2026-07-04T14:42:02`
+Latest verdict: `PASS_ABQPILOT_V2_STAGE5_0G_PIPELINE_SUPERVISOR_NON_SOLVER_REVIEW_GATE_READY`
+Generated at: `2026-07-04T18:03:56`
 
 ## Capabilities
 
@@ -67,6 +67,13 @@ Generated at: `2026-07-04T14:42:02`
 - ACOM result pipeline revalidation gate
 - pipeline-integrated ACOM result RUN/HANDOFF/GATE generation
 - ACOM result routing to downstream AbqPilot revalidation agents
+- ACOM downstream revalidation handoff scaffold
+- downstream agent-specific revalidation profiles
+- revalidation package RUN/HANDOFF/GATE scaffold generation
+- deterministic non-solver revalidation executor
+- non-solver revalidation RUN/HANDOFF/GATE result records
+- PipelineSupervisor non-solver review gate
+- non-final non-solver evidence ledger
 
 ## Safety Boundary Matrix
 
@@ -99,6 +106,9 @@ Generated at: `2026-07-04T14:42:02`
 | Model Condition Preservation Guard | checks original CAE/JNL model-condition intent against exported, patched, and solver-run INPs; no solver/ODB/runtime mutation |
 | ACOM handoff | bounded Codex operator packages only; AbqPilot does not call Codex CLI and Codex summaries are not final evidence |
 | ACOM result intake | Codex structured results are accepted only pending downstream AbqPilot revalidation; unsafe safety flags, task mismatch, and handoff mismatch are rejected |
+| ACOM downstream revalidation | accepted ACOM results can create downstream revalidation scaffolds; Stage 5.0F executes only supported non-solver deterministic checks and still does not approve evidence |
+| ACOM non-solver revalidation | DocsStatusAgent, SoftwareQAAgent, AuditAgent, EvidenceReportAgent, and PipelineSupervisor only; Guard/CandidateBuilder/Diagnosis/Execution/Metrics agents are blocked |
+| PipelineSupervisor non-solver review | can accept Stage 5.0F results into NON_SOLVER_EVIDENCE_LEDGER only; no final evidence freeze, solver approval, ODB approval, or metrics approval |
 | ACOM templates | pipeline RUN/HANDOFF plus bounded codex_handoff packages only; Codex executes externally and manually |
 | Pipeline agents | bounded station protocol only; no automatic scheduling, no Codex bridge, no solver, no QueueRunner, no ODB open |
 | NARM | optional native runtime mode and must preserve the same evidence and safety contracts |
@@ -136,6 +146,12 @@ Generated at: `2026-07-04T14:42:02`
 - `python -m abqpilot.cli validate-codex-handoff --handoff-dir <handoff_dir>`
 - `python -m abqpilot.cli intake-codex-result --handoff-dir <handoff_dir> --result-json <structured_result.json>`
 - `python -m abqpilot.cli report-acom-result-intake --task-dir <task_dir>`
+- `python -m abqpilot.cli scaffold-acom-revalidation --task-dir <task_dir>`
+- `python -m abqpilot.cli report-acom-revalidation --task-dir <task_dir>`
+- `python -m abqpilot.cli execute-non-solver-revalidation --task-dir <task_dir>`
+- `python -m abqpilot.cli report-non-solver-revalidation --task-dir <task_dir>`
+- `python -m abqpilot.cli supervisor-review-non-solver-revalidation --task-dir <task_dir>`
+- `python -m abqpilot.cli report-supervisor-non-solver-review --task-dir <task_dir>`
 - `python -m abqpilot.cli report-codex-handoff --handoff-dir <handoff_dir>`
 - `python -m abqpilot.cli queue-patch-preview --task-dir <task_dir> --patch-preview-dir <preview_dir> --mode preflight-only`
 - `python -m abqpilot.cli queue-patch-preview --task-dir <task_dir> --patch-preview-dir <preview_dir> --mode dry-run-enqueue`
@@ -206,10 +222,13 @@ Generated at: `2026-07-04T14:42:02`
 - Stage 5.0B defines pipeline communication protocol only; it does not add automatic scheduling, Codex runtime bridge, solver execution, QueueRunner launch, enqueue, or ODB opening.
 - Stage 5.0C defines ACOM templates on the pipeline protocol; it generates RUN/HANDOFF records and codex_handoff packages but does not call Codex CLI.
 - Stage 5.0D intakes Codex structured results into pipeline RUN/HANDOFF/GATE records for downstream AbqPilot revalidation; accepted intake is not final evidence.
+- Stage 5.0E creates downstream revalidation scaffolds only; it does not run downstream agents, schedule pipelines, or approve evidence.
+- Stage 5.0F executes deterministic non-solver revalidation only for DocsStatusAgent, SoftwareQAAgent, AuditAgent, EvidenceReportAgent, and PipelineSupervisor; high-risk agents remain blocked.
+- Stage 5.0G lets PipelineSupervisor accept completed non-solver revalidation into NON_SOLVER_EVIDENCE_LEDGER only; final evidence remains separate and unapproved.
 
 ## Recommended Next Stages
 
-- Use ACOM result intake to route external Codex artifacts to the correct downstream AbqPilot revalidation agent
+- Add later guarded executors for GuardAgent/CandidateBuilderAgent/DiagnosisAgent/MetricsAgent only with model/ODB-specific gates
 - Integrate MCPGuard as a mandatory future solver eligibility gate beside StaticValidator, DiffGuard, and PhysicsGuard
 - GUI persistence and usability hardening
 - Use pipeline protocol scaffolds for future task traces before any high-risk execution

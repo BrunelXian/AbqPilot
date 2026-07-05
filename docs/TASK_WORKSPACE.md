@@ -451,3 +451,25 @@ It also writes flat protocol records under `trace/`, `gates/`, and `handoffs/`. 
 Stage 5.0F can execute deterministic non-solver revalidation on an existing scaffold. Supported agents are DocsStatusAgent, SoftwareQAAgent, AuditAgent, EvidenceReportAgent, and PipelineSupervisor. GuardAgent, CandidateBuilderAgent, DiagnosisAgent, ExecutionAgent, and MetricsAgent are blocked in Stage 5.0F. The executor writes `REVALIDATION_EXECUTION_RESULT.json`, `REVALIDATION_EXECUTION_REPORT.md`, and supported RUN/GATE/HANDOFF result records. The gate decision is `PENDING_SUPERVISOR_REVIEW` or `BLOCKED`, never `APPROVED`.
 
 Stage 5.0G writes PipelineSupervisor review artifacts under `supervisor_review/` and may append `NON_SOLVER_EVIDENCE_LEDGER.md/json`. It does not update `TASK_FINAL_EVIDENCE_LEDGER.md` as final proof. The non-solver ledger is non-final and does not approve solver, ODB, metrics, model mutation, final evidence, or final verdict.
+
+Stage 5.0H writes EvidenceReportAgent summary artifacts under `evidence_report/` and appends dynamic RUN/HANDOFF/GATE records for supervisor acknowledgement. It consumes `NON_SOLVER_EVIDENCE_LEDGER.md/json` only. It does not create or modify `TASK_FINAL_EVIDENCE_LEDGER.md`; the report is non-final and non-solver only.
+
+Stage 5.0I writes PipelineSupervisor acknowledgement artifacts under `supervisor_summary_ack/` and appends `NON_SOLVER_SUMMARY_ACK_LEDGER.md/json`. It consumes Stage 5.0H summary artifacts only. It does not create or modify `TASK_FINAL_EVIDENCE_LEDGER.md`; the acknowledgement is non-final and non-solver only.
+
+Stage 5.1A adds GUI workflow-state inspection over task workspace files. The GUI reads `TRACE_INDEX.md`, flat `trace/RUN_*.md`, `handoffs/HANDOFF_*.md`, `gates/GATE_*.md`, `codex_handoff/`, `codex_result/`, `revalidation/`, `supervisor_review/`, `evidence_report/`, and `supervisor_summary_ack/` artifacts to classify the current non-solver workflow position. This inspection is read-only and does not run Codex, run solver, open ODB, enqueue jobs, auto-schedule agents, update `TASK_FINAL_EVIDENCE_LEDGER.md`, approve final evidence, or freeze final verdict.
+
+Stage 5.1B presents the same read-only workspace state with cards, badges, and a workflow timeline. It is a readability layer over existing task records and does not edit trace files, execute downstream agents, run solver, open ODB, call Codex CLI, or update final evidence.
+
+Stage 5.1C adds read-only trace viewer maps over the same workspace. It resolves `RUN_*.md`, `HANDOFF_*.md`, `GATE_*.md`, ACOM JSON artifacts, revalidation reports, supervisor reports, non-solver ledgers, evidence summary reports, and summary acknowledgement reports. It flags unsafe final-approval claims but never modifies files.
+
+Stage 5.1D adds read-only report and artifact previews for those resolved files. Markdown and JSON previews may parse frontmatter, headings, key sections, pretty JSON, status/decision fields, and safety fields. They do not edit artifacts, launch external editors, execute file contents, update `TASK_FINAL_EVIDENCE_LEDGER.md`, approve final evidence, or freeze verdict.
+
+Stage 5.1E adds guided next-step recommendation over the same task workspace. The recommender reads workflow state, trace records, artifact preview state, and safe action catalog metadata, then points to an existing safe GUI panel/action. It does not create a generic executor, auto-schedule agents, call Codex CLI, run solver, open ODB, queue jobs, approve final evidence, or freeze verdict.
+
+Stage 5.1F writes non-final GUI beta smoke artifacts under `gui_beta/`. These artifacts validate GUI readiness for the non-solver ACOM governance workflow only. They do not update `TASK_FINAL_EVIDENCE_LEDGER.md`, execute recommended actions, approve final evidence, freeze verdict, or authorize solver/ODB/metrics work.
+
+Stage 5.2A writes preview-only high-risk gate UX specification artifacts under `gui_high_risk_gate_ux/`. These artifacts describe locked future gates for solver, ODB, queue, Codex, source mutation, metrics, destructive artifact changes, final evidence, and final verdict freeze. They do not create real task `gates/` approval records, do not update `TASK_FINAL_EVIDENCE_LEDGER.md`, and do not authorize high-risk execution.
+
+Stage 5.2B writes controlled solver gate preview artifacts under `gui_high_risk_gate_ux/controlled_solver_gate_preview/`. These artifacts include a readiness checklist, inactive approval token schema, token validation rules, and preview report. They are not solver request files, not active approval gate records, and not authorization to run Abaqus.
+
+Stage 5.2C writes inactive controlled solver human gate draft artifacts under `gui_high_risk_gate_ux/controlled_solver_inactive_gate_draft/`. These artifacts are not active task `gates/` records, not solver request files, and not executable handoffs.

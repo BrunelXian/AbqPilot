@@ -1,0 +1,15 @@
+{
+  "schema_version": "0.1",
+  "stage": "Stage 5.2C",
+  "validation_status": "INACTIVE_GATE_DRAFT_VALID_WITH_WARNINGS",
+  "preview_only": true,
+  "inactive_draft": true,
+  "active_approval": false,
+  "real_gate_created": false,
+  "active_gate_record_created": false,
+  "task_gate_record_created": false,
+  "solver_request_created": false,
+  "solver_run": false,
+  "final_evidence_approved": false,
+  "final_verdict_frozen": false
+}

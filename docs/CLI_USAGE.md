@@ -501,3 +501,26 @@ D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli report-sup
 ```
 
 Accepted review means accepted for `NON_SOLVER_EVIDENCE_LEDGER` only. It does not approve solver, ODB, metrics, model mutation, final evidence, or final verdict.
+
+Stage 5.0H EvidenceReportAgent non-solver evidence summary:
+
+```powershell
+D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli generate-non-solver-evidence-summary --task-dir D:\Projects\AbqPilot-v2\runs\tasks\stage5_0f_non_solver_revalidation_smoke
+D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli report-non-solver-evidence-summary --task-dir D:\Projects\AbqPilot-v2\runs\tasks\stage5_0f_non_solver_revalidation_smoke
+```
+
+The summary consumes `NON_SOLVER_EVIDENCE_LEDGER.md/json` and writes `evidence_report/NON_SOLVER_EVIDENCE_SUMMARY_RESULT.json`, `evidence_report/NON_SOLVER_EVIDENCE_SUMMARY_REPORT.md`, and EvidenceReportAgent RUN/HANDOFF/GATE records. The summary is non-final and non-solver only. It does not update `TASK_FINAL_EVIDENCE_LEDGER.md` and does not approve solver, ODB, metrics, model mutation, final evidence, or final verdict.
+
+Stage 5.0I PipelineSupervisor non-solver summary acknowledgement:
+
+```powershell
+D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli supervisor-ack-non-solver-summary --task-dir D:\Projects\AbqPilot-v2\runs\tasks\stage5_0f_non_solver_revalidation_smoke
+D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli report-supervisor-non-solver-summary-ack --task-dir D:\Projects\AbqPilot-v2\runs\tasks\stage5_0f_non_solver_revalidation_smoke
+```
+
+The acknowledgement writes `supervisor_summary_ack/SUPERVISOR_NON_SOLVER_SUMMARY_ACK_RESULT.json`, `supervisor_summary_ack/SUPERVISOR_NON_SOLVER_SUMMARY_ACK_REPORT.md`, `NON_SOLVER_SUMMARY_ACK_LEDGER.md/json`, and PipelineSupervisor RUN/HANDOFF/GATE records. It is non-final and non-solver only. It does not update `TASK_FINAL_EVIDENCE_LEDGER.md` and does not approve solver, ODB, metrics, model mutation, final evidence, or final verdict.
+## Stage 5.1A GUI Information Architecture
+
+Stage 5.1A does not add solver, ODB, Codex, queue, scheduling, final-evidence, or final-verdict CLI execution paths. The GUI uses existing safe CLI-equivalent actions and a read-only workflow state model to show ACOM/non-solver progress.
+
+High-risk GUI controls are visible only as disabled actions with no executable backend callback.

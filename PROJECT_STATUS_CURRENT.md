@@ -1,7 +1,7 @@
 # AbqPilot Project Status
 
-Latest verdict: `PASS_ABQPILOT_V2_STAGE5_0G_PIPELINE_SUPERVISOR_NON_SOLVER_REVIEW_GATE_READY`
-Generated at: `2026-07-04T18:03:56`
+Latest verdict: `PASS_ABQPILOT_V2_STAGE5_2C_CONTROLLED_SOLVER_INACTIVE_HUMAN_GATE_DRAFT_READY`
+Generated at: `2026-07-05T17:59:31`
 
 ## Capabilities
 
@@ -74,6 +74,24 @@ Generated at: `2026-07-04T18:03:56`
 - non-solver revalidation RUN/HANDOFF/GATE result records
 - PipelineSupervisor non-solver review gate
 - non-final non-solver evidence ledger
+- EvidenceReportAgent non-solver evidence summary report
+- non-final non-solver summary RUN/HANDOFF/GATE records
+- PipelineSupervisor non-solver summary acknowledgement
+- non-final non-solver summary acknowledgement ledger
+- GUI workflow state model for ACOM/non-solver pipeline state
+- GUI safe action catalog with disabled high-risk controls
+- GUI information architecture for RUN/HANDOFF/GATE visibility
+- GUI non-final/non-solver boundary copy and final-evidence lock display
+- GUI visual layout/readability cards, timeline, badges, and action panels
+- GUI read-only trace viewer and timeline interaction
+- GUI evidence file resolver and read-only document previews
+- GUI read-only report viewer and artifact preview polish
+- GUI Markdown/JSON preview safety claim detection
+- GUI guided next-step recommendation for non-solver ACOM workflow
+- GUI beta end-to-end safe workflow smoke and readiness report
+- GUI high-risk gate UX specification and preview-only checklist catalog
+- GUI controlled solver human gate preview and inactive approval token schema
+- GUI controlled solver inactive human gate draft and future-shape specification
 
 ## Safety Boundary Matrix
 
@@ -109,6 +127,17 @@ Generated at: `2026-07-04T18:03:56`
 | ACOM downstream revalidation | accepted ACOM results can create downstream revalidation scaffolds; Stage 5.0F executes only supported non-solver deterministic checks and still does not approve evidence |
 | ACOM non-solver revalidation | DocsStatusAgent, SoftwareQAAgent, AuditAgent, EvidenceReportAgent, and PipelineSupervisor only; Guard/CandidateBuilder/Diagnosis/Execution/Metrics agents are blocked |
 | PipelineSupervisor non-solver review | can accept Stage 5.0F results into NON_SOLVER_EVIDENCE_LEDGER only; no final evidence freeze, solver approval, ODB approval, or metrics approval |
+| EvidenceReportAgent non-solver summary | summarizes NON_SOLVER_EVIDENCE_LEDGER only; does not update TASK_FINAL_EVIDENCE_LEDGER.md or approve solver/ODB/metrics/final evidence |
+| PipelineSupervisor non-solver summary acknowledgement | acknowledges EvidenceReportAgent non-solver summaries into NON_SOLVER_SUMMARY_ACK_LEDGER only; does not update TASK_FINAL_EVIDENCE_LEDGER.md |
+| GUI safe workflow UX | Stage 5.1A displays ACOM/non-solver workflow state and disables solver, ODB, queue, Codex execution, auto scheduling, final evidence, and final verdict controls |
+| GUI visual polish | Stage 5.1B improves layout and readability only; disabled high-risk actions remain callback-free and no execution capability is added |
+| GUI trace viewer | Stage 5.1C resolves RUN/HANDOFF/GATE records and related artifacts read-only; timeline selection does not execute actions |
+| GUI artifact preview | Stage 5.1D previews Markdown and JSON artifacts read-only; no external editor launch, artifact mutation, execution, final evidence approval, or final verdict freeze |
+| GUI next-step recommendation | Stage 5.1E provides advisory recommendations only; no generic executor, no auto scheduling, no Codex CLI call, no solver/ODB/queue/final-evidence action |
+| GUI beta readiness smoke | Stage 5.1F validates GUI beta readiness for non-solver ACOM governance only; not final evidence readiness and no execution authority |
+| GUI high-risk gate UX | Stage 5.2A specifies high-risk gate UX only; preview-only, not approved, not executable, and no real gate creation |
+| Controlled solver gate preview | Stage 5.2B designs controlled solver human gate preview and inactive token schema only; no solver approval, no solver request, and no execution |
+| Controlled solver inactive gate draft | Stage 5.2C creates an inactive controlled solver human gate draft only; no active task gate, no solver request, and no execution |
 | ACOM templates | pipeline RUN/HANDOFF plus bounded codex_handoff packages only; Codex executes externally and manually |
 | Pipeline agents | bounded station protocol only; no automatic scheduling, no Codex bridge, no solver, no QueueRunner, no ODB open |
 | NARM | optional native runtime mode and must preserve the same evidence and safety contracts |
@@ -152,6 +181,10 @@ Generated at: `2026-07-04T18:03:56`
 - `python -m abqpilot.cli report-non-solver-revalidation --task-dir <task_dir>`
 - `python -m abqpilot.cli supervisor-review-non-solver-revalidation --task-dir <task_dir>`
 - `python -m abqpilot.cli report-supervisor-non-solver-review --task-dir <task_dir>`
+- `python -m abqpilot.cli generate-non-solver-evidence-summary --task-dir <task_dir>`
+- `python -m abqpilot.cli report-non-solver-evidence-summary --task-dir <task_dir>`
+- `python -m abqpilot.cli supervisor-ack-non-solver-summary --task-dir <task_dir>`
+- `python -m abqpilot.cli report-supervisor-non-solver-summary-ack --task-dir <task_dir>`
 - `python -m abqpilot.cli report-codex-handoff --handoff-dir <handoff_dir>`
 - `python -m abqpilot.cli queue-patch-preview --task-dir <task_dir> --patch-preview-dir <preview_dir> --mode preflight-only`
 - `python -m abqpilot.cli queue-patch-preview --task-dir <task_dir> --patch-preview-dir <preview_dir> --mode dry-run-enqueue`
@@ -225,10 +258,25 @@ Generated at: `2026-07-04T18:03:56`
 - Stage 5.0E creates downstream revalidation scaffolds only; it does not run downstream agents, schedule pipelines, or approve evidence.
 - Stage 5.0F executes deterministic non-solver revalidation only for DocsStatusAgent, SoftwareQAAgent, AuditAgent, EvidenceReportAgent, and PipelineSupervisor; high-risk agents remain blocked.
 - Stage 5.0G lets PipelineSupervisor accept completed non-solver revalidation into NON_SOLVER_EVIDENCE_LEDGER only; final evidence remains separate and unapproved.
+- Stage 5.0H lets EvidenceReportAgent summarize NON_SOLVER_EVIDENCE_LEDGER into non-final reports only; TASK_FINAL_EVIDENCE_LEDGER.md remains untouched.
+- Stage 5.0I lets PipelineSupervisor acknowledge EvidenceReportAgent non-solver summaries into NON_SOLVER_SUMMARY_ACK_LEDGER only; TASK_FINAL_EVIDENCE_LEDGER.md remains untouched.
+- Stage 5.1A reorganizes GUI information architecture around safe workflow state. High-risk solver/ODB/queue/Codex/final-evidence actions are visible only as disabled controls with no execution backend.
+- Stage 5.1B adds GUI visual layout/readability helpers: status cards, workflow timeline, badge labels, action panels, and disabled high-risk summaries. It adds no solver, ODB, Codex, queue, scheduling, or final-evidence capability.
+- Stage 5.1C adds read-only GUI trace viewer and timeline interaction. It resolves RUN/HANDOFF/GATE records and related artifacts, flags unsafe final-approval claims, and adds no execution capability.
+- Stage 5.1D adds read-only GUI report and artifact preview polish. It parses Markdown/JSON records, flags unsafe final-approval claims, and does not mutate artifacts or launch external editors.
+- Stage 5.1E adds guided next-step recommendation. Recommendations point to existing safe GUI panels only and never auto-execute, call Codex CLI, run solver, open ODB, queue jobs, approve final evidence, or freeze verdict.
+- Stage 5.1F adds an end-to-end GUI safe workflow smoke and non-final beta readiness report. It validates Stage 5.1A-E GUI components without adding solver, ODB, Codex, queue, scheduling, final evidence, or final verdict authority.
+- Stage 5.2A adds a preview-only high-risk gate UX specification catalog. It does not execute high-risk actions, create real approving gates, update TASK_FINAL_EVIDENCE_LEDGER.md, approve final evidence, or freeze verdict.
+- Stage 5.2B narrows the high-risk UX design to CONTROLLED_SOLVER_RUN. It creates preview-only readiness, approval-token schema, validator, and report artifacts, but does not approve solver, create solver requests, run Abaqus, open ODB, mutate queue/runtime files, update final evidence, or freeze verdict.
+- Stage 5.2C creates an inactive CONTROLLED_SOLVER_RUN human gate draft, expected future active gate shape, and expected future solver execution handoff shape. These are specification artifacts only and do not create active task gates, solver requests, queue/runtime mutations, ODB/metrics approvals, final evidence, or verdict freeze.
 
 ## Recommended Next Stages
 
 - Add later guarded executors for GuardAgent/CandidateBuilderAgent/DiagnosisAgent/MetricsAgent only with model/ODB-specific gates
 - Integrate MCPGuard as a mandatory future solver eligibility gate beside StaticValidator, DiffGuard, and PhysicsGuard
 - GUI persistence and usability hardening
+- Add optional read-only GUI workflow reports after the Stage 5.1A presenter stabilizes
 - Use pipeline protocol scaffolds for future task traces before any high-risk execution
+- Implement real high-risk human approval gates only in a future explicit stage after the Stage 5.2A UX specification is reviewed
+- Implement a real controlled solver approval gate only in a future explicit stage, then keep solver execution in a separate later stage
+- Keep Stage 5.2C inactive draft artifacts separate from any future active GATE_XXX approval record

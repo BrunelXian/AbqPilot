@@ -1,0 +1,16 @@
+{
+  "doc_type": "handoff",
+  "task_id": "stage5_0f_non_solver_revalidation_smoke",
+  "from_agent": "PipelineSupervisor",
+  "to_agent": "ExecutionAgent",
+  "target_stage": "future controlled solver execution",
+  "input_gate_id": "GATE_FUTURE_CONTROLLED_SOLVER_APPROVAL",
+  "candidate_inp_path": null,
+  "solver_command_label": "configured-controlled-abaqus-command",
+  "output_directory": "future_controlled_solver_run",
+  "execution_risk_acknowledgement": true,
+  "no_odb_metrics_approval": true,
+  "no_final_evidence_approval": true,
+  "stage_5_2c_expected_shape_only": true,
+  "active_execution_handoff_created": false
+}

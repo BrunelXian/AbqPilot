@@ -3,7 +3,7 @@ from __future__ import annotations
 import tkinter as tk
 from tkinter import ttk
 
-from abqpilot.gui.artifact_viewer import preview_artifact
+from abqpilot.gui.report_viewer import build_report_viewer_card, render_report_viewer_text
 from abqpilot.gui.style import CTK, HAS_CUSTOMTKINTER, PALETTE
 
 
@@ -19,7 +19,7 @@ def set_text(widget, text: str) -> None:
 
 
 def artifact_preview(path: str | None) -> str:
-    return preview_artifact(path).get("preview", "No preview available.")
+    return render_report_viewer_text(build_report_viewer_card(path))
 
 
 def make_frame(parent, padding: int | tuple[int, int] = 0, panel: bool = False):

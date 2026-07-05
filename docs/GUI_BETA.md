@@ -63,6 +63,18 @@ Stage 5.0F adds `Execute Non-Solver Revalidation` and `Report Non-Solver Revalid
 
 Stage 5.0G adds `Supervisor Review Non-Solver Revalidation` and `Report Supervisor Non-Solver Review`. These actions may accept a completed non-solver revalidation result into `NON_SOLVER_EVIDENCE_LEDGER` only. They do not freeze final evidence, approve solver execution, approve ODB, approve metrics, run Codex, auto-schedule agents, or run high-risk agents.
 
+Stage 5.0H adds `Generate Non-Solver Evidence Summary` and `Report Non-Solver Evidence Summary`. These actions let EvidenceReportAgent summarize `NON_SOLVER_EVIDENCE_LEDGER` into a non-final, non-solver report. They do not update `TASK_FINAL_EVIDENCE_LEDGER.md`, approve solver, ODB, metrics, model mutation, final evidence, or final verdict.
+
+Stage 5.0I adds `Supervisor Ack Non-Solver Summary` and `Report Supervisor Non-Solver Summary Ack`. These actions acknowledge EvidenceReportAgent non-solver summaries into `NON_SOLVER_SUMMARY_ACK_LEDGER` only. They do not update `TASK_FINAL_EVIDENCE_LEDGER.md`, approve solver, ODB, metrics, model mutation, final evidence, or final verdict.
+
+Stage 5.1A reorganizes GUI information architecture around safe workflow state. The GUI groups ACOM, intake, downstream revalidation, non-solver revalidation, PipelineSupervisor review, EvidenceReportAgent summary, and PipelineSupervisor acknowledgement actions by workflow panel. High-risk solver, ODB, queue, Codex execution, auto-scheduling, final evidence approval, final verdict freeze, and solver/ODB/metrics approval controls are visible only as disabled actions with no executable backend callback.
+
+The Stage 5.1A GUI must display `Non-final / non-solver record`, `Final evidence remains locked`, and `Solver, ODB, metrics, and model mutation are disabled in this stage`. It does not call Codex CLI, run solver, open ODB, launch QueueRunner, auto-schedule agents, update `TASK_FINAL_EVIDENCE_LEDGER.md`, approve final evidence, or freeze final verdict.
+
+Stage 5.1B polishes the same safe workflow UX with a clearer project header, task workspace card, ACOM/non-solver workflow timeline, next safe action card, disabled high-risk action card, trace summary card, and grouped action panels. This is visual/readability only and adds no new solver, ODB, Codex, queue, scheduling, final evidence, or final verdict capability.
+
+Stage 5.1C adds a read-only trace viewer and timeline interaction. Selecting a timeline step updates a read-only detail panel with related RUN, HANDOFF, GATE, ledger, report, and JSON artifact paths and previews. Timeline selection does not execute agents, run solver, open ODB, call Codex CLI, queue jobs, approve evidence, or freeze verdict. The viewer flags unsafe final-approval claims if encountered.
+
 ## Disabled Actions
 
 Dangerous workflow actions remain disabled in GUI Beta:
@@ -226,3 +238,21 @@ GUI Beta may expose safe Stage 5.0D actions:
 - Report ACOM Result Intake
 
 These actions display task ID, handoff ID, template ID, result status, safety flags, artifact review, downstream agent, gate decision, AbqPilot revalidation requirement, and report path. They do not run Codex, auto-execute Codex, run solver, open ODB, queue jobs, or auto-schedule downstream agents.
+
+## Read-Only Report and Artifact Preview
+
+Stage 5.1D adds read-only preview cards for Markdown reports, RUN / HANDOFF / GATE records, JSON artifacts, ledgers, summaries, and acknowledgement reports. The previewer shows frontmatter, headings, key sections, pretty JSON, status and decision fields, safety fields, claim boundaries, safety boundaries, warnings, blocked items, and unsafe approval claims.
+
+Preview does not edit, delete, rename, mutate, execute, launch external editors, open external programs, run solver, open ODB, call Codex CLI, queue jobs, auto-schedule agents, approve final evidence, freeze final verdict, or update `TASK_FINAL_EVIDENCE_LEDGER.md`. Unsafe approval claims are flagged, not fixed.
+
+## Guided Next-Step Recommendation
+
+Stage 5.1E adds a `Recommended Next Step` card. The recommender reads workflow state, safe action catalog entries, trace viewer state, and artifact preview state to explain the next safe panel/action, prerequisites, missing prerequisites, expected outputs, final evidence effect, and disabled actions.
+
+Recommendations are advisory only. The GUI does not add a generic execute recommendation button, does not auto-click actions, does not call Codex CLI, does not run solver, does not open ODB, does not queue jobs, does not auto-schedule agents, does not approve final evidence, and does not freeze final verdict. For ACOM handoff-ready tasks, the recommender states that Codex is external and must return `structured_result.json` before AbqPilot intake.
+
+## GUI Beta E2E Safe Workflow Smoke
+
+Stage 5.1F generates a non-final GUI beta readiness record under `gui_beta/`. It validates workflow state, safe action catalog, layout sections, timeline, trace viewer, timeline interaction, artifact preview, report viewer, guided recommendation, disabled high-risk actions, final-evidence lock copy, Codex external-only copy, solver/ODB/metrics disabled copy, no generic executor, and unsafe-claim detection.
+
+GUI beta readiness is not final evidence approval, not final verdict freeze, not solver readiness, not ODB readiness, not metrics readiness, and not Codex automation readiness. The smoke does not execute recommended actions.

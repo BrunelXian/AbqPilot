@@ -11,15 +11,19 @@ from abqpilot.analysis.metrics_comparator import render_markdown_report
 from abqpilot.acom import (
     execute_non_solver_revalidation,
     generate_codex_handoff,
+    generate_non_solver_evidence_summary,
     get_template,
     intake_codex_result,
     list_templates,
     render_pipeline_acom_handoff,
     report_acom_revalidation,
     report_non_solver_revalidation,
+    report_non_solver_evidence_summary,
     report_supervisor_non_solver_review,
+    report_supervisor_non_solver_summary_ack,
     scaffold_acom_revalidation,
     supervisor_review_non_solver_revalidation,
+    supervisor_ack_non_solver_summary,
     validate_codex_handoff,
     validate_template_pack,
     write_acom_result_intake_report,
@@ -464,6 +468,66 @@ def command_report_supervisor_non_solver_review(
         task_dir=task_dir,
         revalidation_result=revalidation_result,
         review_id=review_id,
+    )
+    write_result_json(result, result_json)
+    return result
+
+
+def command_generate_non_solver_evidence_summary(
+    task_dir: str | Path,
+    ledger_json: str | Path | None = None,
+    summary_id: str | None = None,
+    result_json: str | Path | None = None,
+) -> dict[str, Any]:
+    result = generate_non_solver_evidence_summary(
+        task_dir=task_dir,
+        ledger_json=ledger_json,
+        summary_id=summary_id,
+    )
+    write_result_json(result, result_json)
+    return result
+
+
+def command_report_non_solver_evidence_summary(
+    task_dir: str | Path,
+    ledger_json: str | Path | None = None,
+    summary_id: str | None = None,
+    result_json: str | Path | None = None,
+) -> dict[str, Any]:
+    result = report_non_solver_evidence_summary(
+        task_dir=task_dir,
+        ledger_json=ledger_json,
+        summary_id=summary_id,
+    )
+    write_result_json(result, result_json)
+    return result
+
+
+def command_supervisor_ack_non_solver_summary(
+    task_dir: str | Path,
+    summary_result: str | Path | None = None,
+    ack_id: str | None = None,
+    result_json: str | Path | None = None,
+) -> dict[str, Any]:
+    result = supervisor_ack_non_solver_summary(
+        task_dir=task_dir,
+        summary_result=summary_result,
+        ack_id=ack_id,
+    )
+    write_result_json(result, result_json)
+    return result
+
+
+def command_report_supervisor_non_solver_summary_ack(
+    task_dir: str | Path,
+    summary_result: str | Path | None = None,
+    ack_id: str | None = None,
+    result_json: str | Path | None = None,
+) -> dict[str, Any]:
+    result = report_supervisor_non_solver_summary_ack(
+        task_dir=task_dir,
+        summary_result=summary_result,
+        ack_id=ack_id,
     )
     write_result_json(result, result_json)
     return result
@@ -1847,6 +1911,42 @@ def build_parser() -> argparse.ArgumentParser:
     report_supervisor_non_solver.add_argument("--review-id", default=None)
     report_supervisor_non_solver.add_argument("--result-json", default=None)
 
+    generate_non_solver_summary = subparsers.add_parser(
+        "generate-non-solver-evidence-summary",
+        help="EvidenceReportAgent non-final summary of NON_SOLVER_EVIDENCE_LEDGER",
+    )
+    generate_non_solver_summary.add_argument("--task-dir", required=True)
+    generate_non_solver_summary.add_argument("--ledger-json", default=None)
+    generate_non_solver_summary.add_argument("--summary-id", default=None)
+    generate_non_solver_summary.add_argument("--result-json", default=None)
+
+    report_non_solver_summary = subparsers.add_parser(
+        "report-non-solver-evidence-summary",
+        help="Write a report for EvidenceReportAgent non-solver evidence summary",
+    )
+    report_non_solver_summary.add_argument("--task-dir", required=True)
+    report_non_solver_summary.add_argument("--ledger-json", default=None)
+    report_non_solver_summary.add_argument("--summary-id", default=None)
+    report_non_solver_summary.add_argument("--result-json", default=None)
+
+    supervisor_ack_summary = subparsers.add_parser(
+        "supervisor-ack-non-solver-summary",
+        help="PipelineSupervisor acknowledgement for an EvidenceReportAgent non-solver summary",
+    )
+    supervisor_ack_summary.add_argument("--task-dir", required=True)
+    supervisor_ack_summary.add_argument("--summary-result", default=None)
+    supervisor_ack_summary.add_argument("--ack-id", default=None)
+    supervisor_ack_summary.add_argument("--result-json", default=None)
+
+    report_supervisor_ack_summary = subparsers.add_parser(
+        "report-supervisor-non-solver-summary-ack",
+        help="Write a report for PipelineSupervisor non-solver summary acknowledgement",
+    )
+    report_supervisor_ack_summary.add_argument("--task-dir", required=True)
+    report_supervisor_ack_summary.add_argument("--summary-result", default=None)
+    report_supervisor_ack_summary.add_argument("--ack-id", default=None)
+    report_supervisor_ack_summary.add_argument("--result-json", default=None)
+
     list_pipeline_agents = subparsers.add_parser(
         "list-pipeline-agents",
         help="List registered pipeline protocol agents without scheduling or executing them",
@@ -2249,6 +2349,34 @@ def main(argv: list[str] | None = None) -> int:
             task_dir=args.task_dir,
             revalidation_result=args.revalidation_result,
             review_id=args.review_id,
+            result_json=args.result_json,
+        )
+    elif args.command == "generate-non-solver-evidence-summary":
+        result = command_generate_non_solver_evidence_summary(
+            task_dir=args.task_dir,
+            ledger_json=args.ledger_json,
+            summary_id=args.summary_id,
+            result_json=args.result_json,
+        )
+    elif args.command == "report-non-solver-evidence-summary":
+        result = command_report_non_solver_evidence_summary(
+            task_dir=args.task_dir,
+            ledger_json=args.ledger_json,
+            summary_id=args.summary_id,
+            result_json=args.result_json,
+        )
+    elif args.command == "supervisor-ack-non-solver-summary":
+        result = command_supervisor_ack_non_solver_summary(
+            task_dir=args.task_dir,
+            summary_result=args.summary_result,
+            ack_id=args.ack_id,
+            result_json=args.result_json,
+        )
+    elif args.command == "report-supervisor-non-solver-summary-ack":
+        result = command_report_supervisor_non_solver_summary_ack(
+            task_dir=args.task_dir,
+            summary_result=args.summary_result,
+            ack_id=args.ack_id,
             result_json=args.result_json,
         )
     elif args.command == "list-pipeline-agents":
@@ -2752,6 +2880,52 @@ def _print_result(result: dict[str, Any]) -> None:
         print(f"report_status={result.get('verdict')}")
         print(f"task_dir={details.get('task_dir')}")
         print(f"reviewed_agent={details.get('reviewed_agent')}")
+        print(f"report_path={result.get('output_paths', {}).get('report_path')}")
+        print(f"protocol_validation={details.get('protocol_validation')}")
+    elif command == "generate-non-solver-evidence-summary":
+        print(f"summary_status={result.get('verdict')}")
+        print(f"task_dir={details.get('task_dir')}")
+        print(f"entries_reviewed={details.get('entries_reviewed')}")
+        print(f"gate_decision={details.get('gate_decision')}")
+        print(f"final_evidence_approved={details.get('final_evidence_approved')}")
+        print(f"final_verdict_frozen={details.get('final_verdict_frozen')}")
+        print(f"solver_approved={details.get('solver_approved')}")
+        print(f"odb_metrics_approved={details.get('odb_metrics_approved')}")
+        print(f"task_final_evidence_ledger_updated={details.get('task_final_evidence_ledger_updated')}")
+        print(f"summary_result={result.get('output_paths', {}).get('summary_result')}")
+        print(f"summary_report={result.get('output_paths', {}).get('summary_report')}")
+        print(f"run_record={result.get('output_paths', {}).get('run_record')}")
+        print(f"gate={result.get('output_paths', {}).get('gate')}")
+        print(f"handoff={result.get('output_paths', {}).get('handoff')}")
+        print(f"protocol_validation={details.get('protocol_validation')}")
+    elif command == "report-non-solver-evidence-summary":
+        print(f"report_status={result.get('verdict')}")
+        print(f"task_dir={details.get('task_dir')}")
+        print(f"summary_status={details.get('summary_status')}")
+        print(f"report_path={result.get('output_paths', {}).get('report_path')}")
+        print(f"protocol_validation={details.get('protocol_validation')}")
+    elif command == "supervisor-ack-non-solver-summary":
+        print(f"ack_status={result.get('verdict')}")
+        print(f"task_dir={details.get('task_dir')}")
+        print(f"reviewed_summary_status={details.get('reviewed_summary_status')}")
+        print(f"gate_decision={details.get('gate_decision')}")
+        print(f"ack_ledger_entry_created={details.get('non_solver_summary_ack_ledger_entry_created')}")
+        print(f"final_evidence_approved={details.get('final_evidence_approved')}")
+        print(f"final_verdict_frozen={details.get('final_verdict_frozen')}")
+        print(f"solver_approved={details.get('solver_approved')}")
+        print(f"odb_metrics_approved={details.get('odb_metrics_approved')}")
+        print(f"task_final_evidence_ledger_updated={details.get('task_final_evidence_ledger_updated')}")
+        print(f"ack_result={result.get('output_paths', {}).get('ack_result')}")
+        print(f"ack_report={result.get('output_paths', {}).get('ack_report')}")
+        print(f"run_record={result.get('output_paths', {}).get('run_record')}")
+        print(f"gate={result.get('output_paths', {}).get('gate')}")
+        print(f"handoff={result.get('output_paths', {}).get('handoff')}")
+        print(f"ack_ledger_md={result.get('output_paths', {}).get('ack_ledger_md')}")
+        print(f"protocol_validation={details.get('protocol_validation')}")
+    elif command == "report-supervisor-non-solver-summary-ack":
+        print(f"report_status={result.get('verdict')}")
+        print(f"task_dir={details.get('task_dir')}")
+        print(f"ack_status={details.get('ack_status')}")
         print(f"report_path={result.get('output_paths', {}).get('report_path')}")
         print(f"protocol_validation={details.get('protocol_validation')}")
     elif command == "queue-patch-preview":

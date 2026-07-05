@@ -1,0 +1,18 @@
+{
+  "doc_type": "gate_decision",
+  "gate_id": "GATE_FUTURE_CONTROLLED_SOLVER_APPROVAL",
+  "gate_type": "CONTROLLED_SOLVER_RUN",
+  "task_id": "stage5_0f_non_solver_revalidation_smoke",
+  "transition": "GUARD_VALIDATION_TO_CONTROLLED_SOLVER_EXECUTION",
+  "decision": "APPROVED_BY_HUMAN",
+  "human_approval_required": true,
+  "human_approval_token_valid": true,
+  "solver_approved": true,
+  "solver_request_allowed": true,
+  "solver_execution_allowed": false,
+  "odb_open_allowed": false,
+  "metrics_approval_allowed": false,
+  "final_evidence_approval_allowed": false,
+  "stage_5_2c_expected_shape_only": true,
+  "active_gate_record_created": false
+}

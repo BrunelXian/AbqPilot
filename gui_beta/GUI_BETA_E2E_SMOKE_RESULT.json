@@ -1,0 +1,170 @@
+{
+  "schema_version": "0.1",
+  "stage_id": "STAGE5_1F",
+  "stage": "Stage 5.1F",
+  "verdict": "PASS_ABQPILOT_V2_STAGE5_1F_GUI_E2E_SAFE_WORKFLOW_BETA_READY",
+  "generated_at": "2026-07-05T13:21:46",
+  "project_root": "D:\\Projects\\AbqPilot-v2",
+  "tests_baseline_before": "699 passed",
+  "tests_result_after": "709 passed",
+  "smoke_cases": [
+    {
+      "case_id": "no_task",
+      "expected": "NEXT_STEP_NO_TASK_SELECTED",
+      "observed": "NEXT_STEP_NO_TASK_SELECTED",
+      "passed": true,
+      "recommended_action_id": "scaffold_pipeline_task",
+      "final_evidence_effect": "NONE",
+      "auto_execute_allowed": false
+    },
+    {
+      "case_id": "fresh_scaffold",
+      "expected": "NEXT_STEP_READY",
+      "observed": "NEXT_STEP_READY",
+      "passed": true,
+      "recommended_action_id": "generate_pipeline_acom_handoff",
+      "final_evidence_effect": "NONE",
+      "auto_execute_allowed": false
+    },
+    {
+      "case_id": "acom_handoff_ready",
+      "expected": "NEXT_STEP_WAITING_FOR_EXTERNAL_CODEX_RESULT",
+      "observed": "NEXT_STEP_WAITING_FOR_EXTERNAL_CODEX_RESULT",
+      "passed": true,
+      "recommended_action_id": "validate_acom_template_pack",
+      "final_evidence_effect": "NONE",
+      "auto_execute_allowed": false
+    },
+    {
+      "case_id": "acom_result_pending_intake",
+      "expected": "NEXT_STEP_READY",
+      "observed": "NEXT_STEP_READY",
+      "passed": true,
+      "recommended_action_id": "intake_acom_result",
+      "final_evidence_effect": "NON_FINAL_NON_SOLVER_RECORD_ONLY",
+      "auto_execute_allowed": false
+    },
+    {
+      "case_id": "acom_result_accepted_pending_revalidation",
+      "expected": "NEXT_STEP_PENDING_REVALIDATION",
+      "observed": "NEXT_STEP_PENDING_REVALIDATION",
+      "passed": true,
+      "recommended_action_id": "scaffold_acom_revalidation",
+      "final_evidence_effect": "NON_FINAL_NON_SOLVER_RECORD_ONLY",
+      "auto_execute_allowed": false
+    },
+    {
+      "case_id": "revalidation_scaffold_low_risk",
+      "expected": "NEXT_STEP_READY",
+      "observed": "NEXT_STEP_READY",
+      "passed": true,
+      "recommended_action_id": "execute_non_solver_revalidation",
+      "final_evidence_effect": "NON_FINAL_NON_SOLVER_RECORD_ONLY",
+      "auto_execute_allowed": false
+    },
+    {
+      "case_id": "revalidation_scaffold_high_risk",
+      "expected": "NEXT_STEP_REVIEW_REQUIRED",
+      "observed": "NEXT_STEP_REVIEW_REQUIRED",
+      "passed": true,
+      "recommended_action_id": "report_acom_revalidation",
+      "final_evidence_effect": "NONE",
+      "auto_execute_allowed": false
+    },
+    {
+      "case_id": "non_solver_revalidation_pending_supervisor",
+      "expected": "NEXT_STEP_PENDING_SUPERVISOR_REVIEW",
+      "observed": "NEXT_STEP_PENDING_SUPERVISOR_REVIEW",
+      "passed": true,
+      "recommended_action_id": "supervisor_review_non_solver_revalidation",
+      "final_evidence_effect": "NON_FINAL_NON_SOLVER_RECORD_ONLY",
+      "auto_execute_allowed": false
+    },
+    {
+      "case_id": "supervisor_review_accepted",
+      "expected": "NEXT_STEP_READY",
+      "observed": "NEXT_STEP_READY",
+      "passed": true,
+      "recommended_action_id": "generate_non_solver_evidence_summary",
+      "final_evidence_effect": "NON_FINAL_NON_SOLVER_RECORD_ONLY",
+      "auto_execute_allowed": false
+    },
+    {
+      "case_id": "summary_ready_pending_ack",
+      "expected": "NEXT_STEP_PENDING_SUMMARY_ACK",
+      "observed": "NEXT_STEP_PENDING_SUMMARY_ACK",
+      "passed": true,
+      "recommended_action_id": "supervisor_ack_non_solver_summary",
+      "final_evidence_effect": "NON_FINAL_NON_SOLVER_RECORD_ONLY",
+      "auto_execute_allowed": false
+    },
+    {
+      "case_id": "summary_acknowledged",
+      "expected": "NEXT_STEP_NON_SOLVER_WORKFLOW_ACKNOWLEDGED",
+      "observed": "NEXT_STEP_NON_SOLVER_WORKFLOW_ACKNOWLEDGED",
+      "passed": true,
+      "recommended_action_id": "review_non_solver_summary_ack",
+      "final_evidence_effect": "NONE",
+      "auto_execute_allowed": false
+    },
+    {
+      "case_id": "unsafe_final_approval_fixture",
+      "expected": "ARTIFACT_PREVIEW_BLOCKED_UNSAFE_FINAL_APPROVAL_CLAIM",
+      "observed": "ARTIFACT_PREVIEW_BLOCKED_UNSAFE_FINAL_APPROVAL_CLAIM",
+      "passed": true,
+      "mutation_performed": false
+    },
+    {
+      "case_id": "live_stage5_0i_summary_acknowledged",
+      "expected": "NEXT_STEP_NON_SOLVER_WORKFLOW_ACKNOWLEDGED",
+      "observed": "NEXT_STEP_NON_SOLVER_WORKFLOW_ACKNOWLEDGED",
+      "passed": true,
+      "trace_viewer_state": "TRACE_VIEWER_READY",
+      "json_preview": "ARTIFACT_PREVIEW_READY",
+      "markdown_preview": "ARTIFACT_PREVIEW_READY"
+    }
+  ],
+  "component_checks": {
+    "workflow_state_model": true,
+    "safe_action_catalog": true,
+    "visual_layout_sections": true,
+    "workflow_timeline": true,
+    "trace_viewer": true,
+    "timeline_interaction": true,
+    "artifact_preview": true,
+    "report_viewer_card": true,
+    "next_step_recommendation": true,
+    "disabled_actions_callback_free": true,
+    "safety_copy_present": true,
+    "final_evidence_locked": true,
+    "codex_external_only": true,
+    "solver_odb_metrics_disabled": true,
+    "no_auto_execution": true,
+    "no_generic_executor": true,
+    "no_final_approval": true,
+    "unsafe_claim_fixture": true
+  },
+  "disabled_actions_check": true,
+  "safety_boundary_check": true,
+  "final_evidence_locked_check": true,
+  "codex_external_only_check": true,
+  "solver_odb_metrics_disabled_check": true,
+  "no_auto_execution_check": true,
+  "no_generic_executor_check": true,
+  "no_final_approval_check": true,
+  "unsafe_claim_fixture_check": true,
+  "docs_updated": true,
+  "known_limitations": [
+    "GUI beta readiness is non-final and non-solver only.",
+    "The smoke validates view models and safety boundaries; it does not execute workflow actions.",
+    "Future solver, ODB, metrics, final evidence, or Codex automation requires explicit later stages."
+  ],
+  "gui_beta_ready": true,
+  "final_evidence_approved": false,
+  "final_verdict_frozen": false,
+  "solver_approved": false,
+  "odb_metrics_approved": false,
+  "codex_cli_called": false,
+  "queue_runner_launched": false,
+  "auto_execute_allowed": false
+}

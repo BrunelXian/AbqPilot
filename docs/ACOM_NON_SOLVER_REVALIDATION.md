@@ -49,3 +49,12 @@ BLOCKED
 They never use `APPROVED`.
 
 Stage 5.0G lets PipelineSupervisor review completed Stage 5.0F results. Accepted review writes `NON_SOLVER_EVIDENCE_LEDGER.md/json` only. It does not approve solver, ODB, metrics, model mutation, final evidence, or final verdict.
+
+Stage 5.0H lets EvidenceReportAgent summarize `NON_SOLVER_EVIDENCE_LEDGER.md/json` into a non-final non-solver evidence report. It does not update `TASK_FINAL_EVIDENCE_LEDGER.md` and does not approve solver, ODB, metrics, model mutation, final evidence, or final verdict.
+
+Stage 5.0I lets PipelineSupervisor acknowledge the non-solver summary into `NON_SOLVER_SUMMARY_ACK_LEDGER.md/json`. It remains non-final and does not update `TASK_FINAL_EVIDENCE_LEDGER.md`.
+## Stage 5.1A GUI View
+
+Stage 5.1A groups ACOM and non-solver revalidation actions in the GUI by workflow stage. It displays non-solver revalidation, PipelineSupervisor review, EvidenceReportAgent summary, and PipelineSupervisor acknowledgement state as non-final project records only.
+
+High-risk agents remain blocked in the GUI. Solver, ODB, metrics, queue, Codex execution, automatic scheduling, final evidence approval, and final verdict freeze controls are disabled.

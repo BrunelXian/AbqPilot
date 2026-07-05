@@ -42,3 +42,25 @@ Stage 5.0D ACOM result intake is also non-executing. It reads structured results
 Stage 5.0F remains non-solver and non-ODB. It executes deterministic revalidation only for DocsStatusAgent, SoftwareQAAgent, AuditAgent, EvidenceReportAgent, and PipelineSupervisor after an explicit CLI/GUI call. GuardAgent, CandidateBuilderAgent, DiagnosisAgent, ExecutionAgent, and MetricsAgent are blocked until later guarded stages.
 
 Stage 5.0G lets PipelineSupervisor review Stage 5.0F results and update the non-final non-solver evidence ledger. This is not final evidence freeze and does not approve solver, ODB, metrics, or model mutation.
+
+Stage 5.0H lets EvidenceReportAgent summarize the non-final non-solver ledger. This remains an ACOM pipeline evidence-reporting step only; it does not call Codex CLI, run solver, open ODB, auto-schedule agents, update the final evidence ledger, or freeze a verdict.
+
+Stage 5.0I lets PipelineSupervisor acknowledge the non-final non-solver summary. This remains a pipeline recordkeeping step only; it does not call Codex CLI, run solver, open ODB, auto-schedule agents, update the final evidence ledger, or freeze a verdict.
+
+Stage 5.1A presents the ACOM/non-solver workflow in the GUI as information architecture and safe UX only. It does not add a new execution mode. ACOM remains external-operator mode, NARM remains optional, and the GUI does not call Codex CLI, run solver, open ODB, queue jobs, auto-schedule agents, approve final evidence, or freeze final verdict.
+
+Stage 5.1B keeps the same execution-mode boundary and improves only the GUI visual layout/readability. It does not add native runtime execution, automatic Codex execution, automatic scheduling, solver execution, ODB access, queue submission, final evidence approval, or final verdict freeze.
+
+Stage 5.1C keeps ACOM and NARM boundaries unchanged. Timeline interaction is read-only evidence navigation and does not execute Codex, native agents, solver, ODB, queue, scheduling, final evidence approval, or final verdict freeze.
+
+Stage 5.1D also keeps execution modes unchanged. Report and artifact preview is read-only presentation over existing records; it does not launch external editors, execute file contents, call Codex CLI, run solver, open ODB, queue jobs, schedule agents, approve final evidence, update the final evidence ledger, or freeze verdict.
+
+Stage 5.1E keeps execution modes unchanged. Guided recommendation is advisory view-model generation only. It may tell the user which existing safe panel action is appropriate, but it does not call Codex CLI, execute NARM workflows, schedule agents, run solver, open ODB, queue jobs, approve final evidence, or freeze verdict.
+
+Stage 5.1F keeps execution modes unchanged. GUI beta readiness smoke is a non-final validation report for the GUI cockpit; it does not execute ACOM, NARM, solver, ODB, queue, scheduling, final evidence approval, or final verdict freeze.
+
+Stage 5.2A also keeps execution modes unchanged. High-risk gate UX records are specification-only previews and do not create real approving gates, mutate task `gates/`, update `TASK_FINAL_EVIDENCE_LEDGER.md`, call Codex CLI, run solver, open ODB, queue jobs, schedule agents, approve final evidence, or freeze verdict.
+
+Stage 5.2B keeps execution modes unchanged as well. Controlled solver approval token validation is preview-only; future real approval and future solver execution must remain separate stages, and ODB/metrics/final evidence remain separately gated.
+
+Stage 5.2C also keeps execution modes unchanged. The inactive controlled solver human gate draft is not active approval and not execution. It may define expected future shapes, but those shapes are not written as active task gates or executable handoffs.

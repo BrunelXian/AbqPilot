@@ -1,0 +1,245 @@
+{
+  "schema_version": "0.1",
+  "stage": "Stage 5.2B",
+  "stage_id": "STAGE5_2B",
+  "gate_type": "CONTROLLED_SOLVER_RUN",
+  "preview_only": true,
+  "approval_status": "NOT_APPROVED",
+  "execution_status": "NOT_EXECUTABLE",
+  "future_stage_required": true,
+  "human_gate_required": true,
+  "real_gate_created": false,
+  "solver_approved": false,
+  "solver_run": false,
+  "solver_request_created": false,
+  "queue_runner_launched": false,
+  "odb_opened": false,
+  "final_evidence_approved": false,
+  "final_verdict_frozen": false,
+  "task_final_evidence_ledger_updated": false,
+  "task_dir": "D:\\Projects\\AbqPilot-v2\\runs\\tasks\\stage5_0f_non_solver_revalidation_smoke",
+  "candidate_artifact_paths": [],
+  "prerequisite_checklist": [
+    {
+      "item_id": "task_dir_exists",
+      "description": "task_dir exists",
+      "status": "PASS",
+      "evidence": "D:\\Projects\\AbqPilot-v2\\runs\\tasks\\stage5_0f_non_solver_revalidation_smoke"
+    },
+    {
+      "item_id": "task_scaffold_exists",
+      "description": "task scaffold exists",
+      "status": "PASS",
+      "evidence": "D:\\Projects\\AbqPilot-v2\\runs\\tasks\\stage5_0f_non_solver_revalidation_smoke"
+    },
+    {
+      "item_id": "candidate_inp_exists",
+      "description": "candidate INP exists under allowed task/artifact directory",
+      "status": "MISSING",
+      "evidence": null
+    },
+    {
+      "item_id": "candidate_inp_not_source_sanity_base",
+      "description": "candidate INP is not source sanity-base INP",
+      "status": "MISSING",
+      "evidence": null
+    },
+    {
+      "item_id": "source_mutation_not_required",
+      "description": "source CAE/INP mutation is not required",
+      "status": "MISSING",
+      "evidence": null
+    },
+    {
+      "item_id": "static_validator_pass",
+      "description": "StaticValidator PASS record exists",
+      "status": "MISSING",
+      "evidence": null
+    },
+    {
+      "item_id": "diff_guard_pass",
+      "description": "DiffGuard PASS record exists",
+      "status": "MISSING",
+      "evidence": null
+    },
+    {
+      "item_id": "physics_guard_pass",
+      "description": "PhysicsGuard PASS record exists",
+      "status": "MISSING",
+      "evidence": null
+    },
+    {
+      "item_id": "mcpguard_pass_or_not_applicable",
+      "description": "MCPGuard PASS record exists or explicit MCPGuard not-applicable reason exists",
+      "status": "PASS",
+      "evidence": null
+    },
+    {
+      "item_id": "candidate_patch_preview_exists",
+      "description": "candidate patch preview exists",
+      "status": "MISSING",
+      "evidence": null
+    },
+    {
+      "item_id": "target_modification_summary_exists",
+      "description": "target modification summary exists",
+      "status": "MISSING",
+      "evidence": null
+    },
+    {
+      "item_id": "forbidden_action_confirmation_exists",
+      "description": "forbidden action confirmation exists",
+      "status": "PASS",
+      "evidence": null
+    },
+    {
+      "item_id": "solver_command_path_configured",
+      "description": "solver command path is configured in project status/config",
+      "status": "PASS",
+      "evidence": null
+    },
+    {
+      "item_id": "future_solver_output_dir_defined",
+      "description": "future controlled solver output directory is defined",
+      "status": "PASS",
+      "evidence": "D:\\Projects\\AbqPilot-v2\\runs\\tasks\\stage5_0f_non_solver_revalidation_smoke\\future_controlled_solver_preview"
+    },
+    {
+      "item_id": "future_human_approval_required",
+      "description": "explicit human approval token would be required in a future stage",
+      "status": "PASS",
+      "evidence": null
+    },
+    {
+      "item_id": "no_queue_mutation_requested",
+      "description": "no queue mutation is requested",
+      "status": "PASS",
+      "evidence": null
+    },
+    {
+      "item_id": "no_odb_metrics_acceptance_requested",
+      "description": "no ODB metrics acceptance is requested",
+      "status": "PASS",
+      "evidence": null
+    },
+    {
+      "item_id": "no_final_evidence_update_requested",
+      "description": "no final evidence update is requested",
+      "status": "MISSING",
+      "evidence": null
+    },
+    {
+      "item_id": "no_final_verdict_freeze_requested",
+      "description": "no final verdict freeze is requested",
+      "status": "MISSING",
+      "evidence": null
+    },
+    {
+      "item_id": "no_automatic_execution_requested",
+      "description": "no automatic execution requested",
+      "status": "MISSING",
+      "evidence": null
+    }
+  ],
+  "missing_prerequisites": [
+    "candidate_inp_exists",
+    "candidate_inp_not_source_sanity_base",
+    "source_mutation_not_required",
+    "static_validator_pass",
+    "diff_guard_pass",
+    "physics_guard_pass",
+    "candidate_patch_preview_exists",
+    "target_modification_summary_exists",
+    "no_final_evidence_update_requested",
+    "no_final_verdict_freeze_requested",
+    "no_automatic_execution_requested"
+  ],
+  "readiness_status": "SOLVER_GATE_PREVIEW_BLOCKED_SOURCE_MUTATION_RISK",
+  "warning_items": [
+    "Missing or blocked prerequisites are advisory in Stage 5.2B; no solver action is enabled."
+  ],
+  "blocked_items": [],
+  "required_human_confirmation_text": "Preview only; not a solver approval. Future controlled solver approval must use an explicit human gate.",
+  "approval_token_preview": {
+    "token_type": "CONTROLLED_SOLVER_RUN_APPROVAL",
+    "token_version": "0.1",
+    "task_id": "stage5_0f_non_solver_revalidation_smoke",
+    "task_dir": "D:\\Projects\\AbqPilot-v2\\runs\\tasks\\stage5_0f_non_solver_revalidation_smoke",
+    "candidate_artifact_hash": null,
+    "candidate_artifact_path": null,
+    "intended_solver_command_label": "configured-controlled-abaqus-command",
+    "allowed_output_dir": "D:\\Projects\\AbqPilot-v2\\runs\\tasks\\stage5_0f_non_solver_revalidation_smoke\\future_controlled_solver_run",
+    "approver_type": "HUMAN",
+    "approval_phrase_required": "I_APPROVE_ABQPILOT_CONTROLLED_SOLVER_RUN_FUTURE_STAGE",
+    "approval_phrase_supplied": "",
+    "acknowledgement_flags": {
+      "understands_solver_will_run": false,
+      "understands_cpu_time_risk": false,
+      "understands_files_will_be_created": false,
+      "understands_no_final_evidence_approval": false,
+      "understands_no_odb_metrics_acceptance": false,
+      "understands_no_queue_mutation_unless_separately_gated": false
+    },
+    "expires_at_optional": "2026-07-06T17:45:39",
+    "one_time_use": true,
+    "preview_only_in_stage_5_2b": true,
+    "active_approval": false
+  },
+  "token_validation_rules": [
+    "token_type must be CONTROLLED_SOLVER_RUN_APPROVAL",
+    "token_version must be supported",
+    "task_id and task_dir must match",
+    "candidate_artifact_hash must match the candidate artifact if it exists",
+    "approval phrase must exactly match the required phrase",
+    "all acknowledgement flags must be true",
+    "token must not be expired if expires_at_optional is present",
+    "one_time_use must be true",
+    "preview_only_in_stage_5_2b must be true",
+    "active_approval must be false in Stage 5.2B"
+  ],
+  "approval_token_validation_preview": {
+    "schema_version": "0.1",
+    "stage": "Stage 5.2B",
+    "validation_status": "TOKEN_PREVIEW_INVALID_APPROVAL_PHRASE",
+    "preview_only": true,
+    "active_approval": false,
+    "solver_approved": false,
+    "solver_run": false,
+    "real_gate_created": false,
+    "solver_request_created": false
+  },
+  "expected_future_gate_record_shape": {
+    "doc_type": "gate_decision",
+    "task_id": "stage5_0f_non_solver_revalidation_smoke",
+    "transition": "CONTROLLED_SOLVER_GATE_PREVIEW_TO_FUTURE_HUMAN_APPROVAL",
+    "decision": "FUTURE_STAGE_REQUIRED",
+    "approver_type": "HUMAN",
+    "stage_5_2b_real_gate_created": false
+  },
+  "expected_future_solver_request_shape": {
+    "task_id": "stage5_0f_non_solver_revalidation_smoke",
+    "request_type": "CONTROLLED_SOLVER_RUN",
+    "stage_5_2b_solver_request_created": false,
+    "requires_future_approved_gate": true,
+    "queue_runner_allowed": false,
+    "odb_metrics_allowed": false
+  },
+  "safety_boundary": "Stage 5.2B designs controlled solver gate preview and approval token schema only. It does not approve solver, run solver, create solver request files, open ODB, extract metrics, mutate queue/runtime files, update final evidence, or freeze verdict.",
+  "no_execution_notice": "No Abaqus solver command is executed. No solver request file is created.",
+  "required_copy": [
+    "Preview only; not a solver approval",
+    "Human approval token is designed but not accepted as active approval in Stage 5.2B",
+    "No Abaqus solver command is executed",
+    "No solver request file is created",
+    "Final evidence remains locked"
+  ],
+  "approval_execution_separation": {
+    "stage_5_2b": "preview token + preview gate only",
+    "future_stage_5_2c_or_later": "real human approval gate record may be created, still no solver execution",
+    "future_stage_5_2d_or_later": "controlled solver execution may consume approved gate, still no ODB/metrics approval",
+    "queue_execution": "separately gated",
+    "odb_metrics": "separately gated after solver completion"
+  },
+  "generated_at": "2026-07-05T17:45:39",
+  "verdict": "PASS_ABQPILOT_V2_STAGE5_2B_CONTROLLED_SOLVER_HUMAN_GATE_PREVIEW_READY"
+}

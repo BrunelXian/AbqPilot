@@ -23,6 +23,10 @@ Accepted review writes:
 - `NON_SOLVER_EVIDENCE_LEDGER.md`
 - `NON_SOLVER_EVIDENCE_LEDGER.json`
 
+Stage 5.0H allows EvidenceReportAgent to consume this ledger and write a non-final non-solver summary. That summary does not update `TASK_FINAL_EVIDENCE_LEDGER.md` and does not approve solver, ODB, metrics, model mutation, final evidence, or final verdict.
+
+Stage 5.0I allows PipelineSupervisor to acknowledge the EvidenceReportAgent non-solver summary into `NON_SOLVER_SUMMARY_ACK_LEDGER.md/json`. This acknowledgement remains non-final and must not update `TASK_FINAL_EVIDENCE_LEDGER.md`.
+
 The final evidence ledger remains separate from the non-solver evidence ledger.
 
 Accepted gate decisions are:

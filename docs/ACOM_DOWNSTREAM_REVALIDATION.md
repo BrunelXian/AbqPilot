@@ -24,3 +24,10 @@ Stage 5.0F executes deterministic non-solver revalidation only for DocsStatusAge
 `NON_SOLVER_REVALIDATION_PASS_PENDING_SUPERVISOR` means the low-risk checks passed and may be reviewed by PipelineSupervisor. It is not final evidence accepted.
 
 Stage 5.0G adds the PipelineSupervisor review gate for completed non-solver revalidation results. Accepted means accepted for `NON_SOLVER_EVIDENCE_LEDGER` only; final evidence remains separate and unapproved.
+
+Stage 5.0H adds EvidenceReportAgent non-solver summary reporting. It summarizes `NON_SOLVER_EVIDENCE_LEDGER` and returns a pending supervisor acknowledgement gate; it does not update the final evidence ledger.
+
+Stage 5.0I lets PipelineSupervisor acknowledge that summary and hand off to DocsStatusAgent for non-final status synchronization. It does not approve final evidence or update the final evidence ledger.
+## Stage 5.1A GUI View
+
+Stage 5.1A lets the GUI display downstream revalidation scaffold state from task workspace records. This is read-only workflow interpretation plus safe action grouping. It does not execute high-risk downstream agents, run Codex, run solver, open ODB, enqueue jobs, or approve evidence.

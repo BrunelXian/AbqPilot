@@ -34,3 +34,14 @@ Stage 5.0E downstream ACOM revalidation scaffold creates protocol-native downstr
 Stage 5.0F non-solver revalidation may add `RUN_XXX_<AGENT>_REVALIDATION_RESULT.md`, `GATE_XXX_<AGENT>_REVALIDATION_RESULT.md`, and `HANDOFF_XXX_<AGENT>_REVALIDATION_RESULT_TO_PIPELINE_SUPERVISOR.md` for supported low-risk agents. The gate decision is `PENDING_SUPERVISOR_REVIEW` or `BLOCKED`, never `APPROVED`.
 
 Stage 5.0G PipelineSupervisor review may add `RUN_XXX_PIPELINE_SUPERVISOR_NON_SOLVER_REVIEW.md`, `GATE_XXX_SUPERVISOR_NON_SOLVER_REVIEW.md`, and an accepted handoff to EvidenceReportAgent. Accepted review is ledger-only and non-final.
+
+Stage 5.0H EvidenceReportAgent summary may add `RUN_XXX_EVIDENCE_REPORT_AGENT_NON_SOLVER_SUMMARY.md`, `GATE_XXX_EVIDENCE_REPORT_AGENT_NON_SOLVER_SUMMARY.md`, and a handoff back to PipelineSupervisor. The gate decision is pending supervisor acknowledgement or blocked, never `APPROVED`.
+
+Stage 5.0I PipelineSupervisor acknowledgement may add `RUN_XXX_PIPELINE_SUPERVISOR_NON_SOLVER_SUMMARY_ACK.md`, `GATE_XXX_SUPERVISOR_NON_SOLVER_SUMMARY_ACK.md`, and a handoff to DocsStatusAgent for non-final status synchronization. The acknowledgement gate is `ACKNOWLEDGED_NON_SOLVER_SUMMARY`, `ACKNOWLEDGED_NON_SOLVER_SUMMARY_WITH_WARNINGS`, or `BLOCKED`, never `APPROVED`.
+## Stage 5.1A GUI Visibility
+
+Stage 5.1A makes the RUN/HANDOFF/GATE protocol visible in the GUI through a read-only workflow state model. The GUI shows counts and latest records, classifies the current ACOM/non-solver workflow position, and recommends safe next actions.
+
+The GUI must not convert non-solver acknowledgement into final evidence. Final evidence remains locked, `TASK_FINAL_EVIDENCE_LEDGER.md` is not updated, and solver/ODB/metrics/final-verdict actions stay disabled.
+
+Stage 5.1C adds read-only trace viewer interaction over the same communication protocol. It displays frontmatter and related files, and flags unsafe final-approval claims if present.

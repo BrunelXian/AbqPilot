@@ -20,6 +20,26 @@ AbqPilot is a closed-loop CAE-ODB automation system for controlled Abaqus simula
 10. A non-solver revalidation PASS only permits PipelineSupervisor review. It does not approve final evidence.
 11. PipelineSupervisor non-solver review may only accept non-solver revalidation results into NON_SOLVER_EVIDENCE_LEDGER.
 12. PipelineSupervisor non-solver review must not freeze final evidence and must not approve solver, ODB, metrics, model mutation, or high-risk agent results.
+13. EvidenceReportAgent may summarize NON_SOLVER_EVIDENCE_LEDGER into a non-final report.
+14. EvidenceReportAgent must not convert non-solver evidence into final evidence.
+15. EvidenceReportAgent must not update TASK_FINAL_EVIDENCE_LEDGER.md in Stage 5.0H.
+16. EvidenceReportAgent must not approve solver, ODB, metrics, model mutation, final evidence, or final verdict.
+17. PipelineSupervisor may acknowledge non-solver summary records into NON_SOLVER_SUMMARY_ACK_LEDGER.
+18. PipelineSupervisor must not convert non-solver summaries into final evidence.
+19. PipelineSupervisor must not update TASK_FINAL_EVIDENCE_LEDGER.md in Stage 5.0I.
+20. PipelineSupervisor must not approve solver, ODB, metrics, model mutation, final evidence, or final verdict.
+21. GUI must not present non-solver acknowledgement as final evidence.
+22. GUI disabled high-risk actions must not have executable backend callbacks.
+23. GUI must preserve RUN/HANDOFF/GATE protocol visibility.
+24. GUI must display final evidence locked unless a future explicit stage changes it.
+25. GUI visual polish must not weaken safety boundaries.
+26. GUI must not present disabled actions as executable.
+27. GUI copy must distinguish non-final/non-solver records from final evidence.
+28. GUI layout must preserve RUN/HANDOFF/GATE visibility.
+29. GUI trace viewer must be read-only.
+30. Timeline interaction must not execute backend actions.
+31. Viewer must flag but not modify unsafe final approval claims.
+32. Viewer must preserve final evidence locked state.
 
 ## Hard Rule: SanityBase-Derived Simulation Candidates Only
 
@@ -129,6 +149,18 @@ IntakeAgent -> AuditAgent -> CandidateBuilderAgent -> GuardAgent -> ExecutionAge
 Support agents are ACOMAgent, SoftwareQAAgent, and DocsStatusAgent.
 
 Agent-to-agent handoff is allowed only through `HANDOFF_XXX.md`. Each step must produce `RUN_XXX.md`. High-risk transitions require `GATE_XXX.md`. No subagent may bypass validators, MCPGuard, diagnosis, approval tokens, or human gates. Do not validate only target edits; also validate original model-condition preservation across export, patching, candidate generation, and solver-run copies. Codex/LLM summary is not final evidence.
+
+GUI artifact preview must be read-only. Preview modules must not open external editors, launch external programs, execute file contents, mutate artifacts, approve evidence, or freeze verdicts. Unsafe final approval claims must be flagged but not modified. `TASK_FINAL_EVIDENCE_LEDGER.md` must remain untouched in Stage 5.1D.
+
+GUI next-step recommender must not add generic execution. Recommendations must preserve final evidence locked state, distinguish external Codex operation from GUI execution, and never imply final evidence approval. Recommendation text may point to existing safe panel actions, but it must not auto-click actions, auto-schedule agents, call Codex CLI, run solver, open ODB, queue jobs, approve final evidence, or freeze verdict.
+
+GUI beta readiness is not final evidence readiness. GUI beta smoke reports are non-final project records and must not mutate `TASK_FINAL_EVIDENCE_LEDGER.md`. GUI beta smoke must not execute recommended actions and must preserve disabled high-risk action behavior.
+
+High-risk gate UX previews must not be confused with approval. No "Approve" or "Execute" callbacks may be added in Stage 5.2A. High-risk prerequisites are advisory until a future explicit gate implementation, and the final evidence locked state must remain visible.
+
+Controlled solver approval preview must not be treated as active approval. Human approval token validation in Stage 5.2B is preview-only. No Approve Solver or Run Solver callbacks may be added, and solver approval and solver execution must remain separated.
+
+Inactive controlled solver gate draft must not be treated as active approval. Inactive draft validation must block active approval attempts. No Approve Solver, Create Active Gate, or Run Solver callbacks may be added, and solver approval and solver execution must remain separated.
 
 ## Allowed development commands
 

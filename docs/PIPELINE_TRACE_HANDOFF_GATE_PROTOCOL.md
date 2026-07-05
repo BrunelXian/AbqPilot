@@ -65,3 +65,26 @@ Stage 5.0E may add downstream revalidation scaffold records such as `RUN_013_GUA
 Stage 5.0F may add non-solver revalidation result records such as `RUN_016_DOCS_STATUS_AGENT_REVALIDATION_RESULT.md`, `GATE_012_DOCS_STATUS_AGENT_REVALIDATION_RESULT.md`, and `HANDOFF_015_DOCS_STATUS_AGENT_REVALIDATION_RESULT_TO_PIPELINE_SUPERVISOR.md`. These records are produced only by explicit CLI/GUI invocation for supported low-risk agents and keep `final_evidence_approved: false`.
 
 Stage 5.0G may add supervisor review records such as `RUN_018_PIPELINE_SUPERVISOR_NON_SOLVER_REVIEW.md`, `GATE_014_SUPERVISOR_NON_SOLVER_REVIEW.md`, and `HANDOFF_017_SUPERVISOR_NON_SOLVER_REVIEW_TO_EVIDENCE_REPORT_AGENT.md`. These records may update `NON_SOLVER_EVIDENCE_LEDGER.md/json`, not `TASK_FINAL_EVIDENCE_LEDGER.md`.
+
+Stage 5.0H may add EvidenceReportAgent non-solver summary records such as `RUN_XXX_EVIDENCE_REPORT_AGENT_NON_SOLVER_SUMMARY.md`, `GATE_XXX_EVIDENCE_REPORT_AGENT_NON_SOLVER_SUMMARY.md`, and `HANDOFF_XXX_EVIDENCE_REPORT_AGENT_NON_SOLVER_SUMMARY_TO_PIPELINE_SUPERVISOR.md`. These records summarize the non-solver ledger only and must not update `TASK_FINAL_EVIDENCE_LEDGER.md`.
+
+Stage 5.0I may add PipelineSupervisor acknowledgement records such as `RUN_XXX_PIPELINE_SUPERVISOR_NON_SOLVER_SUMMARY_ACK.md`, `GATE_XXX_SUPERVISOR_NON_SOLVER_SUMMARY_ACK.md`, and `HANDOFF_XXX_SUPERVISOR_NON_SOLVER_SUMMARY_ACK_TO_DOCS_STATUS_AGENT.md`. These records acknowledge a non-final non-solver summary only and must not update `TASK_FINAL_EVIDENCE_LEDGER.md`.
+## Stage 5.1A GUI Trace Visibility
+
+Stage 5.1A exposes the flat RUN/HANDOFF/GATE protocol in the GUI through read-only workflow-state inspection. The GUI shows trace, handoff, and gate counts plus latest status/decision without scheduling agents or approving transitions.
+
+The GUI remains non-final and non-solver only: no Codex CLI call, no solver run, no ODB open, no QueueRunner launch, no automatic agent scheduling, no final evidence approval, and no final verdict freeze.
+
+## Stage 5.1C Timeline Selection
+
+The GUI trace viewer maps each ACOM/non-solver timeline step to related RUN/HANDOFF/GATE records and artifacts. Timeline selection is read-only and must not approve gates, execute agents, run solver, open ODB, call Codex CLI, queue jobs, or freeze evidence.
+
+## Stage 5.1D Artifact Preview
+
+The GUI report viewer can preview RUN/HANDOFF/GATE Markdown, JSON artifacts, ledgers, and summaries as read-only records. It may extract frontmatter, Markdown sections, pretty JSON, status/decision fields, and safety fields. It must not mutate records, open external editors, execute file contents, approve final evidence, or update `TASK_FINAL_EVIDENCE_LEDGER.md`. Unsafe approval claims are flagged, not fixed.
+
+Stage 5.2A high-risk gate UX specifications are not real `GATE_XXX.md` approval records. They live under `gui_high_risk_gate_ux/`, are marked preview-only/specification-only/not-approved/not-executable, and must not be interpreted as task transition approval. Real high-risk gate decisions require a future explicit stage.
+
+Stage 5.2B controlled solver gate preview records are also not real `GATE_XXX.md` approval records. Approval token validation in this stage is preview-only. Future real approval and future controlled solver execution must be represented by separate later stages.
+
+Stage 5.2C inactive controlled solver gate draft records are not real `GATE_XXX.md` approval records either. Expected future active gate and execution handoff shapes may be written under the preview/spec directory, but they must not appear as active task transition records.

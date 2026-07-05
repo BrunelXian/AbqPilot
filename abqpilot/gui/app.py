@@ -6,6 +6,9 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, simpledialog, ttk
 
 from abqpilot.gui.action_controller import GuiActionController
+from abqpilot.gui.layout_sections import build_layout_sections
+from abqpilot.gui.safe_action_catalog import group_actions_by_panel
+from abqpilot.gui.recommendation_cards import render_next_step_recommendation_text
 from abqpilot.gui.style import (
     APP_TITLE,
     CTK,
@@ -15,6 +18,8 @@ from abqpilot.gui.style import (
     configure_window_theme,
 )
 from abqpilot.gui.widgets import artifact_preview, make_button, make_frame, make_label, make_listbox, make_text, set_text
+from abqpilot.gui.trace_detail_cards import render_trace_detail_text
+from abqpilot.gui.workflow_presenter import render_workflow_presenter_text
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -32,6 +37,10 @@ class AbqPilotGui(BaseWindow):
         self.controller = GuiActionController(self.project_root)
         self.task_dir = Path(task_dir) if task_dir else None
         self.view_model: dict | None = None
+        self.workflow_presenter: dict | None = None
+        self.layout_sections: dict | None = None
+        self.trace_viewer: dict | None = None
+        self.next_step_card: dict | None = None
         self.recent_tasks: list[dict] = []
         self._build_layout()
         self._load_recent_tasks()
@@ -97,114 +106,80 @@ class AbqPilotGui(BaseWindow):
         self.preset_list.bind("<<ListboxSelect>>", self._preset_selected)
 
     def _build_center_panel(self) -> None:
-        make_label(self.center, text="Event Stream", font=("Segoe UI", 12, "bold")).grid(row=0, column=0, sticky="w", padx=10, pady=(10, 4))
-        self.event_text = make_text(self.center, height=28)
-        self.event_text.grid(row=1, column=0, sticky="nsew", padx=10, pady=(0, 10))
-        make_label(self.center, text="Artifact Preview", font=("Segoe UI", 12, "bold")).grid(row=2, column=0, sticky="w", padx=10, pady=(4, 4))
+        make_label(self.center, text="Workflow State", font=("Segoe UI", 12, "bold")).grid(row=0, column=0, sticky="w", padx=10, pady=(10, 4))
+        self.workflow_text = make_text(self.center, height=11)
+        self.workflow_text.grid(row=1, column=0, sticky="ew", padx=10, pady=(0, 10))
+        make_label(self.center, text="Recommended Next Step", font=("Segoe UI", 12, "bold")).grid(row=2, column=0, sticky="w", padx=10, pady=(4, 4))
+        self.recommendation_text = make_text(self.center, height=10)
+        self.recommendation_text.grid(row=3, column=0, sticky="ew", padx=10, pady=(0, 10))
+        make_label(self.center, text="Timeline Steps", font=("Segoe UI", 12, "bold")).grid(row=4, column=0, sticky="w", padx=10, pady=(4, 4))
+        self.timeline_list = make_listbox(self.center, width=72, height=8)
+        self.timeline_list.grid(row=5, column=0, sticky="ew", padx=10, pady=(0, 10))
+        self.timeline_list.bind("<<ListboxSelect>>", self._timeline_selected)
+        make_label(self.center, text="Read-Only Trace Detail", font=("Segoe UI", 12, "bold")).grid(row=6, column=0, sticky="w", padx=10, pady=(4, 4))
+        self.trace_detail_text = make_text(self.center, height=11)
+        self.trace_detail_text.grid(row=7, column=0, sticky="ew", padx=10, pady=(0, 10))
+        make_label(self.center, text="Event Stream", font=("Segoe UI", 12, "bold")).grid(row=8, column=0, sticky="w", padx=10, pady=(10, 4))
+        self.event_text = make_text(self.center, height=12)
+        self.event_text.grid(row=9, column=0, sticky="nsew", padx=10, pady=(0, 10))
+        make_label(self.center, text="Artifact Preview", font=("Segoe UI", 12, "bold")).grid(row=10, column=0, sticky="w", padx=10, pady=(4, 4))
         self.preview_text = make_text(self.center, height=8)
-        self.preview_text.grid(row=3, column=0, sticky="ew", padx=10, pady=(0, 10))
-        make_label(self.center, text="Reasoning Panel", font=("Segoe UI", 12, "bold")).grid(row=4, column=0, sticky="w", padx=10, pady=(4, 4))
+        self.preview_text.grid(row=11, column=0, sticky="ew", padx=10, pady=(0, 10))
+        make_label(self.center, text="Reasoning Panel", font=("Segoe UI", 12, "bold")).grid(row=12, column=0, sticky="w", padx=10, pady=(4, 4))
         self.reasoning_text = make_text(self.center, height=7)
-        self.reasoning_text.grid(row=5, column=0, sticky="ew", padx=10, pady=(0, 10))
-        make_label(self.center, text="Patch Proposal Panel", font=("Segoe UI", 12, "bold")).grid(row=6, column=0, sticky="w", padx=10, pady=(4, 4))
+        self.reasoning_text.grid(row=13, column=0, sticky="ew", padx=10, pady=(0, 10))
+        make_label(self.center, text="Patch Proposal Panel", font=("Segoe UI", 12, "bold")).grid(row=14, column=0, sticky="w", padx=10, pady=(4, 4))
         self.patch_text = make_text(self.center, height=7)
-        self.patch_text.grid(row=7, column=0, sticky="ew", padx=10, pady=(0, 10))
+        self.patch_text.grid(row=15, column=0, sticky="ew", padx=10, pady=(0, 10))
 
     def _build_right_panel(self) -> None:
-        make_label(self.right, text="Current Worker", font=("Segoe UI", 12, "bold")).pack(anchor="w", padx=10, pady=(10, 4))
-        self.right_text = make_text(self.right, width=46, height=27)
+        make_label(self.right, text="Project / Safety Status", font=("Segoe UI", 12, "bold")).pack(anchor="w", padx=10, pady=(10, 4))
+        self.right_text = make_text(self.right, width=46, height=16)
         self.right_text.pack(fill="both", expand=True, padx=10, pady=(0, 10))
         buttons = make_frame(self.right, panel=False)
         buttons.pack(fill="x", padx=10, pady=(8, 10))
-        for label, command in [
-            ("Run Prepare Pipeline", self._run_prepare_pipeline),
-            ("Create Approval Token", self._create_approval_token),
-            ("Poll JobPilot Status", self._poll_status),
-            ("Continue From Job Output", self._continue_output),
-            ("Generate Repair Plan", self._repair_plan),
-            ("Export Run Report", self._export_report),
-            ("Open Artifact Folder", self._show_artifact_folder),
-            ("Run Mock Reasoner", self._run_mock_reasoner),
-            ("Preview LLM Input Summary", self._preview_llm_summary),
-            ("Run Real LLM Reasoner", self._run_real_llm_reasoner),
-            ("Propose Patch with Mock LLM", self._propose_patch_mock),
-            ("Preview Patch Context", self._preview_patch_context),
-            ("Propose Patch with Real LLM", self._propose_patch_real),
-            ("Preview Guarded Patch", self._preview_guarded_patch),
-            ("Preview DFLUX Deactivation Patch", self._preview_dflux_deactivation_patch),
-            ("Run Model Condition Preservation Guard", self._run_model_condition_guard),
-            ("Generate Codex Handoff", self._generate_codex_handoff),
-            ("Validate Codex Handoff", self._validate_codex_handoff),
-            ("Intake Codex Result", self._intake_codex_result),
-            ("Report Codex Handoff", self._report_codex_handoff),
-            ("List ACOM Templates", self._list_acom_templates),
-            ("Describe ACOM Template", self._describe_acom_template),
-            ("Generate Pipeline ACOM Handoff", self._generate_pipeline_acom_handoff),
-            ("Validate ACOM Template Pack", self._validate_acom_template_pack),
-            ("Intake ACOM Result", self._intake_acom_result),
-            ("Report ACOM Result Intake", self._report_acom_result_intake),
-            ("Scaffold ACOM Revalidation", self._scaffold_acom_revalidation),
-            ("Report ACOM Revalidation", self._report_acom_revalidation),
-            ("Execute Non-Solver Revalidation", self._execute_non_solver_revalidation),
-            ("Report Non-Solver Revalidation", self._report_non_solver_revalidation),
-            ("Supervisor Review Non-Solver Revalidation", self._supervisor_review_non_solver_revalidation),
-            ("Report Supervisor Non-Solver Review", self._report_supervisor_non_solver_review),
-            ("List Pipeline Agents", self._list_pipeline_agents),
-            ("Scaffold Pipeline Task", self._scaffold_pipeline_task),
-            ("Validate Pipeline Protocol", self._validate_pipeline_protocol),
-            ("Report Pipeline Protocol", self._report_pipeline_protocol),
-            ("Prepare DFLUX-Guarded Solver Run", self._prepare_dflux_guarded_solver_run),
-            ("Approve DFLUX-Guarded Solver Run", self._approve_dflux_guarded_solver_run),
-            ("Run Approved DFLUX-Guarded Solver", self._run_dflux_guarded_solver),
-            ("Monitor DFLUX-Guarded Solver", self._monitor_dflux_guarded_solver),
-            ("Intake DFLUX-Guarded Solver Output", self._intake_dflux_guarded_solver_output),
-            ("Report DFLUX-Guarded Solver Run", self._report_dflux_guarded_solver_run),
-            ("Queue Patch Preview: Preflight", self._queue_patch_preflight),
-            ("Queue Patch Preview: Dry-Run Enqueue", self._queue_patch_dry_run),
-            ("Create Patch Queue Approval Token", self._create_patch_queue_approval),
-            ("Queue Patch Preview: Real Queue-Only Enqueue", self._queue_patch_real),
-            ("Poll Patch Queue Status", self._poll_patch_queue),
-            ("Poll Patched Job Status", self._poll_patch_queue),
-            ("Intake Patched Job Output", self._intake_patched_job_output),
-            ("Extract Patched Job Metrics", self._extract_patched_job_metrics),
-            ("Report Patched Job", self._report_patched_job),
-            ("Prepare Controlled Solver Run", self._prepare_controlled_solver_run),
-            ("Approve Controlled Solver Run", self._approve_controlled_solver_run),
-            ("Run Approved Solver", self._run_approved_solver),
-            ("Monitor Solver Run", self._monitor_controlled_solver_run),
-            ("Diagnose Job / ODB Output", self._diagnose_job_output),
-            ("List abqjobpilot Job Records", self._list_abqjobpilot_records),
-            ("Diagnose from abqjobpilot Record", self._diagnose_from_abqjobpilot_record),
-            ("Propose Solver Failure Repair", self._propose_solver_failure_repair),
-            ("Intake Solver Output", self._intake_solver_output),
-            ("Report Solver Run", self._report_solver_run),
-        ]:
-            make_button(buttons, label, command).pack(fill="x", pady=3)
+        self._build_workflow_action_groups(buttons)
 
-        ttk.Separator(buttons).pack(fill="x", pady=6)
-        for label in [
-            "Start Abaqus Solver [DISABLED]",
-            "Launch " + "Queue" + "Runner [DISABLED]",
-            "Run LLM Agent [DISABLED]",
-            "Auto Repair INP [DISABLED]",
-            "Apply Patch [DISABLED]",
-            "Run Patched Solver [DISABLED]",
-            "Batch Auto Loop [DISABLED]",
-            "LLM Run Solver [DISABLED]",
-            "Arbitrary Command [DISABLED]",
-            "Auto Retry Loop [DISABLED]",
-            "Run Codex [DISABLED]",
-            "Auto Execute Codex [DISABLED]",
-            "Run Revalidation Agent [DISABLED]",
-            "Auto Schedule Agent [DISABLED]",
-            "Approve Evidence [DISABLED]",
-            "Approve Final Evidence [DISABLED]",
-            "Freeze Final Verdict [DISABLED]",
-            "Approve Solver [DISABLED]",
-            "Approve ODB [DISABLED]",
-            "Approve Metrics [DISABLED]",
-        ]:
-            make_button(buttons, label, lambda name=label: self._blocked_action(name), danger=True).pack(fill="x", pady=3)
+    def _build_workflow_action_groups(self, parent) -> None:
+        command_map = self._workflow_action_commands()
+        for panel_name, actions in group_actions_by_panel().items():
+            ttk.Separator(parent).pack(fill="x", pady=5)
+            make_label(parent, text=panel_name, font=("Segoe UI", 10, "bold")).pack(anchor="w", pady=(2, 2))
+            for action in actions:
+                label = str(action["display_name"])
+                backend = action.get("backend_method")
+                allowed = bool(action["allowed"])
+                if allowed and backend in command_map:
+                    command = command_map[str(backend)]
+                    danger = False
+                else:
+                    command = lambda name=label: self._blocked_action(name)
+                    danger = True
+                make_button(parent, label, command, danger=danger).pack(fill="x", pady=2)
+
+    def _workflow_action_commands(self) -> dict[str, object]:
+        return {
+            "list_acom_templates": self._list_acom_templates,
+            "describe_acom_template": self._describe_acom_template,
+            "generate_pipeline_acom_handoff": self._generate_pipeline_acom_handoff,
+            "validate_acom_template_pack": self._validate_acom_template_pack,
+            "intake_acom_result": self._intake_acom_result,
+            "report_acom_result_intake": self._report_acom_result_intake,
+            "scaffold_acom_revalidation": self._scaffold_acom_revalidation,
+            "report_acom_revalidation": self._report_acom_revalidation,
+            "execute_non_solver_revalidation": self._execute_non_solver_revalidation,
+            "report_non_solver_revalidation": self._report_non_solver_revalidation,
+            "supervisor_review_non_solver_revalidation": self._supervisor_review_non_solver_revalidation,
+            "report_supervisor_non_solver_review": self._report_supervisor_non_solver_review,
+            "generate_non_solver_evidence_summary": self._generate_non_solver_evidence_summary,
+            "report_non_solver_evidence_summary": self._report_non_solver_evidence_summary,
+            "supervisor_ack_non_solver_summary": self._supervisor_ack_non_solver_summary,
+            "report_supervisor_non_solver_summary_ack": self._report_supervisor_non_solver_summary_ack,
+            "list_pipeline_agents": self._list_pipeline_agents,
+            "scaffold_pipeline_task": self._scaffold_pipeline_task,
+            "validate_pipeline_protocol": self._validate_pipeline_protocol,
+            "report_pipeline_protocol": self._report_pipeline_protocol,
+        }
 
     def load_task(self) -> None:
         selected = filedialog.askdirectory(title="Select AbqPilot task directory")
@@ -222,9 +197,19 @@ class AbqPilotGui(BaseWindow):
             self._set_status("Refresh failed")
             return
         self.view_model = result["view_model"]
+        presenter_result = self.controller.workflow_presenter(self.task_dir)
+        self.workflow_presenter = presenter_result.get("details") if presenter_result.get("success") else None
+        self.layout_sections = build_layout_sections(self.task_dir, self.project_root)
+        recommendation_result = self.controller.next_step_recommendation_card(self.task_dir)
+        self.next_step_card = recommendation_result.get("details") if recommendation_result.get("success") else None
+        trace_result = self.controller.trace_viewer(self.task_dir)
+        self.trace_viewer = trace_result.get("details") if trace_result.get("success") else None
         self.task_label.configure(text=f"Task: {self.view_model.get('task_id')}")
         self.status_label.configure(text=f"Overall: {self.view_model.get('overall_status')}")
         self._render_modules()
+        self._render_workflow_state()
+        self._render_next_step_recommendation()
+        self._render_timeline_steps()
         self._render_events()
         self._render_artifacts()
         self._render_right_panel()
@@ -237,6 +222,62 @@ class AbqPilotGui(BaseWindow):
         self.module_list.delete(0, "end")
         for module in self.view_model.get("modules", []):
             self.module_list.insert("end", f"{module['display_name']}  [{module['status']}]")
+
+    def _render_workflow_state(self) -> None:
+        if not self.workflow_presenter:
+            set_text(self.workflow_text, "No workflow state loaded.\nFinal evidence remains locked.")
+            return
+        card = (self.layout_sections or {}).get("next_safe_action_card", {})
+        timeline = (self.layout_sections or {}).get("workflow_timeline_text", "")
+        text = "\n".join(
+            [
+                render_workflow_presenter_text(self.workflow_presenter),
+                "",
+                "Next Safe Action Card",
+                f"Action: {card.get('next_safe_action')}",
+                f"Why safe: {card.get('why_safe')}",
+                f"Final evidence effect: {card.get('final_evidence_effect')}",
+                "",
+                "Readable Timeline",
+                str(timeline),
+            ]
+        )
+        set_text(self.workflow_text, text)
+
+    def _render_timeline_steps(self) -> None:
+        self.timeline_list.delete(0, "end")
+        if not self.trace_viewer:
+            set_text(self.trace_detail_text, "Read-only trace viewer\nNo task loaded.\nFinal evidence remains locked.")
+            return
+        for step in self.trace_viewer.get("timeline_steps", []):
+            self.timeline_list.insert("end", f"{step.get('badge')} {step.get('display_name')} [{step.get('status')}]")
+        if self.trace_viewer.get("timeline_steps"):
+            self.timeline_list.selection_clear(0, "end")
+            self.timeline_list.selection_set(0)
+            self._timeline_selected()
+
+    def _render_next_step_recommendation(self) -> None:
+        if not self.next_step_card:
+            set_text(
+                self.recommendation_text,
+                "Recommended Next Step\nRecommendation only; no automatic execution\nFinal evidence remains locked.",
+            )
+            return
+        set_text(self.recommendation_text, render_next_step_recommendation_text(self.next_step_card))
+
+    def _timeline_selected(self, _event=None) -> None:
+        if not self.trace_viewer:
+            return
+        selection = self.timeline_list.curselection()
+        if not selection:
+            return
+        steps = self.trace_viewer.get("timeline_steps", [])
+        if not steps:
+            return
+        step = steps[selection[0]]
+        result = self.controller.trace_detail_card(self.task_dir, str(step.get("step_id")))
+        card = result.get("details", {}) if result.get("success") else {}
+        set_text(self.trace_detail_text, render_trace_detail_text(card))
 
     def _render_events(self) -> None:
         lines = []
@@ -252,6 +293,65 @@ class AbqPilotGui(BaseWindow):
             self.artifact_list.insert("end", artifact.get("name"))
 
     def _render_right_panel(self) -> None:
+        if self.workflow_presenter:
+            sections = self.workflow_presenter.get("sections", {})
+            layout = self.layout_sections or {}
+            project_header = layout.get("top_project_header", {})
+            task = layout.get("task_sidebar", sections.get("Task Workspace", {}))
+            trace = layout.get("trace_record_summary", {})
+            safety = sections.get("Safety / Audit Status", {})
+            disabled = layout.get("disabled_high_risk_actions_card", {})
+            high_risk_gate = layout.get("high_risk_gate_panel", {})
+            controlled_solver_gate = layout.get("controlled_solver_gate_panel", {}).get("card", {})
+            inactive_solver_gate = layout.get("controlled_solver_gate_panel", {}).get("inactive_gate_draft_card", {})
+            text = "\n".join(
+                [
+                    "AbqPilot-v2",
+                    str(project_header.get("workflow_family")),
+                    str(project_header.get("current_accepted_verdict")),
+                    " | ".join(project_header.get("badges", [])),
+                    "",
+                    "Task Workspace",
+                    f"Task: {task.get('task_id')}",
+                    f"State: {task.get('latest_workflow_state')}",
+                    f"RUN/HANDOFF/GATE: {trace.get('run_count')} / {trace.get('handoff_count')} / {trace.get('gate_count')}",
+                    f"Latest decision: {trace.get('latest_decision')}",
+                    "",
+                    "Safety Boundary",
+                    str(safety.get("non_final_boundary")),
+                    "Final evidence remains locked",
+                    "Solver, ODB, metrics, and model mutation are disabled",
+                    "Codex executes externally; GUI does not call Codex CLI",
+                    "Accepted ACOM result means accepted for AbqPilot revalidation, not evidence",
+                    "Supervisor acknowledgement does not freeze final verdict",
+                    "High-risk agents are intentionally blocked",
+                    "",
+                    "Disabled High-Risk Actions",
+                    str(disabled.get("copy")),
+                    "",
+                    "High-Risk Gates",
+                    str(high_risk_gate.get("no_execution_notice")),
+                    f"Preview actions: {len(high_risk_gate.get('actions', []))}",
+                    "Preview only; not an approval",
+                    "Human gate required in a future explicit stage",
+                    "",
+                    "Controlled Solver Gate Preview",
+                    str(controlled_solver_gate.get("title")),
+                    f"Readiness: {controlled_solver_gate.get('readiness_status')}",
+                    "Preview only; not a solver approval",
+                    "No Abaqus solver command is executed",
+                    "No solver request file is created",
+                    "",
+                    "Controlled Solver Inactive Gate Draft",
+                    str(inactive_solver_gate.get("subtitle")),
+                    f"Draft: {inactive_solver_gate.get('draft_status')}",
+                    f"Validation: {inactive_solver_gate.get('validation_status')}",
+                    "Inactive draft only; not an approval",
+                    "No active gate record is created in Stage 5.2C",
+                ]
+            )
+            set_text(self.right_text, text)
+            return
         panel = self.view_model.get("right_panel", {})
         active = panel.get("active_artifacts", [])
         artifact_lines = [f"- {item.get('name')}: {item.get('path')}" for item in active[-8:]]
@@ -748,6 +848,26 @@ class AbqPilotGui(BaseWindow):
         task_dir = self.task_dir or self.project_root / "runs" / "tasks" / "stage5_0f_non_solver_revalidation_smoke"
         result = self.controller.report_supervisor_non_solver_review(task_dir)
         self._handle_action_result(result, "Supervisor non-solver review report ready")
+
+    def _generate_non_solver_evidence_summary(self) -> None:
+        task_dir = self.task_dir or self.project_root / "runs" / "tasks" / "stage5_0f_non_solver_revalidation_smoke"
+        result = self.controller.generate_non_solver_evidence_summary(task_dir)
+        self._handle_action_result(result, "Non-solver evidence summary generated")
+
+    def _report_non_solver_evidence_summary(self) -> None:
+        task_dir = self.task_dir or self.project_root / "runs" / "tasks" / "stage5_0f_non_solver_revalidation_smoke"
+        result = self.controller.report_non_solver_evidence_summary(task_dir)
+        self._handle_action_result(result, "Non-solver evidence summary report ready")
+
+    def _supervisor_ack_non_solver_summary(self) -> None:
+        task_dir = self.task_dir or self.project_root / "runs" / "tasks" / "stage5_0f_non_solver_revalidation_smoke"
+        result = self.controller.supervisor_ack_non_solver_summary(task_dir)
+        self._handle_action_result(result, "Supervisor non-solver summary acknowledgement checked")
+
+    def _report_supervisor_non_solver_summary_ack(self) -> None:
+        task_dir = self.task_dir or self.project_root / "runs" / "tasks" / "stage5_0f_non_solver_revalidation_smoke"
+        result = self.controller.report_supervisor_non_solver_summary_ack(task_dir)
+        self._handle_action_result(result, "Supervisor non-solver summary acknowledgement report ready")
 
     def _list_pipeline_agents(self) -> None:
         result = self.controller.list_pipeline_agents()

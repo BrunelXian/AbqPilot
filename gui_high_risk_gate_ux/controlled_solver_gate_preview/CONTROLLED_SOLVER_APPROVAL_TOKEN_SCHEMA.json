@@ -1,0 +1,25 @@
+{
+  "token_type": "CONTROLLED_SOLVER_RUN_APPROVAL",
+  "token_version": "0.1",
+  "task_id": "stage5_0f_non_solver_revalidation_smoke",
+  "task_dir": "D:\\Projects\\AbqPilot-v2\\runs\\tasks\\stage5_0f_non_solver_revalidation_smoke",
+  "candidate_artifact_hash": null,
+  "candidate_artifact_path": null,
+  "intended_solver_command_label": "configured-controlled-abaqus-command",
+  "allowed_output_dir": "D:\\Projects\\AbqPilot-v2\\runs\\tasks\\stage5_0f_non_solver_revalidation_smoke\\future_controlled_solver_run",
+  "approver_type": "HUMAN",
+  "approval_phrase_required": "I_APPROVE_ABQPILOT_CONTROLLED_SOLVER_RUN_FUTURE_STAGE",
+  "approval_phrase_supplied": "",
+  "acknowledgement_flags": {
+    "understands_solver_will_run": false,
+    "understands_cpu_time_risk": false,
+    "understands_files_will_be_created": false,
+    "understands_no_final_evidence_approval": false,
+    "understands_no_odb_metrics_acceptance": false,
+    "understands_no_queue_mutation_unless_separately_gated": false
+  },
+  "expires_at_optional": "2026-07-06T17:45:39",
+  "one_time_use": true,
+  "preview_only_in_stage_5_2b": true,
+  "active_approval": false
+}

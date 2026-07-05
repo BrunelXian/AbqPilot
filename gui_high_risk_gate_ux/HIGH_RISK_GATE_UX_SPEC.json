@@ -1,0 +1,2097 @@
+{
+  "schema_version": "0.1",
+  "stage": "Stage 5.2A",
+  "stage_id": "STAGE5_2A",
+  "verdict": "PASS_ABQPILOT_V2_STAGE5_2A_GUI_HIGH_RISK_GATE_UX_SPEC_READY",
+  "generated_at": "2026-07-05T17:23:12",
+  "project_root": "D:\\Projects\\AbqPilot-v2",
+  "preview_only": true,
+  "specification_only": true,
+  "not_approved": true,
+  "not_executable": true,
+  "high_risk_actions": [
+    {
+      "action_id": "CONTROLLED_SOLVER_RUN",
+      "display_name": "Controlled Solver Run",
+      "risk_level": "HIGH",
+      "disabled_reason": "Solver execution requires a future explicit human gate and fixed command approval.",
+      "risk_summary": "Runs Abaqus and may create solver outputs, locks, or partial ODB files.",
+      "possible_failure_modes": [
+        "solver divergence",
+        "partial ODB",
+        "unexpected runtime output",
+        "resource exhaustion"
+      ],
+      "required_evidence_inputs": [
+        "candidate INP",
+        "StaticValidator",
+        "DiffGuard",
+        "PhysicsGuard",
+        "MCPGuard where relevant"
+      ],
+      "expected_future_outputs": [
+        "solver approval token",
+        "fixed command preview",
+        "solver run directory",
+        "diagnosis artifact"
+      ],
+      "forbidden_without_gate": [
+        "run Abaqus",
+        "submit solver",
+        "create solver request files"
+      ],
+      "user_warning_copy": "Controlled solver run is locked. Stage 5.2A shows requirements only and does not run Abaqus.",
+      "required_confirmation_copy": "Future stage must bind candidate hashes, guard results, command preview, expected ODB, and human approval.",
+      "final_evidence_effect": "FUTURE_STAGE_REQUIRED",
+      "default_allowed": false,
+      "executable_in_stage_5_2a": false,
+      "requires_human_gate": true,
+      "requires_future_stage": true,
+      "preview_only": true,
+      "required_prerequisites": [
+        {
+          "prerequisite_id": "task_scaffold_exists",
+          "description": "Task scaffold exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "candidate_inp_exists",
+          "description": "Candidate INP exists under an allowed task or run artifact directory.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "static_validator_pass",
+          "description": "StaticValidator PASS record exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "diff_guard_pass",
+          "description": "DiffGuard PASS record exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "physics_guard_pass",
+          "description": "PhysicsGuard PASS record exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "mcpguard_pass",
+          "description": "MCPGuard PASS record exists where model conditions or INP patches may be affected.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "patch_preview_accepted",
+          "description": "Patch preview has been accepted as a preview artifact, not applied in place.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "future_human_gate",
+          "description": "Explicit human solver gate approval record would be required in a future stage.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "solver_command_configured",
+          "description": "Solver command path is configured in project status or config.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "source_mutation_absent",
+          "description": "No source CAE/INP mutation occurred outside allowed copied artifacts.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        }
+      ]
+    },
+    {
+      "action_id": "QUEUE_JOB",
+      "display_name": "Queue Job",
+      "risk_level": "HIGH",
+      "disabled_reason": "Queue mutation and queue-worker lifecycle require a future explicit gate.",
+      "risk_summary": "May mutate queue files or trigger external execution lifecycle.",
+      "possible_failure_modes": [
+        "queue.json mutation",
+        "runtime status drift",
+        "duplicate job",
+        "untracked external execution"
+      ],
+      "required_evidence_inputs": [
+        "job manifest",
+        "queue mutation gate design",
+        "runtime isolation plan"
+      ],
+      "expected_future_outputs": [
+        "queue approval token",
+        "queue mutation report",
+        "runtime status trace"
+      ],
+      "forbidden_without_gate": [
+        "enqueue job",
+        "launch queue worker",
+        "mutate queue.json"
+      ],
+      "user_warning_copy": "Queue job is locked. Stage 5.2A does not enqueue or mutate runtime queue files.",
+      "required_confirmation_copy": "Future stage must explicitly approve queue mutation and runtime status handling.",
+      "final_evidence_effect": "FUTURE_STAGE_REQUIRED",
+      "default_allowed": false,
+      "executable_in_stage_5_2a": false,
+      "requires_human_gate": true,
+      "requires_future_stage": true,
+      "preview_only": true,
+      "required_prerequisites": [
+        {
+          "prerequisite_id": "solver_readiness_design",
+          "description": "Controlled solver readiness design has been accepted.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "job_manifest_exists",
+          "description": "Task or job manifest exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "future_queue_gate",
+          "description": "Queue mutation gate is approved in a future explicit stage.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "queue_json_risk_acknowledged",
+          "description": "queue.json write risk is acknowledged.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "runtime_status_isolation",
+          "description": "Runtime status isolation is defined.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        }
+      ]
+    },
+    {
+      "action_id": "OPEN_ODB_FOR_DIAGNOSIS",
+      "display_name": "Open ODB for Diagnosis",
+      "risk_level": "HIGH",
+      "disabled_reason": "ODB access remains gated and cannot be opened interactively in Stage 5.2A.",
+      "risk_summary": "ODB access can blur diagnostic metadata checks with uncontrolled model database reads.",
+      "possible_failure_modes": [
+        "locked ODB",
+        "partial ODB accepted accidentally",
+        "uncontrolled interactive open"
+      ],
+      "required_evidence_inputs": [
+        "ODB path",
+        "solver completion record",
+        "ODB acceptance gate design"
+      ],
+      "expected_future_outputs": [
+        "ODB diagnosis report",
+        "acceptability decision",
+        "read-only extractor log"
+      ],
+      "forbidden_without_gate": [
+        "open ODB",
+        "launch Abaqus/CAE",
+        "bypass diagnosis"
+      ],
+      "user_warning_copy": "ODB opening is locked. Stage 5.2A previews the ODB gate only.",
+      "required_confirmation_copy": "Future stage must prove controlled ODB acceptance before any extractor use.",
+      "final_evidence_effect": "FUTURE_STAGE_REQUIRED",
+      "default_allowed": false,
+      "executable_in_stage_5_2a": false,
+      "requires_human_gate": true,
+      "requires_future_stage": true,
+      "preview_only": true,
+      "required_prerequisites": [
+        {
+          "prerequisite_id": "odb_under_allowed_artifact_dir",
+          "description": "ODB path exists under an allowed run artifact directory.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "controlled_solver_completion_record",
+          "description": "Controlled solver completion record exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "future_odb_acceptance_gate",
+          "description": "ODB acceptance gate is pending or required.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "read_only_extractor_contract",
+          "description": "Read-only ODB extractor contract exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "no_uncontrolled_interactive_open",
+          "description": "No uncontrolled interactive ODB opening is allowed.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        }
+      ]
+    },
+    {
+      "action_id": "EXTRACT_ODB_METRICS",
+      "display_name": "Extract ODB Metrics",
+      "risk_level": "HIGH",
+      "disabled_reason": "Metrics extraction requires future ODB acceptance and metrics gate.",
+      "risk_summary": "Metrics may be mistaken for accepted evidence if extracted before acceptance.",
+      "possible_failure_modes": [
+        "partial metrics",
+        "wrong frame",
+        "unaccepted ODB",
+        "schema drift"
+      ],
+      "required_evidence_inputs": [
+        "accepted ODB gate",
+        "metrics schema",
+        "extractor contract"
+      ],
+      "expected_future_outputs": [
+        "metrics JSON",
+        "metrics validation report",
+        "comparison report"
+      ],
+      "forbidden_without_gate": [
+        "extract metrics",
+        "accept metrics",
+        "update final evidence"
+      ],
+      "user_warning_copy": "ODB metrics extraction is locked. Stage 5.2A only shows prerequisites.",
+      "required_confirmation_copy": "Future stage must accept ODB and metric schema before extraction.",
+      "final_evidence_effect": "FUTURE_STAGE_REQUIRED",
+      "default_allowed": false,
+      "executable_in_stage_5_2a": false,
+      "requires_human_gate": true,
+      "requires_future_stage": true,
+      "preview_only": true,
+      "required_prerequisites": [
+        {
+          "prerequisite_id": "future_odb_metrics_acceptance",
+          "description": "ODB is accepted for metrics in a future gate.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "metrics_schema_exists",
+          "description": "Metrics schema exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "extractor_contract_exists",
+          "description": "Extraction script contract exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "metrics_output_target_defined",
+          "description": "Output JSON target is defined.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "metrics_non_final_until_gated",
+          "description": "Metrics remain non-final until EvidenceReportAgent and PipelineSupervisor gates.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        }
+      ]
+    },
+    {
+      "action_id": "MUTATE_SOURCE_CAE",
+      "display_name": "Mutate Source CAE",
+      "risk_level": "CRITICAL",
+      "disabled_reason": "Source CAE mutation is irreversible-risk work and requires a future explicit source gate.",
+      "risk_summary": "May alter the canonical model source.",
+      "possible_failure_modes": [
+        "lost source intent",
+        "unreviewed model drift",
+        "irreversible overwrite"
+      ],
+      "required_evidence_inputs": [
+        "mutation justification",
+        "backup plan",
+        "diff plan"
+      ],
+      "expected_future_outputs": [
+        "source mutation approval",
+        "backup artifact",
+        "post-mutation audit"
+      ],
+      "forbidden_without_gate": [
+        "edit CAE",
+        "overwrite CAE",
+        "save source CAE"
+      ],
+      "user_warning_copy": "Source CAE mutation is locked. Stage 5.2A never mutates source model files.",
+      "required_confirmation_copy": "Future stage must document backup, diff, and explicit human approval.",
+      "final_evidence_effect": "FUTURE_STAGE_REQUIRED",
+      "default_allowed": false,
+      "executable_in_stage_5_2a": false,
+      "requires_human_gate": true,
+      "requires_future_stage": true,
+      "preview_only": true,
+      "required_prerequisites": [
+        {
+          "prerequisite_id": "source_mutation_justification",
+          "description": "Explicit source mutation justification exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "backup_freeze_plan",
+          "description": "Backup and freeze plan exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "diff_plan",
+          "description": "Diff plan exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "irreversible_warning",
+          "description": "Irreversible mutation warning is acknowledged.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "future_human_source_gate",
+          "description": "Human gate approval exists in a future explicit stage.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        }
+      ]
+    },
+    {
+      "action_id": "MUTATE_SOURCE_INP",
+      "display_name": "Mutate Source INP",
+      "risk_level": "CRITICAL",
+      "disabled_reason": "Source INP mutation must be separated from copied preview artifacts.",
+      "risk_summary": "May destroy traceability between source export and candidates.",
+      "possible_failure_modes": [
+        "unbounded raw edit",
+        "lost source baseline",
+        "unreviewed solver input drift"
+      ],
+      "required_evidence_inputs": [
+        "mutation justification",
+        "backup plan",
+        "diff plan"
+      ],
+      "expected_future_outputs": [
+        "source mutation approval",
+        "backup artifact",
+        "post-mutation audit"
+      ],
+      "forbidden_without_gate": [
+        "edit source INP",
+        "overwrite source INP",
+        "raw unbounded INP edit"
+      ],
+      "user_warning_copy": "Source INP mutation is locked. Stage 5.2A never mutates source INP files.",
+      "required_confirmation_copy": "Future stage must document backup, diff, and explicit human approval.",
+      "final_evidence_effect": "FUTURE_STAGE_REQUIRED",
+      "default_allowed": false,
+      "executable_in_stage_5_2a": false,
+      "requires_human_gate": true,
+      "requires_future_stage": true,
+      "preview_only": true,
+      "required_prerequisites": [
+        {
+          "prerequisite_id": "source_mutation_justification",
+          "description": "Explicit source mutation justification exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "backup_freeze_plan",
+          "description": "Backup and freeze plan exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "diff_plan",
+          "description": "Diff plan exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "irreversible_warning",
+          "description": "Irreversible mutation warning is acknowledged.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "future_human_source_gate",
+          "description": "Human gate approval exists in a future explicit stage.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        }
+      ]
+    },
+    {
+      "action_id": "ACCEPT_METRICS_FOR_EVIDENCE",
+      "display_name": "Accept Metrics for Evidence",
+      "risk_level": "CRITICAL",
+      "disabled_reason": "Metric acceptance can affect final evidence and requires future supervisor gates.",
+      "risk_summary": "May convert computational results into evidence if approved too early.",
+      "possible_failure_modes": [
+        "bad metrics accepted",
+        "unaccepted ODB used",
+        "final evidence contamination"
+      ],
+      "required_evidence_inputs": [
+        "metrics JSON",
+        "metrics validation",
+        "comparison report",
+        "ODB acceptance gate"
+      ],
+      "expected_future_outputs": [
+        "metrics acceptance gate",
+        "evidence report draft",
+        "supervisor review"
+      ],
+      "forbidden_without_gate": [
+        "accept metrics",
+        "update final evidence",
+        "freeze verdict"
+      ],
+      "user_warning_copy": "Metrics evidence acceptance is locked. Stage 5.2A does not approve metrics.",
+      "required_confirmation_copy": "Future stage must bind ODB acceptance, metrics validation, and supervisor review.",
+      "final_evidence_effect": "FUTURE_STAGE_REQUIRED",
+      "default_allowed": false,
+      "executable_in_stage_5_2a": false,
+      "requires_human_gate": true,
+      "requires_future_stage": true,
+      "preview_only": true,
+      "required_prerequisites": [
+        {
+          "prerequisite_id": "future_odb_metrics_acceptance",
+          "description": "ODB is accepted for metrics in a future gate.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "metrics_schema_exists",
+          "description": "Metrics schema exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "extractor_contract_exists",
+          "description": "Extraction script contract exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "metrics_output_target_defined",
+          "description": "Output JSON target is defined.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "metrics_non_final_until_gated",
+          "description": "Metrics remain non-final until EvidenceReportAgent and PipelineSupervisor gates.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "all_upstream_traces_complete",
+          "description": "All upstream RUN/HANDOFF/GATE traces are complete.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "metrics_accepted",
+          "description": "Metrics are accepted through a future metrics gate.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "final_evidence_ledger_draft",
+          "description": "Final evidence ledger draft is complete.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "pipeline_supervisor_final_review",
+          "description": "PipelineSupervisor final review is complete.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "future_final_freeze_stage",
+          "description": "Explicit human approval occurs in a future final freeze stage.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        }
+      ]
+    },
+    {
+      "action_id": "APPROVE_FINAL_EVIDENCE",
+      "display_name": "Approve Final Evidence",
+      "risk_level": "CRITICAL",
+      "disabled_reason": "Final evidence approval is outside Stage 5.2A authority.",
+      "risk_summary": "Would convert non-final records into final project evidence.",
+      "possible_failure_modes": [
+        "premature final evidence",
+        "missing upstream trace",
+        "unreviewed metrics"
+      ],
+      "required_evidence_inputs": [
+        "complete trace",
+        "accepted metrics",
+        "final evidence ledger draft",
+        "supervisor review"
+      ],
+      "expected_future_outputs": [
+        "final evidence approval gate",
+        "final evidence ledger"
+      ],
+      "forbidden_without_gate": [
+        "approve final evidence",
+        "update TASK_FINAL_EVIDENCE_LEDGER.md"
+      ],
+      "user_warning_copy": "Final evidence remains locked. Stage 5.2A is preview-only.",
+      "required_confirmation_copy": "Future final evidence stage must explicitly approve final evidence.",
+      "final_evidence_effect": "FUTURE_STAGE_REQUIRED",
+      "default_allowed": false,
+      "executable_in_stage_5_2a": false,
+      "requires_human_gate": true,
+      "requires_future_stage": true,
+      "preview_only": true,
+      "required_prerequisites": [
+        {
+          "prerequisite_id": "all_upstream_traces_complete",
+          "description": "All upstream RUN/HANDOFF/GATE traces are complete.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "metrics_accepted",
+          "description": "Metrics are accepted through a future metrics gate.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "final_evidence_ledger_draft",
+          "description": "Final evidence ledger draft is complete.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "pipeline_supervisor_final_review",
+          "description": "PipelineSupervisor final review is complete.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "future_final_freeze_stage",
+          "description": "Explicit human approval occurs in a future final freeze stage.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        }
+      ]
+    },
+    {
+      "action_id": "FREEZE_FINAL_VERDICT",
+      "display_name": "Freeze Final Verdict",
+      "risk_level": "CRITICAL",
+      "disabled_reason": "Final verdict freeze requires a future explicit final freeze stage.",
+      "risk_summary": "Would make the project verdict final.",
+      "possible_failure_modes": [
+        "premature verdict",
+        "unaccepted evidence",
+        "missing human approval"
+      ],
+      "required_evidence_inputs": [
+        "approved final evidence",
+        "PipelineSupervisor final review",
+        "human freeze approval"
+      ],
+      "expected_future_outputs": [
+        "final verdict freeze gate",
+        "final status update"
+      ],
+      "forbidden_without_gate": [
+        "freeze verdict",
+        "publish final status"
+      ],
+      "user_warning_copy": "Final verdict freeze is locked. Stage 5.2A cannot freeze verdicts.",
+      "required_confirmation_copy": "Future explicit final freeze stage must bind all final evidence records.",
+      "final_evidence_effect": "FUTURE_STAGE_REQUIRED",
+      "default_allowed": false,
+      "executable_in_stage_5_2a": false,
+      "requires_human_gate": true,
+      "requires_future_stage": true,
+      "preview_only": true,
+      "required_prerequisites": [
+        {
+          "prerequisite_id": "all_upstream_traces_complete",
+          "description": "All upstream RUN/HANDOFF/GATE traces are complete.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "metrics_accepted",
+          "description": "Metrics are accepted through a future metrics gate.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "final_evidence_ledger_draft",
+          "description": "Final evidence ledger draft is complete.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "pipeline_supervisor_final_review",
+          "description": "PipelineSupervisor final review is complete.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "future_final_freeze_stage",
+          "description": "Explicit human approval occurs in a future final freeze stage.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        }
+      ]
+    },
+    {
+      "action_id": "DELETE_OR_OVERWRITE_HISTORICAL_ARTIFACT",
+      "display_name": "Delete or Overwrite Historical Artifact",
+      "risk_level": "CRITICAL",
+      "disabled_reason": "Historical artifact deletion/overwrite is destructive and requires a future explicit gate.",
+      "risk_summary": "May destroy traceability and audit history.",
+      "possible_failure_modes": [
+        "lost audit trail",
+        "irreversible deletion",
+        "overwritten evidence"
+      ],
+      "required_evidence_inputs": [
+        "artifact inventory",
+        "retention policy",
+        "backup plan"
+      ],
+      "expected_future_outputs": [
+        "destructive-action approval gate",
+        "backup record",
+        "retention report"
+      ],
+      "forbidden_without_gate": [
+        "delete artifact",
+        "overwrite artifact",
+        "rewrite history"
+      ],
+      "user_warning_copy": "Historical artifact deletion/overwrite is locked. Stage 5.2A only previews requirements.",
+      "required_confirmation_copy": "Future destructive-action stage must require explicit human approval.",
+      "final_evidence_effect": "FUTURE_STAGE_REQUIRED",
+      "default_allowed": false,
+      "executable_in_stage_5_2a": false,
+      "requires_human_gate": true,
+      "requires_future_stage": true,
+      "preview_only": true,
+      "required_prerequisites": [
+        {
+          "prerequisite_id": "historical_artifact_inventory",
+          "description": "Historical artifact inventory exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "retention_policy",
+          "description": "Retention policy and replacement rationale are documented.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "backup_plan",
+          "description": "Backup plan exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "future_human_destructive_gate",
+          "description": "Human destructive-action gate exists in a future explicit stage.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        }
+      ]
+    },
+    {
+      "action_id": "RUN_CODEX_FROM_GUI",
+      "display_name": "Run Codex from GUI",
+      "risk_level": "HIGH",
+      "disabled_reason": "ACOM keeps Codex external/manual; GUI Codex execution requires a future runtime bridge design.",
+      "risk_summary": "Would introduce tool execution and security boundary concerns.",
+      "possible_failure_modes": [
+        "unbounded execution",
+        "secret leakage",
+        "trace gaps",
+        "unexpected file mutation"
+      ],
+      "required_evidence_inputs": [
+        "runtime bridge design",
+        "security boundary",
+        "trace policy",
+        "secret controls"
+      ],
+      "expected_future_outputs": [
+        "runtime bridge gate",
+        "execution trace",
+        "abort/rollback policy"
+      ],
+      "forbidden_without_gate": [
+        "call Codex CLI",
+        "auto-execute handoff",
+        "bridge Codex runtime"
+      ],
+      "user_warning_copy": "GUI does not call Codex CLI. Codex remains external/manual in Stage 5.2A.",
+      "required_confirmation_copy": "Future runtime bridge stage must prove security, trace, and abort controls.",
+      "final_evidence_effect": "FUTURE_STAGE_REQUIRED",
+      "default_allowed": false,
+      "executable_in_stage_5_2a": false,
+      "requires_human_gate": true,
+      "requires_future_stage": true,
+      "preview_only": true,
+      "required_prerequisites": [
+        {
+          "prerequisite_id": "future_runtime_bridge_design",
+          "description": "Future explicit runtime bridge design exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "security_boundary",
+          "description": "Security boundary is defined.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "user_confirmation",
+          "description": "User confirmation is defined.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "log_trace_policy",
+          "description": "Log and trace policy exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "secret_leakage_controls",
+          "description": "No-secret-leak controls are defined.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "abort_rollback_policy",
+          "description": "Abort and rollback policy exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        }
+      ]
+    },
+    {
+      "action_id": "AUTO_SCHEDULE_AGENT",
+      "display_name": "Auto Schedule Agent",
+      "risk_level": "HIGH",
+      "disabled_reason": "Automatic scheduling is outside Stage 5.2A and requires a future orchestration design.",
+      "risk_summary": "May execute downstream agents without explicit user control.",
+      "possible_failure_modes": [
+        "unintended agent execution",
+        "high-risk agent run",
+        "trace mismatch",
+        "approval bypass"
+      ],
+      "required_evidence_inputs": [
+        "orchestration design",
+        "agent risk policy",
+        "trace policy",
+        "abort/rollback policy"
+      ],
+      "expected_future_outputs": [
+        "scheduler gate",
+        "agent execution trace",
+        "supervisor policy"
+      ],
+      "forbidden_without_gate": [
+        "auto-schedule agents",
+        "run high-risk agents",
+        "bypass handoff gates"
+      ],
+      "user_warning_copy": "Automatic agent scheduling is locked. Stage 5.2A only previews requirements.",
+      "required_confirmation_copy": "Future orchestration stage must define policy, trace, and human controls.",
+      "final_evidence_effect": "FUTURE_STAGE_REQUIRED",
+      "default_allowed": false,
+      "executable_in_stage_5_2a": false,
+      "requires_human_gate": true,
+      "requires_future_stage": true,
+      "preview_only": true,
+      "required_prerequisites": [
+        {
+          "prerequisite_id": "future_runtime_bridge_design",
+          "description": "Future explicit runtime bridge design exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "security_boundary",
+          "description": "Security boundary is defined.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "user_confirmation",
+          "description": "User confirmation is defined.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "log_trace_policy",
+          "description": "Log and trace policy exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "secret_leakage_controls",
+          "description": "No-secret-leak controls are defined.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "abort_rollback_policy",
+          "description": "Abort and rollback policy exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        }
+      ]
+    }
+  ],
+  "gate_previews": [
+    {
+      "action_id": "CONTROLLED_SOLVER_RUN",
+      "display_name": "Controlled Solver Run",
+      "risk_level": "HIGH",
+      "current_allowed": false,
+      "executable": false,
+      "preview_only": true,
+      "approval_status": "NOT_APPROVED",
+      "execution_status": "NOT_EXECUTABLE",
+      "human_gate_required": true,
+      "future_stage_required": true,
+      "disabled_reason": "Solver execution requires a future explicit human gate and fixed command approval.",
+      "risk_summary": "Runs Abaqus and may create solver outputs, locks, or partial ODB files.",
+      "prerequisite_checklist": [
+        {
+          "prerequisite_id": "task_scaffold_exists",
+          "description": "Task scaffold exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "candidate_inp_exists",
+          "description": "Candidate INP exists under an allowed task or run artifact directory.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "static_validator_pass",
+          "description": "StaticValidator PASS record exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "diff_guard_pass",
+          "description": "DiffGuard PASS record exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "physics_guard_pass",
+          "description": "PhysicsGuard PASS record exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "mcpguard_pass",
+          "description": "MCPGuard PASS record exists where model conditions or INP patches may be affected.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "patch_preview_accepted",
+          "description": "Patch preview has been accepted as a preview artifact, not applied in place.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "future_human_gate",
+          "description": "Explicit human solver gate approval record would be required in a future stage.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "solver_command_configured",
+          "description": "Solver command path is configured in project status or config.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "source_mutation_absent",
+          "description": "No source CAE/INP mutation occurred outside allowed copied artifacts.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        }
+      ],
+      "missing_prerequisites": [
+        "task_scaffold_exists",
+        "candidate_inp_exists",
+        "static_validator_pass",
+        "diff_guard_pass",
+        "physics_guard_pass",
+        "mcpguard_pass",
+        "patch_preview_accepted",
+        "future_human_gate",
+        "solver_command_configured",
+        "source_mutation_absent"
+      ],
+      "required_evidence_inputs": [
+        "candidate INP",
+        "StaticValidator",
+        "DiffGuard",
+        "PhysicsGuard",
+        "MCPGuard where relevant"
+      ],
+      "expected_future_outputs": [
+        "solver approval token",
+        "fixed command preview",
+        "solver run directory",
+        "diagnosis artifact"
+      ],
+      "warning_copy": "Controlled solver run is locked. Stage 5.2A shows requirements only and does not run Abaqus.",
+      "confirmation_copy_preview": "Future stage must bind candidate hashes, guard results, command preview, expected ODB, and human approval.",
+      "forbidden_actions": [
+        "run Abaqus",
+        "submit solver",
+        "create solver request files"
+      ],
+      "final_evidence_effect": "FUTURE_STAGE_REQUIRED",
+      "safety_boundary": "Stage 5.2A is preview-only. It does not run solver, open ODB, queue jobs, call Codex CLI, auto-schedule agents, approve gates, approve final evidence, freeze verdicts, or mutate TASK_FINAL_EVIDENCE_LEDGER.md.",
+      "user_instruction": "Preview gate requirements only. Do not approve, execute, or manually bypass the future gate.",
+      "recommended_future_stage": "Future explicit human gate for CONTROLLED_SOLVER_RUN",
+      "read_only_notice": "Preview only; not an approval",
+      "no_execution_notice": "This GUI does not execute the high-risk action",
+      "required_copy": [
+        "Preview only; not an approval",
+        "This GUI does not execute the high-risk action",
+        "Human gate required in a future explicit stage",
+        "Final evidence remains locked",
+        "No solver / ODB / queue / Codex / final freeze is enabled in Stage 5.2A"
+      ],
+      "real_gate_created": false,
+      "auto_execute_allowed": false,
+      "final_evidence_approved": false,
+      "final_verdict_frozen": false,
+      "solver_approved": false,
+      "odb_metrics_approved": false,
+      "queue_runner_launched": false,
+      "codex_cli_called": false,
+      "task_final_evidence_ledger_updated": false
+    },
+    {
+      "action_id": "QUEUE_JOB",
+      "display_name": "Queue Job",
+      "risk_level": "HIGH",
+      "current_allowed": false,
+      "executable": false,
+      "preview_only": true,
+      "approval_status": "NOT_APPROVED",
+      "execution_status": "NOT_EXECUTABLE",
+      "human_gate_required": true,
+      "future_stage_required": true,
+      "disabled_reason": "Queue mutation and queue-worker lifecycle require a future explicit gate.",
+      "risk_summary": "May mutate queue files or trigger external execution lifecycle.",
+      "prerequisite_checklist": [
+        {
+          "prerequisite_id": "solver_readiness_design",
+          "description": "Controlled solver readiness design has been accepted.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "job_manifest_exists",
+          "description": "Task or job manifest exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "future_queue_gate",
+          "description": "Queue mutation gate is approved in a future explicit stage.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "queue_json_risk_acknowledged",
+          "description": "queue.json write risk is acknowledged.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "runtime_status_isolation",
+          "description": "Runtime status isolation is defined.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        }
+      ],
+      "missing_prerequisites": [
+        "solver_readiness_design",
+        "job_manifest_exists",
+        "future_queue_gate",
+        "queue_json_risk_acknowledged",
+        "runtime_status_isolation"
+      ],
+      "required_evidence_inputs": [
+        "job manifest",
+        "queue mutation gate design",
+        "runtime isolation plan"
+      ],
+      "expected_future_outputs": [
+        "queue approval token",
+        "queue mutation report",
+        "runtime status trace"
+      ],
+      "warning_copy": "Queue job is locked. Stage 5.2A does not enqueue or mutate runtime queue files.",
+      "confirmation_copy_preview": "Future stage must explicitly approve queue mutation and runtime status handling.",
+      "forbidden_actions": [
+        "enqueue job",
+        "launch queue worker",
+        "mutate queue.json"
+      ],
+      "final_evidence_effect": "FUTURE_STAGE_REQUIRED",
+      "safety_boundary": "Stage 5.2A is preview-only. It does not run solver, open ODB, queue jobs, call Codex CLI, auto-schedule agents, approve gates, approve final evidence, freeze verdicts, or mutate TASK_FINAL_EVIDENCE_LEDGER.md.",
+      "user_instruction": "Preview gate requirements only. Do not approve, execute, or manually bypass the future gate.",
+      "recommended_future_stage": "Future explicit human gate for QUEUE_JOB",
+      "read_only_notice": "Preview only; not an approval",
+      "no_execution_notice": "This GUI does not execute the high-risk action",
+      "required_copy": [
+        "Preview only; not an approval",
+        "This GUI does not execute the high-risk action",
+        "Human gate required in a future explicit stage",
+        "Final evidence remains locked",
+        "No solver / ODB / queue / Codex / final freeze is enabled in Stage 5.2A"
+      ],
+      "real_gate_created": false,
+      "auto_execute_allowed": false,
+      "final_evidence_approved": false,
+      "final_verdict_frozen": false,
+      "solver_approved": false,
+      "odb_metrics_approved": false,
+      "queue_runner_launched": false,
+      "codex_cli_called": false,
+      "task_final_evidence_ledger_updated": false
+    },
+    {
+      "action_id": "OPEN_ODB_FOR_DIAGNOSIS",
+      "display_name": "Open ODB for Diagnosis",
+      "risk_level": "HIGH",
+      "current_allowed": false,
+      "executable": false,
+      "preview_only": true,
+      "approval_status": "NOT_APPROVED",
+      "execution_status": "NOT_EXECUTABLE",
+      "human_gate_required": true,
+      "future_stage_required": true,
+      "disabled_reason": "ODB access remains gated and cannot be opened interactively in Stage 5.2A.",
+      "risk_summary": "ODB access can blur diagnostic metadata checks with uncontrolled model database reads.",
+      "prerequisite_checklist": [
+        {
+          "prerequisite_id": "odb_under_allowed_artifact_dir",
+          "description": "ODB path exists under an allowed run artifact directory.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "controlled_solver_completion_record",
+          "description": "Controlled solver completion record exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "future_odb_acceptance_gate",
+          "description": "ODB acceptance gate is pending or required.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "read_only_extractor_contract",
+          "description": "Read-only ODB extractor contract exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "no_uncontrolled_interactive_open",
+          "description": "No uncontrolled interactive ODB opening is allowed.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        }
+      ],
+      "missing_prerequisites": [
+        "odb_under_allowed_artifact_dir",
+        "controlled_solver_completion_record",
+        "future_odb_acceptance_gate",
+        "read_only_extractor_contract",
+        "no_uncontrolled_interactive_open"
+      ],
+      "required_evidence_inputs": [
+        "ODB path",
+        "solver completion record",
+        "ODB acceptance gate design"
+      ],
+      "expected_future_outputs": [
+        "ODB diagnosis report",
+        "acceptability decision",
+        "read-only extractor log"
+      ],
+      "warning_copy": "ODB opening is locked. Stage 5.2A previews the ODB gate only.",
+      "confirmation_copy_preview": "Future stage must prove controlled ODB acceptance before any extractor use.",
+      "forbidden_actions": [
+        "open ODB",
+        "launch Abaqus/CAE",
+        "bypass diagnosis"
+      ],
+      "final_evidence_effect": "FUTURE_STAGE_REQUIRED",
+      "safety_boundary": "Stage 5.2A is preview-only. It does not run solver, open ODB, queue jobs, call Codex CLI, auto-schedule agents, approve gates, approve final evidence, freeze verdicts, or mutate TASK_FINAL_EVIDENCE_LEDGER.md.",
+      "user_instruction": "Preview gate requirements only. Do not approve, execute, or manually bypass the future gate.",
+      "recommended_future_stage": "Future explicit human gate for OPEN_ODB_FOR_DIAGNOSIS",
+      "read_only_notice": "Preview only; not an approval",
+      "no_execution_notice": "This GUI does not execute the high-risk action",
+      "required_copy": [
+        "Preview only; not an approval",
+        "This GUI does not execute the high-risk action",
+        "Human gate required in a future explicit stage",
+        "Final evidence remains locked",
+        "No solver / ODB / queue / Codex / final freeze is enabled in Stage 5.2A"
+      ],
+      "real_gate_created": false,
+      "auto_execute_allowed": false,
+      "final_evidence_approved": false,
+      "final_verdict_frozen": false,
+      "solver_approved": false,
+      "odb_metrics_approved": false,
+      "queue_runner_launched": false,
+      "codex_cli_called": false,
+      "task_final_evidence_ledger_updated": false
+    },
+    {
+      "action_id": "EXTRACT_ODB_METRICS",
+      "display_name": "Extract ODB Metrics",
+      "risk_level": "HIGH",
+      "current_allowed": false,
+      "executable": false,
+      "preview_only": true,
+      "approval_status": "NOT_APPROVED",
+      "execution_status": "NOT_EXECUTABLE",
+      "human_gate_required": true,
+      "future_stage_required": true,
+      "disabled_reason": "Metrics extraction requires future ODB acceptance and metrics gate.",
+      "risk_summary": "Metrics may be mistaken for accepted evidence if extracted before acceptance.",
+      "prerequisite_checklist": [
+        {
+          "prerequisite_id": "future_odb_metrics_acceptance",
+          "description": "ODB is accepted for metrics in a future gate.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "metrics_schema_exists",
+          "description": "Metrics schema exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "extractor_contract_exists",
+          "description": "Extraction script contract exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "metrics_output_target_defined",
+          "description": "Output JSON target is defined.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "metrics_non_final_until_gated",
+          "description": "Metrics remain non-final until EvidenceReportAgent and PipelineSupervisor gates.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        }
+      ],
+      "missing_prerequisites": [
+        "future_odb_metrics_acceptance",
+        "metrics_schema_exists",
+        "extractor_contract_exists",
+        "metrics_output_target_defined",
+        "metrics_non_final_until_gated"
+      ],
+      "required_evidence_inputs": [
+        "accepted ODB gate",
+        "metrics schema",
+        "extractor contract"
+      ],
+      "expected_future_outputs": [
+        "metrics JSON",
+        "metrics validation report",
+        "comparison report"
+      ],
+      "warning_copy": "ODB metrics extraction is locked. Stage 5.2A only shows prerequisites.",
+      "confirmation_copy_preview": "Future stage must accept ODB and metric schema before extraction.",
+      "forbidden_actions": [
+        "extract metrics",
+        "accept metrics",
+        "update final evidence"
+      ],
+      "final_evidence_effect": "FUTURE_STAGE_REQUIRED",
+      "safety_boundary": "Stage 5.2A is preview-only. It does not run solver, open ODB, queue jobs, call Codex CLI, auto-schedule agents, approve gates, approve final evidence, freeze verdicts, or mutate TASK_FINAL_EVIDENCE_LEDGER.md.",
+      "user_instruction": "Preview gate requirements only. Do not approve, execute, or manually bypass the future gate.",
+      "recommended_future_stage": "Future explicit human gate for EXTRACT_ODB_METRICS",
+      "read_only_notice": "Preview only; not an approval",
+      "no_execution_notice": "This GUI does not execute the high-risk action",
+      "required_copy": [
+        "Preview only; not an approval",
+        "This GUI does not execute the high-risk action",
+        "Human gate required in a future explicit stage",
+        "Final evidence remains locked",
+        "No solver / ODB / queue / Codex / final freeze is enabled in Stage 5.2A"
+      ],
+      "real_gate_created": false,
+      "auto_execute_allowed": false,
+      "final_evidence_approved": false,
+      "final_verdict_frozen": false,
+      "solver_approved": false,
+      "odb_metrics_approved": false,
+      "queue_runner_launched": false,
+      "codex_cli_called": false,
+      "task_final_evidence_ledger_updated": false
+    },
+    {
+      "action_id": "MUTATE_SOURCE_CAE",
+      "display_name": "Mutate Source CAE",
+      "risk_level": "CRITICAL",
+      "current_allowed": false,
+      "executable": false,
+      "preview_only": true,
+      "approval_status": "NOT_APPROVED",
+      "execution_status": "NOT_EXECUTABLE",
+      "human_gate_required": true,
+      "future_stage_required": true,
+      "disabled_reason": "Source CAE mutation is irreversible-risk work and requires a future explicit source gate.",
+      "risk_summary": "May alter the canonical model source.",
+      "prerequisite_checklist": [
+        {
+          "prerequisite_id": "source_mutation_justification",
+          "description": "Explicit source mutation justification exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "backup_freeze_plan",
+          "description": "Backup and freeze plan exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "diff_plan",
+          "description": "Diff plan exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "irreversible_warning",
+          "description": "Irreversible mutation warning is acknowledged.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "future_human_source_gate",
+          "description": "Human gate approval exists in a future explicit stage.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        }
+      ],
+      "missing_prerequisites": [
+        "source_mutation_justification",
+        "backup_freeze_plan",
+        "diff_plan",
+        "irreversible_warning",
+        "future_human_source_gate"
+      ],
+      "required_evidence_inputs": [
+        "mutation justification",
+        "backup plan",
+        "diff plan"
+      ],
+      "expected_future_outputs": [
+        "source mutation approval",
+        "backup artifact",
+        "post-mutation audit"
+      ],
+      "warning_copy": "Source CAE mutation is locked. Stage 5.2A never mutates source model files.",
+      "confirmation_copy_preview": "Future stage must document backup, diff, and explicit human approval.",
+      "forbidden_actions": [
+        "edit CAE",
+        "overwrite CAE",
+        "save source CAE"
+      ],
+      "final_evidence_effect": "FUTURE_STAGE_REQUIRED",
+      "safety_boundary": "Stage 5.2A is preview-only. It does not run solver, open ODB, queue jobs, call Codex CLI, auto-schedule agents, approve gates, approve final evidence, freeze verdicts, or mutate TASK_FINAL_EVIDENCE_LEDGER.md.",
+      "user_instruction": "Preview gate requirements only. Do not approve, execute, or manually bypass the future gate.",
+      "recommended_future_stage": "Future explicit human gate for MUTATE_SOURCE_CAE",
+      "read_only_notice": "Preview only; not an approval",
+      "no_execution_notice": "This GUI does not execute the high-risk action",
+      "required_copy": [
+        "Preview only; not an approval",
+        "This GUI does not execute the high-risk action",
+        "Human gate required in a future explicit stage",
+        "Final evidence remains locked",
+        "No solver / ODB / queue / Codex / final freeze is enabled in Stage 5.2A"
+      ],
+      "real_gate_created": false,
+      "auto_execute_allowed": false,
+      "final_evidence_approved": false,
+      "final_verdict_frozen": false,
+      "solver_approved": false,
+      "odb_metrics_approved": false,
+      "queue_runner_launched": false,
+      "codex_cli_called": false,
+      "task_final_evidence_ledger_updated": false
+    },
+    {
+      "action_id": "MUTATE_SOURCE_INP",
+      "display_name": "Mutate Source INP",
+      "risk_level": "CRITICAL",
+      "current_allowed": false,
+      "executable": false,
+      "preview_only": true,
+      "approval_status": "NOT_APPROVED",
+      "execution_status": "NOT_EXECUTABLE",
+      "human_gate_required": true,
+      "future_stage_required": true,
+      "disabled_reason": "Source INP mutation must be separated from copied preview artifacts.",
+      "risk_summary": "May destroy traceability between source export and candidates.",
+      "prerequisite_checklist": [
+        {
+          "prerequisite_id": "source_mutation_justification",
+          "description": "Explicit source mutation justification exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "backup_freeze_plan",
+          "description": "Backup and freeze plan exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "diff_plan",
+          "description": "Diff plan exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "irreversible_warning",
+          "description": "Irreversible mutation warning is acknowledged.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "future_human_source_gate",
+          "description": "Human gate approval exists in a future explicit stage.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        }
+      ],
+      "missing_prerequisites": [
+        "source_mutation_justification",
+        "backup_freeze_plan",
+        "diff_plan",
+        "irreversible_warning",
+        "future_human_source_gate"
+      ],
+      "required_evidence_inputs": [
+        "mutation justification",
+        "backup plan",
+        "diff plan"
+      ],
+      "expected_future_outputs": [
+        "source mutation approval",
+        "backup artifact",
+        "post-mutation audit"
+      ],
+      "warning_copy": "Source INP mutation is locked. Stage 5.2A never mutates source INP files.",
+      "confirmation_copy_preview": "Future stage must document backup, diff, and explicit human approval.",
+      "forbidden_actions": [
+        "edit source INP",
+        "overwrite source INP",
+        "raw unbounded INP edit"
+      ],
+      "final_evidence_effect": "FUTURE_STAGE_REQUIRED",
+      "safety_boundary": "Stage 5.2A is preview-only. It does not run solver, open ODB, queue jobs, call Codex CLI, auto-schedule agents, approve gates, approve final evidence, freeze verdicts, or mutate TASK_FINAL_EVIDENCE_LEDGER.md.",
+      "user_instruction": "Preview gate requirements only. Do not approve, execute, or manually bypass the future gate.",
+      "recommended_future_stage": "Future explicit human gate for MUTATE_SOURCE_INP",
+      "read_only_notice": "Preview only; not an approval",
+      "no_execution_notice": "This GUI does not execute the high-risk action",
+      "required_copy": [
+        "Preview only; not an approval",
+        "This GUI does not execute the high-risk action",
+        "Human gate required in a future explicit stage",
+        "Final evidence remains locked",
+        "No solver / ODB / queue / Codex / final freeze is enabled in Stage 5.2A"
+      ],
+      "real_gate_created": false,
+      "auto_execute_allowed": false,
+      "final_evidence_approved": false,
+      "final_verdict_frozen": false,
+      "solver_approved": false,
+      "odb_metrics_approved": false,
+      "queue_runner_launched": false,
+      "codex_cli_called": false,
+      "task_final_evidence_ledger_updated": false
+    },
+    {
+      "action_id": "ACCEPT_METRICS_FOR_EVIDENCE",
+      "display_name": "Accept Metrics for Evidence",
+      "risk_level": "CRITICAL",
+      "current_allowed": false,
+      "executable": false,
+      "preview_only": true,
+      "approval_status": "NOT_APPROVED",
+      "execution_status": "NOT_EXECUTABLE",
+      "human_gate_required": true,
+      "future_stage_required": true,
+      "disabled_reason": "Metric acceptance can affect final evidence and requires future supervisor gates.",
+      "risk_summary": "May convert computational results into evidence if approved too early.",
+      "prerequisite_checklist": [
+        {
+          "prerequisite_id": "future_odb_metrics_acceptance",
+          "description": "ODB is accepted for metrics in a future gate.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "metrics_schema_exists",
+          "description": "Metrics schema exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "extractor_contract_exists",
+          "description": "Extraction script contract exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "metrics_output_target_defined",
+          "description": "Output JSON target is defined.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "metrics_non_final_until_gated",
+          "description": "Metrics remain non-final until EvidenceReportAgent and PipelineSupervisor gates.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "all_upstream_traces_complete",
+          "description": "All upstream RUN/HANDOFF/GATE traces are complete.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "metrics_accepted",
+          "description": "Metrics are accepted through a future metrics gate.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "final_evidence_ledger_draft",
+          "description": "Final evidence ledger draft is complete.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "pipeline_supervisor_final_review",
+          "description": "PipelineSupervisor final review is complete.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "future_final_freeze_stage",
+          "description": "Explicit human approval occurs in a future final freeze stage.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        }
+      ],
+      "missing_prerequisites": [
+        "future_odb_metrics_acceptance",
+        "metrics_schema_exists",
+        "extractor_contract_exists",
+        "metrics_output_target_defined",
+        "metrics_non_final_until_gated",
+        "all_upstream_traces_complete",
+        "metrics_accepted",
+        "final_evidence_ledger_draft",
+        "pipeline_supervisor_final_review",
+        "future_final_freeze_stage"
+      ],
+      "required_evidence_inputs": [
+        "metrics JSON",
+        "metrics validation",
+        "comparison report",
+        "ODB acceptance gate"
+      ],
+      "expected_future_outputs": [
+        "metrics acceptance gate",
+        "evidence report draft",
+        "supervisor review"
+      ],
+      "warning_copy": "Metrics evidence acceptance is locked. Stage 5.2A does not approve metrics.",
+      "confirmation_copy_preview": "Future stage must bind ODB acceptance, metrics validation, and supervisor review.",
+      "forbidden_actions": [
+        "accept metrics",
+        "update final evidence",
+        "freeze verdict"
+      ],
+      "final_evidence_effect": "FUTURE_STAGE_REQUIRED",
+      "safety_boundary": "Stage 5.2A is preview-only. It does not run solver, open ODB, queue jobs, call Codex CLI, auto-schedule agents, approve gates, approve final evidence, freeze verdicts, or mutate TASK_FINAL_EVIDENCE_LEDGER.md.",
+      "user_instruction": "Preview gate requirements only. Do not approve, execute, or manually bypass the future gate.",
+      "recommended_future_stage": "Future explicit human gate for ACCEPT_METRICS_FOR_EVIDENCE",
+      "read_only_notice": "Preview only; not an approval",
+      "no_execution_notice": "This GUI does not execute the high-risk action",
+      "required_copy": [
+        "Preview only; not an approval",
+        "This GUI does not execute the high-risk action",
+        "Human gate required in a future explicit stage",
+        "Final evidence remains locked",
+        "No solver / ODB / queue / Codex / final freeze is enabled in Stage 5.2A"
+      ],
+      "real_gate_created": false,
+      "auto_execute_allowed": false,
+      "final_evidence_approved": false,
+      "final_verdict_frozen": false,
+      "solver_approved": false,
+      "odb_metrics_approved": false,
+      "queue_runner_launched": false,
+      "codex_cli_called": false,
+      "task_final_evidence_ledger_updated": false
+    },
+    {
+      "action_id": "APPROVE_FINAL_EVIDENCE",
+      "display_name": "Approve Final Evidence",
+      "risk_level": "CRITICAL",
+      "current_allowed": false,
+      "executable": false,
+      "preview_only": true,
+      "approval_status": "NOT_APPROVED",
+      "execution_status": "NOT_EXECUTABLE",
+      "human_gate_required": true,
+      "future_stage_required": true,
+      "disabled_reason": "Final evidence approval is outside Stage 5.2A authority.",
+      "risk_summary": "Would convert non-final records into final project evidence.",
+      "prerequisite_checklist": [
+        {
+          "prerequisite_id": "all_upstream_traces_complete",
+          "description": "All upstream RUN/HANDOFF/GATE traces are complete.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "metrics_accepted",
+          "description": "Metrics are accepted through a future metrics gate.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "final_evidence_ledger_draft",
+          "description": "Final evidence ledger draft is complete.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "pipeline_supervisor_final_review",
+          "description": "PipelineSupervisor final review is complete.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "future_final_freeze_stage",
+          "description": "Explicit human approval occurs in a future final freeze stage.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        }
+      ],
+      "missing_prerequisites": [
+        "all_upstream_traces_complete",
+        "metrics_accepted",
+        "final_evidence_ledger_draft",
+        "pipeline_supervisor_final_review",
+        "future_final_freeze_stage"
+      ],
+      "required_evidence_inputs": [
+        "complete trace",
+        "accepted metrics",
+        "final evidence ledger draft",
+        "supervisor review"
+      ],
+      "expected_future_outputs": [
+        "final evidence approval gate",
+        "final evidence ledger"
+      ],
+      "warning_copy": "Final evidence remains locked. Stage 5.2A is preview-only.",
+      "confirmation_copy_preview": "Future final evidence stage must explicitly approve final evidence.",
+      "forbidden_actions": [
+        "approve final evidence",
+        "update TASK_FINAL_EVIDENCE_LEDGER.md"
+      ],
+      "final_evidence_effect": "FUTURE_STAGE_REQUIRED",
+      "safety_boundary": "Stage 5.2A is preview-only. It does not run solver, open ODB, queue jobs, call Codex CLI, auto-schedule agents, approve gates, approve final evidence, freeze verdicts, or mutate TASK_FINAL_EVIDENCE_LEDGER.md.",
+      "user_instruction": "Preview gate requirements only. Do not approve, execute, or manually bypass the future gate.",
+      "recommended_future_stage": "Future explicit human gate for APPROVE_FINAL_EVIDENCE",
+      "read_only_notice": "Preview only; not an approval",
+      "no_execution_notice": "This GUI does not execute the high-risk action",
+      "required_copy": [
+        "Preview only; not an approval",
+        "This GUI does not execute the high-risk action",
+        "Human gate required in a future explicit stage",
+        "Final evidence remains locked",
+        "No solver / ODB / queue / Codex / final freeze is enabled in Stage 5.2A"
+      ],
+      "real_gate_created": false,
+      "auto_execute_allowed": false,
+      "final_evidence_approved": false,
+      "final_verdict_frozen": false,
+      "solver_approved": false,
+      "odb_metrics_approved": false,
+      "queue_runner_launched": false,
+      "codex_cli_called": false,
+      "task_final_evidence_ledger_updated": false
+    },
+    {
+      "action_id": "FREEZE_FINAL_VERDICT",
+      "display_name": "Freeze Final Verdict",
+      "risk_level": "CRITICAL",
+      "current_allowed": false,
+      "executable": false,
+      "preview_only": true,
+      "approval_status": "NOT_APPROVED",
+      "execution_status": "NOT_EXECUTABLE",
+      "human_gate_required": true,
+      "future_stage_required": true,
+      "disabled_reason": "Final verdict freeze requires a future explicit final freeze stage.",
+      "risk_summary": "Would make the project verdict final.",
+      "prerequisite_checklist": [
+        {
+          "prerequisite_id": "all_upstream_traces_complete",
+          "description": "All upstream RUN/HANDOFF/GATE traces are complete.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "metrics_accepted",
+          "description": "Metrics are accepted through a future metrics gate.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "final_evidence_ledger_draft",
+          "description": "Final evidence ledger draft is complete.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "pipeline_supervisor_final_review",
+          "description": "PipelineSupervisor final review is complete.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "future_final_freeze_stage",
+          "description": "Explicit human approval occurs in a future final freeze stage.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        }
+      ],
+      "missing_prerequisites": [
+        "all_upstream_traces_complete",
+        "metrics_accepted",
+        "final_evidence_ledger_draft",
+        "pipeline_supervisor_final_review",
+        "future_final_freeze_stage"
+      ],
+      "required_evidence_inputs": [
+        "approved final evidence",
+        "PipelineSupervisor final review",
+        "human freeze approval"
+      ],
+      "expected_future_outputs": [
+        "final verdict freeze gate",
+        "final status update"
+      ],
+      "warning_copy": "Final verdict freeze is locked. Stage 5.2A cannot freeze verdicts.",
+      "confirmation_copy_preview": "Future explicit final freeze stage must bind all final evidence records.",
+      "forbidden_actions": [
+        "freeze verdict",
+        "publish final status"
+      ],
+      "final_evidence_effect": "FUTURE_STAGE_REQUIRED",
+      "safety_boundary": "Stage 5.2A is preview-only. It does not run solver, open ODB, queue jobs, call Codex CLI, auto-schedule agents, approve gates, approve final evidence, freeze verdicts, or mutate TASK_FINAL_EVIDENCE_LEDGER.md.",
+      "user_instruction": "Preview gate requirements only. Do not approve, execute, or manually bypass the future gate.",
+      "recommended_future_stage": "Future explicit human gate for FREEZE_FINAL_VERDICT",
+      "read_only_notice": "Preview only; not an approval",
+      "no_execution_notice": "This GUI does not execute the high-risk action",
+      "required_copy": [
+        "Preview only; not an approval",
+        "This GUI does not execute the high-risk action",
+        "Human gate required in a future explicit stage",
+        "Final evidence remains locked",
+        "No solver / ODB / queue / Codex / final freeze is enabled in Stage 5.2A"
+      ],
+      "real_gate_created": false,
+      "auto_execute_allowed": false,
+      "final_evidence_approved": false,
+      "final_verdict_frozen": false,
+      "solver_approved": false,
+      "odb_metrics_approved": false,
+      "queue_runner_launched": false,
+      "codex_cli_called": false,
+      "task_final_evidence_ledger_updated": false
+    },
+    {
+      "action_id": "DELETE_OR_OVERWRITE_HISTORICAL_ARTIFACT",
+      "display_name": "Delete or Overwrite Historical Artifact",
+      "risk_level": "CRITICAL",
+      "current_allowed": false,
+      "executable": false,
+      "preview_only": true,
+      "approval_status": "NOT_APPROVED",
+      "execution_status": "NOT_EXECUTABLE",
+      "human_gate_required": true,
+      "future_stage_required": true,
+      "disabled_reason": "Historical artifact deletion/overwrite is destructive and requires a future explicit gate.",
+      "risk_summary": "May destroy traceability and audit history.",
+      "prerequisite_checklist": [
+        {
+          "prerequisite_id": "historical_artifact_inventory",
+          "description": "Historical artifact inventory exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "retention_policy",
+          "description": "Retention policy and replacement rationale are documented.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "backup_plan",
+          "description": "Backup plan exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "future_human_destructive_gate",
+          "description": "Human destructive-action gate exists in a future explicit stage.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        }
+      ],
+      "missing_prerequisites": [
+        "historical_artifact_inventory",
+        "retention_policy",
+        "backup_plan",
+        "future_human_destructive_gate"
+      ],
+      "required_evidence_inputs": [
+        "artifact inventory",
+        "retention policy",
+        "backup plan"
+      ],
+      "expected_future_outputs": [
+        "destructive-action approval gate",
+        "backup record",
+        "retention report"
+      ],
+      "warning_copy": "Historical artifact deletion/overwrite is locked. Stage 5.2A only previews requirements.",
+      "confirmation_copy_preview": "Future destructive-action stage must require explicit human approval.",
+      "forbidden_actions": [
+        "delete artifact",
+        "overwrite artifact",
+        "rewrite history"
+      ],
+      "final_evidence_effect": "FUTURE_STAGE_REQUIRED",
+      "safety_boundary": "Stage 5.2A is preview-only. It does not run solver, open ODB, queue jobs, call Codex CLI, auto-schedule agents, approve gates, approve final evidence, freeze verdicts, or mutate TASK_FINAL_EVIDENCE_LEDGER.md.",
+      "user_instruction": "Preview gate requirements only. Do not approve, execute, or manually bypass the future gate.",
+      "recommended_future_stage": "Future explicit human gate for DELETE_OR_OVERWRITE_HISTORICAL_ARTIFACT",
+      "read_only_notice": "Preview only; not an approval",
+      "no_execution_notice": "This GUI does not execute the high-risk action",
+      "required_copy": [
+        "Preview only; not an approval",
+        "This GUI does not execute the high-risk action",
+        "Human gate required in a future explicit stage",
+        "Final evidence remains locked",
+        "No solver / ODB / queue / Codex / final freeze is enabled in Stage 5.2A"
+      ],
+      "real_gate_created": false,
+      "auto_execute_allowed": false,
+      "final_evidence_approved": false,
+      "final_verdict_frozen": false,
+      "solver_approved": false,
+      "odb_metrics_approved": false,
+      "queue_runner_launched": false,
+      "codex_cli_called": false,
+      "task_final_evidence_ledger_updated": false
+    },
+    {
+      "action_id": "RUN_CODEX_FROM_GUI",
+      "display_name": "Run Codex from GUI",
+      "risk_level": "HIGH",
+      "current_allowed": false,
+      "executable": false,
+      "preview_only": true,
+      "approval_status": "NOT_APPROVED",
+      "execution_status": "NOT_EXECUTABLE",
+      "human_gate_required": true,
+      "future_stage_required": true,
+      "disabled_reason": "ACOM keeps Codex external/manual; GUI Codex execution requires a future runtime bridge design.",
+      "risk_summary": "Would introduce tool execution and security boundary concerns.",
+      "prerequisite_checklist": [
+        {
+          "prerequisite_id": "future_runtime_bridge_design",
+          "description": "Future explicit runtime bridge design exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "security_boundary",
+          "description": "Security boundary is defined.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "user_confirmation",
+          "description": "User confirmation is defined.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "log_trace_policy",
+          "description": "Log and trace policy exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "secret_leakage_controls",
+          "description": "No-secret-leak controls are defined.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "abort_rollback_policy",
+          "description": "Abort and rollback policy exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        }
+      ],
+      "missing_prerequisites": [
+        "future_runtime_bridge_design",
+        "security_boundary",
+        "user_confirmation",
+        "log_trace_policy",
+        "secret_leakage_controls",
+        "abort_rollback_policy"
+      ],
+      "required_evidence_inputs": [
+        "runtime bridge design",
+        "security boundary",
+        "trace policy",
+        "secret controls"
+      ],
+      "expected_future_outputs": [
+        "runtime bridge gate",
+        "execution trace",
+        "abort/rollback policy"
+      ],
+      "warning_copy": "GUI does not call Codex CLI. Codex remains external/manual in Stage 5.2A.",
+      "confirmation_copy_preview": "Future runtime bridge stage must prove security, trace, and abort controls.",
+      "forbidden_actions": [
+        "call Codex CLI",
+        "auto-execute handoff",
+        "bridge Codex runtime"
+      ],
+      "final_evidence_effect": "FUTURE_STAGE_REQUIRED",
+      "safety_boundary": "Stage 5.2A is preview-only. It does not run solver, open ODB, queue jobs, call Codex CLI, auto-schedule agents, approve gates, approve final evidence, freeze verdicts, or mutate TASK_FINAL_EVIDENCE_LEDGER.md.",
+      "user_instruction": "Preview gate requirements only. Do not approve, execute, or manually bypass the future gate.",
+      "recommended_future_stage": "Future explicit human gate for RUN_CODEX_FROM_GUI",
+      "read_only_notice": "Preview only; not an approval",
+      "no_execution_notice": "This GUI does not execute the high-risk action",
+      "required_copy": [
+        "Preview only; not an approval",
+        "This GUI does not execute the high-risk action",
+        "Human gate required in a future explicit stage",
+        "Final evidence remains locked",
+        "No solver / ODB / queue / Codex / final freeze is enabled in Stage 5.2A"
+      ],
+      "real_gate_created": false,
+      "auto_execute_allowed": false,
+      "final_evidence_approved": false,
+      "final_verdict_frozen": false,
+      "solver_approved": false,
+      "odb_metrics_approved": false,
+      "queue_runner_launched": false,
+      "codex_cli_called": false,
+      "task_final_evidence_ledger_updated": false
+    },
+    {
+      "action_id": "AUTO_SCHEDULE_AGENT",
+      "display_name": "Auto Schedule Agent",
+      "risk_level": "HIGH",
+      "current_allowed": false,
+      "executable": false,
+      "preview_only": true,
+      "approval_status": "NOT_APPROVED",
+      "execution_status": "NOT_EXECUTABLE",
+      "human_gate_required": true,
+      "future_stage_required": true,
+      "disabled_reason": "Automatic scheduling is outside Stage 5.2A and requires a future orchestration design.",
+      "risk_summary": "May execute downstream agents without explicit user control.",
+      "prerequisite_checklist": [
+        {
+          "prerequisite_id": "future_runtime_bridge_design",
+          "description": "Future explicit runtime bridge design exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "security_boundary",
+          "description": "Security boundary is defined.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "user_confirmation",
+          "description": "User confirmation is defined.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "log_trace_policy",
+          "description": "Log and trace policy exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "secret_leakage_controls",
+          "description": "No-secret-leak controls are defined.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        },
+        {
+          "prerequisite_id": "abort_rollback_policy",
+          "description": "Abort and rollback policy exists.",
+          "stage_5_2a_status": "SPECIFICATION_ONLY",
+          "required_in_future_gate": true
+        }
+      ],
+      "missing_prerequisites": [
+        "future_runtime_bridge_design",
+        "security_boundary",
+        "user_confirmation",
+        "log_trace_policy",
+        "secret_leakage_controls",
+        "abort_rollback_policy"
+      ],
+      "required_evidence_inputs": [
+        "orchestration design",
+        "agent risk policy",
+        "trace policy",
+        "abort/rollback policy"
+      ],
+      "expected_future_outputs": [
+        "scheduler gate",
+        "agent execution trace",
+        "supervisor policy"
+      ],
+      "warning_copy": "Automatic agent scheduling is locked. Stage 5.2A only previews requirements.",
+      "confirmation_copy_preview": "Future orchestration stage must define policy, trace, and human controls.",
+      "forbidden_actions": [
+        "auto-schedule agents",
+        "run high-risk agents",
+        "bypass handoff gates"
+      ],
+      "final_evidence_effect": "FUTURE_STAGE_REQUIRED",
+      "safety_boundary": "Stage 5.2A is preview-only. It does not run solver, open ODB, queue jobs, call Codex CLI, auto-schedule agents, approve gates, approve final evidence, freeze verdicts, or mutate TASK_FINAL_EVIDENCE_LEDGER.md.",
+      "user_instruction": "Preview gate requirements only. Do not approve, execute, or manually bypass the future gate.",
+      "recommended_future_stage": "Future explicit human gate for AUTO_SCHEDULE_AGENT",
+      "read_only_notice": "Preview only; not an approval",
+      "no_execution_notice": "This GUI does not execute the high-risk action",
+      "required_copy": [
+        "Preview only; not an approval",
+        "This GUI does not execute the high-risk action",
+        "Human gate required in a future explicit stage",
+        "Final evidence remains locked",
+        "No solver / ODB / queue / Codex / final freeze is enabled in Stage 5.2A"
+      ],
+      "real_gate_created": false,
+      "auto_execute_allowed": false,
+      "final_evidence_approved": false,
+      "final_verdict_frozen": false,
+      "solver_approved": false,
+      "odb_metrics_approved": false,
+      "queue_runner_launched": false,
+      "codex_cli_called": false,
+      "task_final_evidence_ledger_updated": false
+    }
+  ],
+  "action_count": 12,
+  "all_actions_disabled": true,
+  "all_actions_preview_only": true,
+  "all_actions_require_human_gate": true,
+  "final_evidence_approved": false,
+  "final_verdict_frozen": false,
+  "solver_approved": false,
+  "odb_metrics_approved": false,
+  "queue_runner_launched": false,
+  "codex_cli_called": false,
+  "auto_execute_allowed": false,
+  "real_gate_created": false,
+  "task_final_evidence_ledger_updated": false,
+  "safety_boundary": "No solver, ODB, queue, Codex, scheduling, final evidence approval, final verdict freeze, real gate creation, or TASK_FINAL_EVIDENCE_LEDGER.md mutation is enabled in Stage 5.2A.",
+  "known_limitations": [
+    "This is a GUI UX specification only.",
+    "Prerequisites are advisory until a future explicit gate implementation.",
+    "No task gates/ records are created as approvals."
+  ]
+}

@@ -4,9 +4,30 @@ from pathlib import Path
 from typing import Any, Callable
 
 from abqpilot import cli
-from abqpilot.gui.artifact_viewer import preview_artifact
+from abqpilot.gui.artifact_preview import build_artifact_preview
+from abqpilot.gui.layout_sections import build_layout_sections
+from abqpilot.gui.beta_smoke import build_gui_beta_e2e_smoke, write_gui_beta_e2e_smoke_outputs
+from abqpilot.gui.controlled_solver_inactive_gate_card import build_controlled_solver_inactive_gate_card
+from abqpilot.gui.controlled_solver_inactive_gate_draft import (
+    build_controlled_solver_inactive_gate_draft,
+    write_controlled_solver_inactive_gate_draft,
+)
+from abqpilot.gui.controlled_solver_gate_card import build_controlled_solver_gate_card
+from abqpilot.gui.controlled_solver_gate_preview import build_controlled_solver_gate_preview, write_controlled_solver_gate_preview
+from abqpilot.gui.high_risk_gate_catalog import get_high_risk_gate_catalog
+from abqpilot.gui.high_risk_gate_preview import build_high_risk_gate_ux_spec, write_high_risk_gate_ux_spec
+from abqpilot.gui.high_risk_gate_ux import build_high_risk_gate_ux
+from abqpilot.gui.next_step_recommender import build_next_step_recommendation
+from abqpilot.gui.recommendation_cards import build_next_step_recommendation_card
+from abqpilot.gui.report_viewer import build_report_viewer_card
+from abqpilot.gui.safe_action_catalog import get_safe_action_catalog, group_actions_by_panel
 from abqpilot.gui.task_loader import discover_recent_tasks, load_task_summary
+from abqpilot.gui.timeline_interaction import select_timeline_step
+from abqpilot.gui.trace_detail_cards import build_trace_detail_card
+from abqpilot.gui.trace_viewer import build_trace_viewer
+from abqpilot.gui.workflow_presenter import build_gui_workflow_presenter
 from abqpilot.gui.workflow_presets import workflow_presets
+from abqpilot.gui.workflow_state import inspect_gui_workflow_state
 from abqpilot.ui_state.view_model import build_task_view_model
 
 
@@ -22,6 +43,278 @@ class GuiActionController:
 
     def refresh_task(self, task_dir: str | Path) -> dict[str, Any]:
         return self._safe("refresh_task", lambda: self._load_task(task_dir, refreshed=True))
+
+    def workflow_state(self, task_dir: str | Path | None) -> dict[str, Any]:
+        return self._safe(
+            "workflow_state",
+            lambda: {
+                "command": "workflow_state",
+                "verdict": "GUI_WORKFLOW_STATE_READY",
+                "success": True,
+                "details": inspect_gui_workflow_state(task_dir),
+                "errors": [],
+                "warnings": [],
+            },
+        )
+
+    def workflow_presenter(self, task_dir: str | Path | None) -> dict[str, Any]:
+        return self._safe(
+            "workflow_presenter",
+            lambda: {
+                "command": "workflow_presenter",
+                "verdict": "GUI_WORKFLOW_PRESENTER_READY",
+                "success": True,
+                "details": build_gui_workflow_presenter(task_dir, project_root=self.project_root),
+                "errors": [],
+                "warnings": [],
+            },
+        )
+
+    def safe_action_catalog(self) -> dict[str, Any]:
+        return self._safe(
+            "safe_action_catalog",
+            lambda: {
+                "command": "safe_action_catalog",
+                "verdict": "GUI_SAFE_ACTION_CATALOG_READY",
+                "success": True,
+                "actions": get_safe_action_catalog(),
+                "panels": group_actions_by_panel(),
+                "errors": [],
+                "warnings": [],
+            },
+        )
+
+    def layout_sections(self, task_dir: str | Path | None) -> dict[str, Any]:
+        return self._safe(
+            "layout_sections",
+            lambda: {
+                "command": "layout_sections",
+                "verdict": "GUI_LAYOUT_SECTIONS_READY",
+                "success": True,
+                "details": build_layout_sections(task_dir, project_root=self.project_root),
+                "errors": [],
+                "warnings": [],
+            },
+        )
+
+    def gui_beta_smoke(self, task_dir: str | Path | None = None) -> dict[str, Any]:
+        return self._safe(
+            "gui_beta_smoke",
+            lambda: {
+                "command": "gui_beta_smoke",
+                "verdict": "GUI_BETA_E2E_SMOKE_READY",
+                "success": True,
+                "details": build_gui_beta_e2e_smoke(self.project_root, task_dir=task_dir),
+                "errors": [],
+                "warnings": [],
+            },
+        )
+
+    def report_gui_beta_smoke(self, task_dir: str | Path | None = None) -> dict[str, Any]:
+        return self._safe(
+            "report_gui_beta_smoke",
+            lambda: write_gui_beta_e2e_smoke_outputs(self.project_root, task_dir=task_dir),
+        )
+
+    def high_risk_gate_catalog(self) -> dict[str, Any]:
+        return self._safe(
+            "high_risk_gate_catalog",
+            lambda: {
+                "command": "high_risk_gate_catalog",
+                "verdict": "GUI_HIGH_RISK_GATE_CATALOG_READY",
+                "success": True,
+                "details": {"actions": get_high_risk_gate_catalog()},
+                "errors": [],
+                "warnings": [],
+            },
+        )
+
+    def high_risk_gate_preview(self, action_id: str) -> dict[str, Any]:
+        return self._safe(
+            "high_risk_gate_preview",
+            lambda: {
+                "command": "high_risk_gate_preview",
+                "verdict": "GUI_HIGH_RISK_GATE_PREVIEW_READY",
+                "success": True,
+                "details": build_high_risk_gate_ux(action_id),
+                "errors": [],
+                "warnings": [],
+            },
+        )
+
+    def high_risk_gate_ux_spec(self) -> dict[str, Any]:
+        return self._safe(
+            "high_risk_gate_ux_spec",
+            lambda: {
+                "command": "high_risk_gate_ux_spec",
+                "verdict": "GUI_HIGH_RISK_GATE_UX_SPEC_READY",
+                "success": True,
+                "details": build_high_risk_gate_ux_spec(self.project_root),
+                "errors": [],
+                "warnings": [],
+            },
+        )
+
+    def report_high_risk_gate_ux_spec(self) -> dict[str, Any]:
+        return self._safe(
+            "report_high_risk_gate_ux_spec",
+            lambda: write_high_risk_gate_ux_spec(self.project_root),
+        )
+
+    def controlled_solver_gate_preview(self, task_dir: str | Path | None = None, candidate_inp: str | Path | None = None) -> dict[str, Any]:
+        return self._safe(
+            "controlled_solver_gate_preview",
+            lambda: {
+                "command": "controlled_solver_gate_preview",
+                "verdict": "CONTROLLED_SOLVER_GATE_PREVIEW_READY",
+                "success": True,
+                "details": build_controlled_solver_gate_preview(task_dir=task_dir, candidate_inp=candidate_inp),
+                "errors": [],
+                "warnings": [],
+            },
+        )
+
+    def controlled_solver_gate_card(self, task_dir: str | Path | None = None, candidate_inp: str | Path | None = None) -> dict[str, Any]:
+        return self._safe(
+            "controlled_solver_gate_card",
+            lambda: {
+                "command": "controlled_solver_gate_card",
+                "verdict": "CONTROLLED_SOLVER_GATE_CARD_READY",
+                "success": True,
+                "details": build_controlled_solver_gate_card(task_dir=task_dir, candidate_inp=candidate_inp),
+                "errors": [],
+                "warnings": [],
+            },
+        )
+
+    def report_controlled_solver_gate_preview(self, task_dir: str | Path | None = None, candidate_inp: str | Path | None = None) -> dict[str, Any]:
+        return self._safe(
+            "report_controlled_solver_gate_preview",
+            lambda: write_controlled_solver_gate_preview(self.project_root, task_dir=task_dir, candidate_inp=candidate_inp),
+        )
+
+    def controlled_solver_inactive_gate_draft(self, task_dir: str | Path | None = None, candidate_inp: str | Path | None = None) -> dict[str, Any]:
+        return self._safe(
+            "controlled_solver_inactive_gate_draft",
+            lambda: {
+                "command": "controlled_solver_inactive_gate_draft",
+                "verdict": "CONTROLLED_SOLVER_INACTIVE_GATE_DRAFT_READY",
+                "success": True,
+                "details": build_controlled_solver_inactive_gate_draft(task_dir=task_dir, candidate_inp=candidate_inp),
+                "errors": [],
+                "warnings": [],
+            },
+        )
+
+    def controlled_solver_inactive_gate_card(self, task_dir: str | Path | None = None, candidate_inp: str | Path | None = None) -> dict[str, Any]:
+        return self._safe(
+            "controlled_solver_inactive_gate_card",
+            lambda: {
+                "command": "controlled_solver_inactive_gate_card",
+                "verdict": "CONTROLLED_SOLVER_INACTIVE_GATE_CARD_READY",
+                "success": True,
+                "details": build_controlled_solver_inactive_gate_card(task_dir=task_dir, candidate_inp=candidate_inp),
+                "errors": [],
+                "warnings": [],
+            },
+        )
+
+    def report_controlled_solver_inactive_gate_draft(self, task_dir: str | Path | None = None, candidate_inp: str | Path | None = None) -> dict[str, Any]:
+        return self._safe(
+            "report_controlled_solver_inactive_gate_draft",
+            lambda: write_controlled_solver_inactive_gate_draft(self.project_root, task_dir=task_dir, candidate_inp=candidate_inp),
+        )
+
+    def next_step_recommendation(self, task_dir: str | Path | None) -> dict[str, Any]:
+        return self._safe(
+            "next_step_recommendation",
+            lambda: {
+                "command": "next_step_recommendation",
+                "verdict": "GUI_NEXT_STEP_RECOMMENDATION_READY",
+                "success": True,
+                "details": build_next_step_recommendation(task_dir),
+                "errors": [],
+                "warnings": [],
+            },
+        )
+
+    def next_step_recommendation_card(self, task_dir: str | Path | None) -> dict[str, Any]:
+        return self._safe(
+            "next_step_recommendation_card",
+            lambda: {
+                "command": "next_step_recommendation_card",
+                "verdict": "GUI_NEXT_STEP_RECOMMENDATION_CARD_READY",
+                "success": True,
+                "details": build_next_step_recommendation_card(task_dir),
+                "errors": [],
+                "warnings": [],
+            },
+        )
+
+    def trace_viewer(self, task_dir: str | Path | None) -> dict[str, Any]:
+        return self._safe(
+            "trace_viewer",
+            lambda: {
+                "command": "trace_viewer",
+                "verdict": "GUI_TRACE_VIEWER_READY",
+                "success": True,
+                "details": build_trace_viewer(task_dir),
+                "errors": [],
+                "warnings": [],
+            },
+        )
+
+    def select_timeline_step(self, task_dir: str | Path | None, step_id: str) -> dict[str, Any]:
+        return self._safe(
+            "select_timeline_step",
+            lambda: {
+                "command": "select_timeline_step",
+                "verdict": "GUI_TIMELINE_STEP_SELECTED_READ_ONLY",
+                "success": True,
+                "details": select_timeline_step(task_dir, step_id),
+                "errors": [],
+                "warnings": [],
+            },
+        )
+
+    def trace_detail_card(self, task_dir: str | Path | None, step_id: str) -> dict[str, Any]:
+        return self._safe(
+            "trace_detail_card",
+            lambda: {
+                "command": "trace_detail_card",
+                "verdict": "GUI_TRACE_DETAIL_CARD_READY",
+                "success": True,
+                "details": build_trace_detail_card(task_dir, step_id),
+                "errors": [],
+                "warnings": [],
+            },
+        )
+
+    def artifact_preview(self, path: str | Path | None) -> dict[str, Any]:
+        return self._safe(
+            "artifact_preview",
+            lambda: {
+                "command": "artifact_preview",
+                "verdict": build_artifact_preview(path).get("parse_status", "ARTIFACT_PREVIEW_REVIEW_REQUIRED"),
+                "success": True,
+                "details": build_artifact_preview(path),
+                "errors": [],
+                "warnings": [],
+            },
+        )
+
+    def report_viewer_card(self, path: str | Path | None) -> dict[str, Any]:
+        return self._safe(
+            "report_viewer_card",
+            lambda: {
+                "command": "report_viewer_card",
+                "verdict": "GUI_REPORT_VIEWER_CARD_READY",
+                "success": True,
+                "details": build_report_viewer_card(path),
+                "errors": [],
+                "warnings": [],
+            },
+        )
 
     def recent_tasks(self, work_root: str | Path | None = None, limit: int = 10) -> dict[str, Any]:
         root = Path(work_root) if work_root is not None else self.project_root / "runs"
@@ -283,6 +576,30 @@ class GuiActionController:
         return self._safe(
             "report_supervisor_non_solver_review",
             lambda: cli.command_report_supervisor_non_solver_review(task_dir=task_dir),
+        )
+
+    def generate_non_solver_evidence_summary(self, task_dir: str | Path) -> dict[str, Any]:
+        return self._safe(
+            "generate_non_solver_evidence_summary",
+            lambda: cli.command_generate_non_solver_evidence_summary(task_dir=task_dir),
+        )
+
+    def report_non_solver_evidence_summary(self, task_dir: str | Path) -> dict[str, Any]:
+        return self._safe(
+            "report_non_solver_evidence_summary",
+            lambda: cli.command_report_non_solver_evidence_summary(task_dir=task_dir),
+        )
+
+    def supervisor_ack_non_solver_summary(self, task_dir: str | Path) -> dict[str, Any]:
+        return self._safe(
+            "supervisor_ack_non_solver_summary",
+            lambda: cli.command_supervisor_ack_non_solver_summary(task_dir=task_dir),
+        )
+
+    def report_supervisor_non_solver_summary_ack(self, task_dir: str | Path) -> dict[str, Any]:
+        return self._safe(
+            "report_supervisor_non_solver_summary_ack",
+            lambda: cli.command_report_supervisor_non_solver_summary_ack(task_dir=task_dir),
         )
 
     def report_codex_handoff(self, handoff_dir: str | Path) -> dict[str, Any]:
@@ -594,7 +911,7 @@ class GuiActionController:
         }
 
     def preview_artifact(self, path: str | Path | None) -> dict[str, Any]:
-        return self._safe("preview_artifact", lambda: {"command": "preview_artifact", **preview_artifact(path)})
+        return self.artifact_preview(path)
 
     def presets(self) -> dict[str, Any]:
         return {

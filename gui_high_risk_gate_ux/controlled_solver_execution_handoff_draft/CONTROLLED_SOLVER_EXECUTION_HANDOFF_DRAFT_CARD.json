@@ -1,0 +1,14 @@
+{
+  "title": "Controlled Solver Execution Handoff Draft [DRAFT ONLY]",
+  "draft_exists": true,
+  "source_gate_validated": true,
+  "candidate_hash_verified": true,
+  "to_agent": "ExecutionAgent",
+  "active_execution_handoff": false,
+  "handoff_active_for_execution": false,
+  "solver_execution_allowed": false,
+  "solver_request_created": false,
+  "future_execution_stage_required": true,
+  "final_evidence_locked": true,
+  "backend_callback": null
+}

@@ -52,3 +52,9 @@ These files are not solver requests and are not approval gates.
 ## Inactive Gate Draft
 
 Stage 5.2C turns this preview/token design into an inactive human gate draft. The draft remains preview-only, inactive, not approved, and not executable. It may include expected future active gate and future execution handoff shapes, but it does not write active task `gates/` records, create solver requests, or authorize solver execution.
+
+Stage 5.2D defines the active human gate record schema and validator as design-only artifacts. It does not write a real active gate to any real task. Token consumption does not execute solver, and solver execution must be a later explicit stage.
+
+Stage 5.2E permits active gate writer verification only in test fixtures. Fixture active gate records are not real solver approvals, and real task gate writes remain disabled.
+
+Stage 5.2F creates a real active human gate only for the dedicated smoke task. Arbitrary task gate writing remains disabled, and solver execution remains a separate future stage.

@@ -162,6 +162,20 @@ Controlled solver approval preview must not be treated as active approval. Human
 
 Inactive controlled solver gate draft must not be treated as active approval. Inactive draft validation must block active approval attempts. No Approve Solver, Create Active Gate, or Run Solver callbacks may be added, and solver approval and solver execution must remain separated.
 
+Active controlled solver gate design must not be treated as real approval in Stage 5.2D. No active real task gates may be written in Stage 5.2D. No Approve Solver, Approve and Run, or Run Solver callbacks may be added. Solver approval and solver execution must remain separated.
+
+Active gate writer fixture support must not be treated as real approval. Real task gates must not be written in Stage 5.2E. No Approve Solver, Approve and Run, or Run Solver callbacks may be added. Solver approval and solver execution remain separated.
+
+Stage 5.2F smoke gate must not be treated as permission to execute solver. Active gate creation and solver execution remain separated. No arbitrary task gate writing is allowed in Stage 5.2F. No Run Solver or Approve and Run callbacks may be added.
+
+Stage 5.2G handoff draft must not be treated as active execution permission. No active execution handoff may be written in Stage 5.2G. No solver request may be created in Stage 5.2G. No Run Solver or Execute Handoff callbacks may be added.
+
+Stage 5.2H request draft must not be treated as an active solver request. No solver_request.json may be written in Stage 5.2H. No active execution request may be created in Stage 5.2H. No Run Solver or Execute Request callbacks may be added.
+
+Stage 5.2I preflight pass must not be treated as solver execution permission. No solver_request.json may be written in Stage 5.2I. No active execution request may be created in Stage 5.2I. No Run Solver or Execute Request callbacks may be added. Preflight validates shape/policy only; it does not invoke solver.
+
+Stage 5.2J dry-run request must not be treated as active solver request. No `solver_request.json`, `job_request.json`, or `abaqus_job.json` may be written in Stage 5.2J. No active execution request, queue submission, output execution directory, Run Solver, Submit Queue, Execute Request, or Approve and Run callback may be added. Dry-run materialization validates request shape only; it does not invoke solver.
+
 ## Allowed development commands
 
 ```powershell
@@ -175,3 +189,7 @@ D:\XianLab\envs\conda\LangChainEnv\Scripts\python.exe -m abqpilot.cli --help
 Abaqus job submission must be performed only through approved AbqPilot job tools.
 Manual Abaqus commands must be emitted as handoff instructions unless the current phase explicitly allows automatic execution.
 Abaqus CAE export and ODB metrics extraction must remain gated.
+
+Stage 5.3A-R workspace remediation establishes a hard patch-root policy after the failed Stage 5.3A attempt. Future Codex/apply_patch operations must confirm cwd, resolved project root, and git root before patching. The only valid project root is `D:\Projects\AbqPilot-v2`; `D:\Users\wuxia\Documents\AbqPilot` is forbidden except for explicitly approved cleanup. Relative patch paths must not be used unless cwd and git root are confirmed, every planned file target is listed as an absolute path, and a forbidden-root scan is run after patching. If any writer touches outside the project root, stop immediately and do not continue the implementation stage.
+
+Stage 5.3A-v2 controlled solver demo smoke must use the Stage 5.3A-R workspace guard policy. It may create exactly one `solver_request.json` only under `runs/tasks/stage5_3a_v2_controlled_solver_demo_smoke/artifacts/solver_requests/` and may attempt only the fixed Abaqus command for the copied demo INP. No generic Run Solver, Approve and Run, Execute Request, QueueRunner, ODB open, metrics extraction, final evidence approval, final verdict freeze, or forbidden-root write may be added.

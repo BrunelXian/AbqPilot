@@ -1,0 +1,21 @@
+{
+  "doc_type": "handoff",
+  "handoff_type": "CONTROLLED_SOLVER_APPROVAL_TO_EXECUTION",
+  "design_stage_id": "STAGE5_2D",
+  "expected_future_execution_handoff_shape": true,
+  "active_execution_handoff_written_in_stage_5_2d": false,
+  "from_agent": "PipelineSupervisor",
+  "to_agent": "ExecutionAgent",
+  "source_gate_type": "CONTROLLED_SOLVER_RUN",
+  "source_gate_decision": "APPROVED_BY_HUMAN",
+  "solver_execution_stage_required": true,
+  "solver_auto_start": false,
+  "candidate_artifact_path": null,
+  "candidate_artifact_hash": null,
+  "solver_command_label": "configured-controlled-abaqus-command",
+  "allowed_output_dir": "D:\\Projects\\AbqPilot-v2\\runs\\tasks\\stage5_0f_non_solver_revalidation_smoke\\future_controlled_solver_run",
+  "no_odb_open": true,
+  "no_metrics_approval": true,
+  "no_final_evidence_approval": true,
+  "queue_runner_launched": false
+}

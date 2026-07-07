@@ -87,3 +87,21 @@ Stage 5.2A specifies GUI high-risk gate UX only. It adds preview-only catalogs, 
 Stage 5.2B narrows the high-risk gate design to `CONTROLLED_SOLVER_RUN`. It adds preview-only solver readiness checks, human approval token schema, token validation rules, GUI card models, and non-final reports. It does not approve solver, run Abaqus, create solver request files, create active approval gates, open ODB, accept metrics, update final evidence, or freeze verdict.
 
 Stage 5.2C creates an inactive `CONTROLLED_SOLVER_RUN` human gate draft. The draft includes expected future active gate and future solver execution handoff shapes, but it does not write active task `gates/` records, create solver requests, approve solver, run Abaqus, open ODB, approve metrics, update final evidence, or freeze verdict.
+
+Stage 5.2D defines the active `CONTROLLED_SOLVER_RUN` human gate record design. It adds schema, validator, token-consumption design, candidate SHA256 hash binding, disabled writer policy, GUI design card, and non-final design reports. It does not write real active task gates, create solver requests, write active execution handoffs, run Abaqus, open ODB, approve metrics, update final evidence, or freeze verdict. Human approval and solver execution remain separate, and solver execution must be a later explicit stage.
+
+Stage 5.2E verifies the active gate writer in test fixtures only. It can write fixture active gate records under pytest temporary directories or `tests/fixtures/`, and it blocks real `runs/tasks/*/gates`, forbidden roots, queue/runtime/status paths, source sanity-base paths, solver request creation, execution handoff creation, and final evidence authority. It does not write real active task gates, run Abaqus, open ODB, mutate queue/runtime files, approve metrics, update final evidence, or freeze verdict.
+
+Stage 5.2F creates a real active `CONTROLLED_SOLVER_RUN` human approval gate only in the dedicated smoke task `runs/tasks/stage5_2f_controlled_solver_real_gate_smoke/`. The gate may record `APPROVED_BY_HUMAN` and `solver_approved=true`, but it keeps solver execution disabled, creates no solver request, writes no active execution handoff, opens no ODB, mutates no queue/runtime files, grants no metrics or final evidence authority, and freezes no verdict.
+
+Stage 5.2G creates a draft-only controlled solver execution handoff from the Stage 5.2F smoke gate. The draft targets a future `ExecutionAgent` stage but is not active for execution and does not create solver request files.
+
+Stage 5.2H creates a draft-only controlled solver request schema from the Stage 5.2F smoke gate and Stage 5.2G handoff draft. It does not create active `solver_request.json`, `job_request.json`, `abaqus_job.json`, solver launchers, or solver execution.
+
+Stage 5.2I validates the controlled solver request draft as a preflight-only readiness report. It does not create active request files, output execution directories, solver launchers, or solver execution.
+
+Stage 5.2J materializes a dry-run-only controlled solver request artifact. Dry-run materialization is not execution permission: no active solver request, job request, Abaqus job file, output execution directory, queue entry, solver run, ODB, metrics approval, final evidence approval, or verdict freeze is created.
+
+Stage 5.3A-R remediates the failed Stage 5.3A workspace-root violation. Stray Stage 5.3A files under `D:\Users\wuxia\Documents\AbqPilot` may be deleted only with explicit human approval and only when they clearly match the failed attempt. Future patching must confirm cwd, git root, and absolute write targets before any file edit. Stage 5.3A-R does not resume the solver demo, does not run Abaqus, does not create solver requests, and does not touch final evidence.
+
+Stage 5.3A-v2 retries the controlled solver demo smoke run with the Stage 5.3A-R workspace guard. It is limited to the dedicated v2 smoke task and records gate, request, command shape, solver status, and artifact presence. It does not open ODB, extract metrics, approve metrics or final evidence, freeze verdict, launch QueueRunner, or generalize solver execution.

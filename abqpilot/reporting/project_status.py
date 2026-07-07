@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import json
 from datetime import datetime
@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any
 
 
-LATEST_VERDICT = "PASS_ABQPILOT_V2_STAGE5_2C_CONTROLLED_SOLVER_INACTIVE_HUMAN_GATE_DRAFT_READY"
+LATEST_VERDICT = "PASS_ABQPILOT_V2_STAGE5_3A_V2_CONTROLLED_SOLVER_DEMO_SMOKE_RUN_READY"
 
 PIPELINE_ORDER = [
     "01_export_cae",
@@ -109,6 +109,16 @@ CAPABILITIES = [
     "GUI high-risk gate UX specification and preview-only checklist catalog",
     "GUI controlled solver human gate preview and inactive approval token schema",
     "GUI controlled solver inactive human gate draft and future-shape specification",
+    "GUI controlled solver active human gate record design and disabled writer policy",
+    "GUI controlled solver active gate writer fixture-only verification",
+    "GUI controlled solver real human gate smoke creation without execution",
+    "GUI controlled solver execution handoff draft without execution",
+    "GUI controlled solver request draft schema without execution",
+    "GUI controlled solver request preflight validator without execution",
+    "GUI controlled solver dry-run request materialization without execution",
+    "controlled solver demo smoke corridor with fixed Stage 5.3A task scope",
+    "workspace-root remediation and patch-root hardening",
+    "controlled solver demo smoke v2 with workspace guard",
 ]
 
 SAFETY_BOUNDARIES = {
@@ -153,6 +163,14 @@ SAFETY_BOUNDARIES = {
     "GUI high-risk gate UX": "Stage 5.2A specifies high-risk gate UX only; preview-only, not approved, not executable, and no real gate creation",
     "Controlled solver gate preview": "Stage 5.2B designs controlled solver human gate preview and inactive token schema only; no solver approval, no solver request, and no execution",
     "Controlled solver inactive gate draft": "Stage 5.2C creates an inactive controlled solver human gate draft only; no active task gate, no solver request, and no execution",
+    "Controlled solver active gate design": "Stage 5.2D defines active controlled solver human gate record schema/design only; no real active task gate, no active execution handoff, no solver request, and no execution",
+    "Controlled solver active gate fixture writer": "Stage 5.2E verifies active gate writing under test fixtures only; real task gates, solver requests, active execution handoffs, ODB, metrics, final evidence, and execution remain blocked",
+    "Controlled solver real smoke gate": "Stage 5.2F creates one real human approval gate under the dedicated smoke task only; solver execution, solver requests, active execution handoffs, ODB, metrics, final evidence, and arbitrary task gates remain blocked",
+    "Controlled solver execution handoff draft": "Stage 5.2G creates a draft-only future ExecutionAgent handoff under non-active draft artifact locations; no active handoff, solver request, solver execution, queue, ODB, metrics, final evidence, or verdict freeze is allowed",
+    "Controlled solver request draft schema": "Stage 5.2H defines draft-only future solver request schema artifacts under non-active request_drafts/report locations; no active solver_request.json, job request, Abaqus job, solver launcher, execution, queue, ODB, metrics, final evidence, or verdict freeze is allowed",
+    "Controlled solver request preflight": "Stage 5.2I validates the Stage 5.2H request draft for future execution readiness without creating active request files, output directories, solver execution, queue, ODB, metrics, final evidence, or verdict freeze",
+    "Controlled solver dry-run request": "Stage 5.2J materializes CONTROLLED_SOLVER_DRY_RUN_REQUEST.json as an inert dry-run artifact only; it does not create solver_request.json, job_request.json, abaqus_job.json, output execution directories, queue entries, solver execution, ODB, metrics, final evidence, or verdict freeze",
+    "Controlled solver demo smoke": "Stage 5.3A creates a dedicated demo smoke task and one scoped solver_request.json for a controlled Abaqus invocation; ODB opening, metrics extraction, queue entries, final evidence, and verdict freeze remain disabled",
     "ACOM templates": "pipeline RUN/HANDOFF plus bounded codex_handoff packages only; Codex executes externally and manually",
     "Pipeline agents": "bounded station protocol only; no automatic scheduling, no Codex bridge, no solver, no QueueRunner, no ODB open",
     "NARM": "optional native runtime mode and must preserve the same evidence and safety contracts",
@@ -296,6 +314,16 @@ def export_project_status(root: str | Path = ".") -> dict[str, Any]:
             "Stage 5.2A adds a preview-only high-risk gate UX specification catalog. It does not execute high-risk actions, create real approving gates, update TASK_FINAL_EVIDENCE_LEDGER.md, approve final evidence, or freeze verdict.",
             "Stage 5.2B narrows the high-risk UX design to CONTROLLED_SOLVER_RUN. It creates preview-only readiness, approval-token schema, validator, and report artifacts, but does not approve solver, create solver requests, run Abaqus, open ODB, mutate queue/runtime files, update final evidence, or freeze verdict.",
             "Stage 5.2C creates an inactive CONTROLLED_SOLVER_RUN human gate draft, expected future active gate shape, and expected future solver execution handoff shape. These are specification artifacts only and do not create active task gates, solver requests, queue/runtime mutations, ODB/metrics approvals, final evidence, or verdict freeze.",
+            "Stage 5.2D defines active CONTROLLED_SOLVER_RUN human gate record schema, validator, token consumption design, candidate hash binding, disabled writer policy, GUI design card, and design reports only. It does not write real active task gates, create active execution handoffs, create solver requests, run Abaqus, open ODB, approve metrics, update final evidence, or freeze verdict.",
+            "Stage 5.2E verifies the active gate writer in test fixtures only. It can write fixture active gate records under pytest temporary directories or tests/fixtures, and it blocks real runs/tasks/*/gates, forbidden roots, queue/runtime/status paths, source sanity-base paths, solver request creation, execution handoff creation, and final evidence authority.",
+            "Stage 5.2F creates a real active CONTROLLED_SOLVER_RUN human approval gate only in the dedicated smoke task. The gate may record APPROVED_BY_HUMAN and solver_approved=true, but it keeps solver execution disabled, creates no solver request, writes no active execution handoff, opens no ODB, mutates no queue/runtime files, grants no metrics or final evidence authority, and freezes no verdict.",
+            "Stage 5.2G creates a controlled solver execution handoff draft from the Stage 5.2F smoke gate. The draft targets a future ExecutionAgent stage but is not active for execution, creates no solver request, writes no active task handoff, opens no ODB, grants no metrics or final evidence authority, and freezes no verdict.",
+            "Stage 5.2H defines a controlled solver request draft schema from the Stage 5.2F smoke gate and Stage 5.2G handoff draft. It creates no active solver_request.json, job_request.json, abaqus_job.json, solver launcher, active execution handoff, queue mutation, ODB, metrics approval, final evidence, or verdict freeze.",
+            "Stage 5.2I validates the controlled solver request draft preflight before any future execution stage. It creates no active solver_request.json, job_request.json, abaqus_job.json, solver launcher, output execution directory, active handoff, queue mutation, ODB, metrics approval, final evidence, or verdict freeze.",
+            "Stage 5.2J materializes a dry-run-only controlled solver request artifact. It is not an active solver_request.json, job request, queue submission, Abaqus command, execution permission, ODB acceptance, metrics approval, final evidence approval, or verdict freeze.",
+            "Stage 5.3A opens the demo alpha solver corridor for one dedicated smoke task only. It may create solver_request.json only under that task and may invoke the fixed Abaqus command only for the copied demo INP; ODB opening, metrics extraction, final evidence approval, and verdict freeze remain disabled.",
+            "Stage 5.3A-R cleans up the forbidden-root workspace violation from the failed Stage 5.3A attempt and hardens patch-root policy. It does not resume solver work, run Abaqus, create solver requests, open ODB, extract metrics, approve final evidence, or freeze verdict.",
+            "Stage 5.3A-v2 retries the controlled solver demo smoke with workspace guard. It creates one scoped solver_request.json under the dedicated v2 task, invokes the fixed Abaqus command once, captures return status and artifact presence, and still does not open ODB, extract metrics, approve final evidence, or freeze verdict.",
         ],
         "recommended_next_stages": [
             "Add later guarded executors for GuardAgent/CandidateBuilderAgent/DiagnosisAgent/MetricsAgent only with model/ODB-specific gates",
@@ -306,6 +334,15 @@ def export_project_status(root: str | Path = ".") -> dict[str, Any]:
             "Implement real high-risk human approval gates only in a future explicit stage after the Stage 5.2A UX specification is reviewed",
             "Implement a real controlled solver approval gate only in a future explicit stage, then keep solver execution in a separate later stage",
             "Keep Stage 5.2C inactive draft artifacts separate from any future active GATE_XXX approval record",
+            "Keep Stage 5.2D active gate design artifacts separate from any future real active task gate and any future solver execution handoff",
+            "Keep Stage 5.2E fixture writer records out of real task gates; future real gate writing must be a separate explicit stage",
+            "Use the Stage 5.2F smoke gate only as a future-execution prerequisite record; solver execution must remain a separate later stage",
+            "Use the Stage 5.2G handoff draft only as a future execution design artifact; active execution handoff creation and solver request creation must remain separate later stages",
+            "Use the Stage 5.2H request draft schema only as a future request design artifact; active request writing and solver execution must remain separate later stages",
+            "Use the Stage 5.2J dry-run request only as inert future execution shape evidence; active request writing and solver execution must remain separate later stages",
+            "Use the Stage 5.3A demo smoke status only as controlled corridor evidence; ODB and metrics preview remain deferred to Stage 5.3B",
+            "Use the Stage 5.3A-R remediation as the active workspace-root guard policy before any future patching",
+            "Use the Stage 5.3A-v2 status as the controlled solver demo smoke result; ODB/metrics remain deferred to Stage 5.3B",
         ],
     }
     json_path = project_root / "PROJECT_STATUS_CURRENT.json"
@@ -348,3 +385,6 @@ def _render_markdown(status: dict[str, Any]) -> str:
     lines.extend(["", "## Recommended Next Stages", ""])
     lines.extend(f"- {item}" for item in status["recommended_next_stages"])
     return "\n".join(lines) + "\n"
+
+
+

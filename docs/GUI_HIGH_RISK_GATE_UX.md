@@ -59,3 +59,19 @@ These are specification outputs only. Human gate approval must be introduced onl
 Stage 5.2B narrows this catalog to `CONTROLLED_SOLVER_RUN` and defines a preview-only readiness checklist, inactive human approval token schema, token validation rules, and GUI preview card. It does not approve solver, run solver, create solver request files, create active approval gate records, open ODB, extract metrics, approve final evidence, or freeze verdict. Future real approval and future execution must be separate stages.
 
 Stage 5.2C adds an inactive controlled solver human gate draft. It is not active approval, does not create active task `gates/` records, and keeps future active approval and future solver execution as separate later stages.
+
+Stage 5.2D defines the active controlled solver human gate record design. It does not write real active task gates, create solver request files, write active execution handoffs, run solver, open ODB, approve metrics, approve final evidence, or freeze verdict. The GUI may show active gate schema, token consumption rules, candidate hash binding, and future handoff shape as design-only previews.
+
+Stage 5.2E adds an Active Gate Writer [TEST FIXTURE ONLY] display. Real task writes remain disabled, fixture active gate records are not real solver approvals, and no Create Real Active Gate, Approve Solver, Approve and Run, or Run Solver callbacks are added.
+
+Stage 5.2F adds a Controlled Solver Human Gate [SMOKE TASK CREATED] display. The active gate exists only in the Stage 5.2F smoke task, solver execution remains disabled, no solver request is created, future execution stage is required, and final evidence remains locked.
+
+Stage 5.2G adds a Controlled Solver Execution Handoff Draft [DRAFT ONLY] display. The draft is not active for execution, no solver request is created, no solver execution occurs, a future ExecutionAgent stage is required, and final evidence remains locked.
+
+Stage 5.2H adds a Controlled Solver Request Draft Schema [DRAFT ONLY] display. The draft schema is not an active solver request, no `solver_request.json` is created, no solver execution occurs, a future ExecutionAgent stage is required, and final evidence remains locked.
+
+Stage 5.2I adds a Controlled Solver Request Preflight [NO EXECUTION] display. It may show source gate, handoff draft, request draft, candidate hash, command label, output policy, and resource policy checks, but it must also show that no active request, no output execution directory, and no solver execution are created.
+
+Stage 5.2J adds a Controlled Solver Dry-Run Request [NO EXECUTION] display. The GUI must label it as dry-run-only and no-execution; it must not expose Run Solver, Submit Queue, Execute Request, Approve and Run, active request activation, queue submission, or generic execute callbacks.
+
+Stage 5.3A-v2 adds a guarded Controlled Solver Demo Smoke Run status card for the dedicated v2 task. The GUI card is report/status oriented and must keep arbitrary task execution, generic Run Solver, Approve and Run, QueueRunner, ODB opening, metrics extraction, and final evidence controls disabled.

@@ -43,3 +43,11 @@ Stage 5.2C writes non-final inactive draft/specification outputs under `gui_high
 - `CONTROLLED_SOLVER_FUTURE_EXECUTION_HANDOFF_SHAPE.json`
 
 These files are not active gate records, not solver requests, and not execution handoffs.
+
+## Active Gate Record Design
+
+Stage 5.2D defines the active controlled solver human gate record design. It does not write a real active gate to any real task, does not create solver request files, and does not run solver. The active gate schema and writer policy remain design-only in Stage 5.2D. Human approval and solver execution remain separate, and solver execution must be a later explicit stage.
+
+Stage 5.2E verifies active gate writer behavior in fixtures only. It does not write real task gates or create solver requests.
+
+Stage 5.2F creates a real human approval gate only in the dedicated smoke task. It does not execute solver or create solver request files.

@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import json
 from pathlib import Path
@@ -304,6 +304,14 @@ class AbqPilotGui(BaseWindow):
             high_risk_gate = layout.get("high_risk_gate_panel", {})
             controlled_solver_gate = layout.get("controlled_solver_gate_panel", {}).get("card", {})
             inactive_solver_gate = layout.get("controlled_solver_gate_panel", {}).get("inactive_gate_draft_card", {})
+            active_gate_design = layout.get("controlled_solver_gate_panel", {}).get("active_gate_design_card", {})
+            real_gate_card = layout.get("controlled_solver_gate_panel", {}).get("real_gate_card", {})
+            execution_handoff_card = layout.get("controlled_solver_gate_panel", {}).get("execution_handoff_draft_card", {})
+            request_draft_card = layout.get("controlled_solver_gate_panel", {}).get("request_draft_card", {})
+            request_preflight_card = layout.get("controlled_solver_gate_panel", {}).get("request_preflight_card", {})
+            dry_run_request_card = layout.get("controlled_solver_gate_panel", {}).get("dry_run_request_card", {})
+            demo_smoke_card = layout.get("controlled_solver_gate_panel", {}).get("demo_smoke_card", {})
+            demo_smoke_v2_card = layout.get("controlled_solver_gate_panel", {}).get("demo_smoke_v2_card", {})
             text = "\n".join(
                 [
                     "AbqPilot-v2",
@@ -348,6 +356,76 @@ class AbqPilotGui(BaseWindow):
                     f"Validation: {inactive_solver_gate.get('validation_status')}",
                     "Inactive draft only; not an approval",
                     "No active gate record is created in Stage 5.2C",
+                    "",
+                    "Controlled Solver Active Gate Design",
+                    str(active_gate_design.get("title")),
+                    str(active_gate_design.get("fixture_writer_title")),
+                    f"Validation: {active_gate_design.get('validation_status')}",
+                    f"Writer: {active_gate_design.get('writer_status')}",
+                    "Active Gate Writer [TEST FIXTURE ONLY]",
+                    "real task writes disabled",
+                    "Active gate record design only",
+                    "No real project gate is written in Stage 5.2D",
+                    "Human approval does not execute solver",
+                    "Future solver execution must consume the active gate in a later explicit stage",
+                    "Final evidence remains locked",
+                    "",
+                    "Controlled Solver Real Human Gate",
+                    str(real_gate_card.get("title")),
+                    f"Gate exists: {real_gate_card.get('gate_exists')}",
+                    "active gate exists only in Stage 5.2F smoke task",
+                    "solver execution remains disabled",
+                    "solver request not created",
+                    "future execution stage required",
+                    "final evidence remains locked",
+                    "",
+                    "Controlled Solver Execution Handoff Draft",
+                    str(execution_handoff_card.get("title")),
+                    f"Draft exists: {execution_handoff_card.get('draft_exists')}",
+                    f"To agent: {execution_handoff_card.get('to_agent')}",
+                    "Draft only; not an active execution handoff",
+                    "No solver execution",
+                    "No solver request file is created",
+                    "Future ExecutionAgent stage is required",
+                    "Final evidence remains locked",
+                    "",
+                    "Controlled Solver Request Draft Schema",
+                    str(request_draft_card.get("title")),
+                    f"Draft exists: {request_draft_card.get('draft_exists')}",
+                    f"Target agent: {request_draft_card.get('target_agent')}",
+                    "Draft schema only; not an active solver request",
+                    "No solver_request.json is created",
+                    "No solver execution",
+                    "Future ExecutionAgent stage is required",
+                    "Final evidence remains locked",
+                    "",
+                    "Controlled Solver Request Preflight",
+                    str(request_preflight_card.get("title")),
+                    f"Preflight exists: {request_preflight_card.get('preflight_exists')}",
+                    "Preflight only; no solver execution",
+                    "No solver_request.json is created",
+                    "No output directory for execution is created",
+                    "Future ExecutionAgent stage is required",
+                    "Final evidence remains locked",
+                    "",
+                    "Controlled Solver Dry-Run Request",
+                    str(dry_run_request_card.get("title")),
+                    f"Dry-run request exists: {dry_run_request_card.get('dry_run_request_exists')}",
+                    "Dry-run request artifact only; not an active solver_request.json",
+                    "No solver execution",
+                    "No queue entry",
+                    "No output execution directory",
+                    "Future ExecutionAgent stage is required",
+                    "Final evidence remains locked",
+                    "",
+                    "Controlled Solver Demo Smoke Run",
+                    str(demo_smoke_card.get("title")),
+                    f"Solver request exists: {demo_smoke_card.get('solver_request_exists')}",
+                    f"Status exists: {demo_smoke_card.get('status_exists')}",
+                    "Demo smoke only",
+                    "ODB not opened",
+                    "Metrics not extracted",
+                    "Final evidence remains locked",
                 ]
             )
             set_text(self.right_text, text)
@@ -1038,3 +1116,4 @@ def _latest_solver_job_name(solver_run: Path) -> str:
 
 if __name__ == "__main__":
     main()
+

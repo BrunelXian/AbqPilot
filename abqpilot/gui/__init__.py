@@ -1,7 +1,24 @@
-"""Local standard-library GUI beta for AbqPilot."""
+﻿"""Local standard-library GUI beta for AbqPilot."""
 
 from abqpilot.gui.artifact_preview import ArtifactPreviewState, build_artifact_preview
 from abqpilot.gui.beta_smoke import build_gui_beta_e2e_smoke
+from abqpilot.gui.controlled_solver_active_gate_card import build_controlled_solver_active_gate_card
+from abqpilot.gui.controlled_solver_active_gate_schema import build_controlled_solver_active_gate_schema
+from abqpilot.gui.controlled_solver_active_gate_fixture_writer import write_controlled_solver_active_gate_fixture
+from abqpilot.gui.controlled_solver_execution_handoff_card import build_controlled_solver_execution_handoff_card
+from abqpilot.gui.controlled_solver_execution_handoff_draft import create_controlled_solver_execution_handoff_draft_no_exec
+from abqpilot.gui.controlled_solver_dry_run_request_card import build_controlled_solver_dry_run_request_card
+from abqpilot.gui.controlled_solver_dry_run_request import create_controlled_solver_dry_run_request_no_exec
+from abqpilot.gui.controlled_solver_demo_smoke_card import build_controlled_solver_demo_smoke_card
+from abqpilot.gui.controlled_solver_demo_smoke_v2_card import build_controlled_solver_demo_smoke_v2_card
+from abqpilot.gui.controlled_solver_demo_smoke import run_controlled_solver_demo_smoke
+from abqpilot.gui.controlled_solver_demo_smoke_v2 import run_controlled_solver_demo_smoke_v2
+from abqpilot.gui.controlled_solver_request_card import build_controlled_solver_request_card
+from abqpilot.gui.controlled_solver_request_draft import create_controlled_solver_request_draft_no_exec
+from abqpilot.gui.controlled_solver_request_preflight_card import build_controlled_solver_request_preflight_card
+from abqpilot.gui.controlled_solver_request_preflight import create_controlled_solver_request_preflight_no_exec
+from abqpilot.gui.controlled_solver_real_gate_card import build_controlled_solver_real_gate_card
+from abqpilot.gui.controlled_solver_real_gate_creation import create_controlled_solver_real_gate_smoke
 from abqpilot.gui.controlled_solver_inactive_gate_card import build_controlled_solver_inactive_gate_card
 from abqpilot.gui.controlled_solver_inactive_gate_draft import build_controlled_solver_inactive_gate_draft
 from abqpilot.gui.controlled_solver_gate_card import build_controlled_solver_gate_card
@@ -22,6 +39,23 @@ __all__ = [
     "ArtifactPreviewState",
     "build_artifact_preview",
     "build_gui_beta_e2e_smoke",
+    "build_controlled_solver_active_gate_card",
+    "build_controlled_solver_active_gate_schema",
+    "build_controlled_solver_execution_handoff_card",
+    "build_controlled_solver_dry_run_request_card",
+    "build_controlled_solver_demo_smoke_card",
+    "build_controlled_solver_demo_smoke_v2_card",
+    "build_controlled_solver_request_card",
+    "build_controlled_solver_request_preflight_card",
+    "build_controlled_solver_real_gate_card",
+    "write_controlled_solver_active_gate_fixture",
+    "create_controlled_solver_execution_handoff_draft_no_exec",
+    "create_controlled_solver_dry_run_request_no_exec",
+    "run_controlled_solver_demo_smoke",
+    "run_controlled_solver_demo_smoke_v2",
+    "create_controlled_solver_request_draft_no_exec",
+    "create_controlled_solver_request_preflight_no_exec",
+    "create_controlled_solver_real_gate_smoke",
     "build_controlled_solver_gate_card",
     "build_controlled_solver_gate_preview",
     "build_controlled_solver_inactive_gate_card",
@@ -37,3 +71,4 @@ __all__ = [
     "get_high_risk_gate_catalog",
     "inspect_gui_workflow_state",
 ]
+

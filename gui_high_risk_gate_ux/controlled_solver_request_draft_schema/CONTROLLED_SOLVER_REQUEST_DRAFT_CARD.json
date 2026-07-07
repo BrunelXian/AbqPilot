@@ -1,0 +1,15 @@
+{
+  "title": "Controlled Solver Request Draft Schema [DRAFT ONLY]",
+  "draft_exists": true,
+  "source_gate_validated": true,
+  "source_handoff_draft_validated": true,
+  "candidate_hash_verified": true,
+  "target_agent": "ExecutionAgent",
+  "request_active": false,
+  "executable_request": false,
+  "solver_execution_allowed": false,
+  "solver_request_created": false,
+  "future_execution_stage_required": true,
+  "final_evidence_locked": true,
+  "backend_callback": null
+}

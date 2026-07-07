@@ -1,10 +1,30 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from pathlib import Path
 from typing import Any
 
 from abqpilot import cli
 from abqpilot.gui.beta_smoke import build_gui_beta_e2e_smoke, write_gui_beta_e2e_smoke_outputs
+from abqpilot.gui.controlled_solver_active_gate_card import build_controlled_solver_active_gate_card
+from abqpilot.gui.controlled_solver_active_gate_fixture_report import write_active_gate_writer_fixture_report
+from abqpilot.gui.controlled_solver_active_gate_schema import (
+    build_controlled_solver_active_gate_schema,
+    write_controlled_solver_active_gate_design,
+)
+from abqpilot.gui.controlled_solver_execution_handoff_card import build_controlled_solver_execution_handoff_card
+from abqpilot.gui.controlled_solver_execution_handoff_draft import create_controlled_solver_execution_handoff_draft_no_exec
+from abqpilot.gui.controlled_solver_dry_run_request_card import build_controlled_solver_dry_run_request_card
+from abqpilot.gui.controlled_solver_dry_run_request import create_controlled_solver_dry_run_request_no_exec
+from abqpilot.gui.controlled_solver_demo_smoke_card import build_controlled_solver_demo_smoke_card
+from abqpilot.gui.controlled_solver_demo_smoke_v2_card import build_controlled_solver_demo_smoke_v2_card
+from abqpilot.gui.controlled_solver_demo_smoke import run_controlled_solver_demo_smoke
+from abqpilot.gui.controlled_solver_demo_smoke_v2 import run_controlled_solver_demo_smoke_v2
+from abqpilot.gui.controlled_solver_request_card import build_controlled_solver_request_card
+from abqpilot.gui.controlled_solver_request_draft import create_controlled_solver_request_draft_no_exec
+from abqpilot.gui.controlled_solver_request_preflight_card import build_controlled_solver_request_preflight_card
+from abqpilot.gui.controlled_solver_request_preflight import create_controlled_solver_request_preflight_no_exec
+from abqpilot.gui.controlled_solver_real_gate_card import build_controlled_solver_real_gate_card
+from abqpilot.gui.controlled_solver_real_gate_creation import create_controlled_solver_real_gate_smoke
 from abqpilot.gui.controlled_solver_inactive_gate_card import build_controlled_solver_inactive_gate_card
 from abqpilot.gui.controlled_solver_inactive_gate_draft import (
     build_controlled_solver_inactive_gate_draft,
@@ -102,6 +122,91 @@ def report_controlled_solver_inactive_gate_draft(
     candidate_inp: str | Path | None = None,
 ) -> dict[str, Any]:
     return write_controlled_solver_inactive_gate_draft(project_root=project_root, task_dir=task_dir, candidate_inp=candidate_inp)
+
+
+def load_controlled_solver_active_gate_schema(
+    task_id: str = "UNSELECTED_TASK",
+    task_dir: str | Path | None = None,
+    candidate_artifact_path: str | Path | None = None,
+) -> dict[str, Any]:
+    return build_controlled_solver_active_gate_schema(task_id=task_id, task_dir=task_dir, candidate_artifact_path=candidate_artifact_path)
+
+
+def load_controlled_solver_active_gate_card(
+    task_dir: str | Path | None = None,
+    candidate_artifact_path: str | Path | None = None,
+) -> dict[str, Any]:
+    return build_controlled_solver_active_gate_card(task_dir=task_dir, candidate_artifact_path=candidate_artifact_path)
+
+
+def report_controlled_solver_active_gate_design(
+    project_root: str | Path,
+    task_id: str = "UNSELECTED_TASK",
+    task_dir: str | Path | None = None,
+    candidate_artifact_path: str | Path | None = None,
+) -> dict[str, Any]:
+    return write_controlled_solver_active_gate_design(
+        project_root=project_root,
+        task_id=task_id,
+        task_dir=task_dir,
+        candidate_artifact_path=candidate_artifact_path,
+    )
+
+
+def report_controlled_solver_active_gate_writer_policy(project_root: str | Path) -> dict[str, Any]:
+    return write_active_gate_writer_fixture_report(project_root)
+
+
+def load_controlled_solver_real_gate_card(project_root: str | Path) -> dict[str, Any]:
+    return build_controlled_solver_real_gate_card(project_root)
+
+
+def create_controlled_solver_smoke_gate_no_exec(project_root: str | Path) -> dict[str, Any]:
+    return create_controlled_solver_real_gate_smoke(project_root)
+
+
+def load_controlled_solver_execution_handoff_card(project_root: str | Path) -> dict[str, Any]:
+    return build_controlled_solver_execution_handoff_card(project_root)
+
+
+def create_controlled_solver_execution_handoff_draft(project_root: str | Path) -> dict[str, Any]:
+    return create_controlled_solver_execution_handoff_draft_no_exec(project_root)
+
+
+def load_controlled_solver_request_card(project_root: str | Path) -> dict[str, Any]:
+    return build_controlled_solver_request_card(project_root)
+
+
+def create_controlled_solver_request_draft(project_root: str | Path) -> dict[str, Any]:
+    return create_controlled_solver_request_draft_no_exec(project_root)
+
+
+def load_controlled_solver_request_preflight_card(project_root: str | Path) -> dict[str, Any]:
+    return build_controlled_solver_request_preflight_card(project_root)
+
+
+def create_controlled_solver_request_preflight(project_root: str | Path) -> dict[str, Any]:
+    return create_controlled_solver_request_preflight_no_exec(project_root)
+
+
+def load_controlled_solver_dry_run_request_card(project_root: str | Path) -> dict[str, Any]:
+    return build_controlled_solver_dry_run_request_card(project_root)
+
+
+def create_controlled_solver_dry_run_request(project_root: str | Path) -> dict[str, Any]:
+    return create_controlled_solver_dry_run_request_no_exec(project_root)
+
+
+def load_controlled_solver_demo_smoke_card(project_root: str | Path) -> dict[str, Any]:
+    return build_controlled_solver_demo_smoke_card(project_root)
+
+
+def load_controlled_solver_demo_smoke_v2_card(project_root: str | Path) -> dict[str, Any]:
+    return build_controlled_solver_demo_smoke_v2_card(project_root)
+
+
+def run_controlled_solver_demo_smoke_action(project_root: str | Path) -> dict[str, Any]:
+    return run_controlled_solver_demo_smoke(project_root, attempt_solver=True)
 
 
 def load_next_step_recommendation(task_dir: str | Path | None) -> dict[str, Any]:
@@ -204,3 +309,5 @@ def supervisor_ack_non_solver_summary(task_dir: str | Path) -> dict[str, Any]:
 
 def report_supervisor_non_solver_summary_ack(task_dir: str | Path) -> dict[str, Any]:
     return cli.command_report_supervisor_non_solver_summary_ack(task_dir=task_dir)
+
+

@@ -88,3 +88,5 @@ Stage 5.2A high-risk gate UX specifications are not real `GATE_XXX.md` approval 
 Stage 5.2B controlled solver gate preview records are also not real `GATE_XXX.md` approval records. Approval token validation in this stage is preview-only. Future real approval and future controlled solver execution must be represented by separate later stages.
 
 Stage 5.2C inactive controlled solver gate draft records are not real `GATE_XXX.md` approval records either. Expected future active gate and execution handoff shapes may be written under the preview/spec directory, but they must not appear as active task transition records.
+
+Stage 5.2D active controlled solver gate design records are still not real task `GATE_XXX.md` approval records. The schema can describe a future `APPROVED_BY_HUMAN` gate, but Stage 5.2D must not write that schema into real task `gates/`, must not write an active execution handoff into real task `handoffs/`, and must not create a solver request.

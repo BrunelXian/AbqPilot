@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from pathlib import Path
 from typing import Any, Callable
@@ -7,6 +7,25 @@ from abqpilot import cli
 from abqpilot.gui.artifact_preview import build_artifact_preview
 from abqpilot.gui.layout_sections import build_layout_sections
 from abqpilot.gui.beta_smoke import build_gui_beta_e2e_smoke, write_gui_beta_e2e_smoke_outputs
+from abqpilot.gui.controlled_solver_active_gate_card import build_controlled_solver_active_gate_card
+from abqpilot.gui.controlled_solver_active_gate_fixture_report import write_active_gate_writer_fixture_report
+from abqpilot.gui.controlled_solver_active_gate_schema import (
+    build_controlled_solver_active_gate_schema,
+    write_controlled_solver_active_gate_design,
+)
+from abqpilot.gui.controlled_solver_execution_handoff_card import build_controlled_solver_execution_handoff_card
+from abqpilot.gui.controlled_solver_execution_handoff_draft import create_controlled_solver_execution_handoff_draft_no_exec
+from abqpilot.gui.controlled_solver_dry_run_request_card import build_controlled_solver_dry_run_request_card
+from abqpilot.gui.controlled_solver_dry_run_request import create_controlled_solver_dry_run_request_no_exec
+from abqpilot.gui.controlled_solver_demo_smoke_card import build_controlled_solver_demo_smoke_card
+from abqpilot.gui.controlled_solver_demo_smoke_v2_card import build_controlled_solver_demo_smoke_v2_card
+from abqpilot.gui.controlled_solver_demo_smoke import run_controlled_solver_demo_smoke
+from abqpilot.gui.controlled_solver_request_card import build_controlled_solver_request_card
+from abqpilot.gui.controlled_solver_request_draft import create_controlled_solver_request_draft_no_exec
+from abqpilot.gui.controlled_solver_request_preflight_card import build_controlled_solver_request_preflight_card
+from abqpilot.gui.controlled_solver_request_preflight import create_controlled_solver_request_preflight_no_exec
+from abqpilot.gui.controlled_solver_real_gate_card import build_controlled_solver_real_gate_card
+from abqpilot.gui.controlled_solver_real_gate_creation import create_controlled_solver_real_gate_smoke
 from abqpilot.gui.controlled_solver_inactive_gate_card import build_controlled_solver_inactive_gate_card
 from abqpilot.gui.controlled_solver_inactive_gate_draft import (
     build_controlled_solver_inactive_gate_draft,
@@ -223,6 +242,188 @@ class GuiActionController:
         return self._safe(
             "report_controlled_solver_inactive_gate_draft",
             lambda: write_controlled_solver_inactive_gate_draft(self.project_root, task_dir=task_dir, candidate_inp=candidate_inp),
+        )
+
+    def controlled_solver_active_gate_schema(
+        self,
+        task_id: str = "UNSELECTED_TASK",
+        task_dir: str | Path | None = None,
+        candidate_artifact_path: str | Path | None = None,
+    ) -> dict[str, Any]:
+        return self._safe(
+            "controlled_solver_active_gate_schema",
+            lambda: {
+                "command": "controlled_solver_active_gate_schema",
+                "verdict": "CONTROLLED_SOLVER_ACTIVE_GATE_SCHEMA_READY",
+                "success": True,
+                "details": build_controlled_solver_active_gate_schema(
+                    task_id=task_id,
+                    task_dir=task_dir,
+                    candidate_artifact_path=candidate_artifact_path,
+                ),
+                "errors": [],
+                "warnings": [],
+            },
+        )
+
+    def controlled_solver_active_gate_card(
+        self,
+        task_dir: str | Path | None = None,
+        candidate_artifact_path: str | Path | None = None,
+    ) -> dict[str, Any]:
+        return self._safe(
+            "controlled_solver_active_gate_card",
+            lambda: {
+                "command": "controlled_solver_active_gate_card",
+                "verdict": "CONTROLLED_SOLVER_ACTIVE_GATE_CARD_READY",
+                "success": True,
+                "details": build_controlled_solver_active_gate_card(
+                    task_dir=task_dir,
+                    candidate_artifact_path=candidate_artifact_path,
+                ),
+                "errors": [],
+                "warnings": [],
+            },
+        )
+
+    def report_controlled_solver_active_gate_design(
+        self,
+        task_id: str = "UNSELECTED_TASK",
+        task_dir: str | Path | None = None,
+        candidate_artifact_path: str | Path | None = None,
+    ) -> dict[str, Any]:
+        return self._safe(
+            "report_controlled_solver_active_gate_design",
+            lambda: write_controlled_solver_active_gate_design(
+                self.project_root,
+                task_id=task_id,
+                task_dir=task_dir,
+                candidate_artifact_path=candidate_artifact_path,
+            ),
+        )
+
+    def report_controlled_solver_active_gate_writer_policy(self) -> dict[str, Any]:
+        return self._safe(
+            "report_controlled_solver_active_gate_writer_policy",
+            lambda: write_active_gate_writer_fixture_report(self.project_root),
+        )
+
+    def controlled_solver_real_gate_card(self) -> dict[str, Any]:
+        return self._safe(
+            "controlled_solver_real_gate_card",
+            lambda: {
+                "command": "controlled_solver_real_gate_card",
+                "verdict": "CONTROLLED_SOLVER_REAL_GATE_CARD_READY",
+                "success": True,
+                "details": build_controlled_solver_real_gate_card(self.project_root),
+                "errors": [],
+                "warnings": [],
+            },
+        )
+
+    def create_controlled_solver_smoke_gate_no_exec(self) -> dict[str, Any]:
+        return self._safe(
+            "create_controlled_solver_smoke_gate_no_exec",
+            lambda: create_controlled_solver_real_gate_smoke(self.project_root),
+        )
+
+    def controlled_solver_execution_handoff_card(self) -> dict[str, Any]:
+        return self._safe(
+            "controlled_solver_execution_handoff_card",
+            lambda: {
+                "command": "controlled_solver_execution_handoff_card",
+                "verdict": "CONTROLLED_SOLVER_EXECUTION_HANDOFF_DRAFT_CARD_READY",
+                "success": True,
+                "details": build_controlled_solver_execution_handoff_card(self.project_root),
+                "errors": [],
+                "warnings": [],
+            },
+        )
+
+    def create_controlled_solver_execution_handoff_draft_no_exec(self) -> dict[str, Any]:
+        return self._safe(
+            "create_controlled_solver_execution_handoff_draft_no_exec",
+            lambda: create_controlled_solver_execution_handoff_draft_no_exec(self.project_root),
+        )
+
+    def controlled_solver_request_card(self) -> dict[str, Any]:
+        return self._safe(
+            "controlled_solver_request_card",
+            lambda: {
+                "command": "controlled_solver_request_card",
+                "verdict": "CONTROLLED_SOLVER_REQUEST_DRAFT_CARD_READY",
+                "success": True,
+                "details": build_controlled_solver_request_card(self.project_root),
+                "errors": [],
+                "warnings": [],
+            },
+        )
+
+    def create_controlled_solver_request_draft_no_exec(self) -> dict[str, Any]:
+        return self._safe(
+            "create_controlled_solver_request_draft_no_exec",
+            lambda: create_controlled_solver_request_draft_no_exec(self.project_root),
+        )
+
+    def controlled_solver_request_preflight_card(self) -> dict[str, Any]:
+        return self._safe(
+            "controlled_solver_request_preflight_card",
+            lambda: {
+                "command": "controlled_solver_request_preflight_card",
+                "verdict": "CONTROLLED_SOLVER_REQUEST_PREFLIGHT_CARD_READY",
+                "success": True,
+                "details": build_controlled_solver_request_preflight_card(self.project_root),
+                "errors": [],
+                "warnings": [],
+            },
+        )
+
+    def create_controlled_solver_request_preflight_no_exec(self) -> dict[str, Any]:
+        return self._safe(
+            "create_controlled_solver_request_preflight_no_exec",
+            lambda: create_controlled_solver_request_preflight_no_exec(self.project_root),
+        )
+
+    def controlled_solver_dry_run_request_card(self) -> dict[str, Any]:
+        return self._safe(
+            "controlled_solver_dry_run_request_card",
+            lambda: {
+                "command": "controlled_solver_dry_run_request_card",
+                "success": True,
+                "details": build_controlled_solver_dry_run_request_card(self.project_root),
+            },
+        )
+
+    def create_controlled_solver_dry_run_request_no_exec(self) -> dict[str, Any]:
+        return self._safe(
+            "create_controlled_solver_dry_run_request_no_exec",
+            lambda: create_controlled_solver_dry_run_request_no_exec(self.project_root),
+        )
+
+    def controlled_solver_demo_smoke_card(self) -> dict[str, Any]:
+        return self._safe(
+            "controlled_solver_demo_smoke_card",
+            lambda: {
+                "command": "controlled_solver_demo_smoke_card",
+                "success": True,
+                "details": build_controlled_solver_demo_smoke_card(self.project_root),
+            },
+        )
+
+    def controlled_solver_demo_smoke_v2_card(self) -> dict[str, Any]:
+        return self._safe(
+            "controlled_solver_demo_smoke_v2_card",
+            lambda: {
+                "command": "controlled_solver_demo_smoke_v2_card",
+                "success": True,
+                "details": build_controlled_solver_demo_smoke_v2_card(self.project_root),
+            },
+        )
+
+    def run_controlled_solver_demo_smoke(self) -> dict[str, Any]:
+        return self._safe(
+            "run_controlled_solver_demo_smoke",
+            lambda: run_controlled_solver_demo_smoke(self.project_root, attempt_solver=True),
         )
 
     def next_step_recommendation(self, task_dir: str | Path | None) -> dict[str, Any]:
@@ -961,3 +1162,5 @@ class GuiActionController:
                 "errors": [str(exc)],
                 "warnings": [],
             }
+
+

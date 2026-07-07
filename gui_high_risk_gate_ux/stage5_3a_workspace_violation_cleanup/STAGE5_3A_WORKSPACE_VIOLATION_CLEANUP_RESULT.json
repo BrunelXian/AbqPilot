@@ -1,0 +1,79 @@
+﻿{
+    "stage_id":  "STAGE5_3A_R",
+    "verdict":  "PASS_ABQPILOT_V2_STAGE5_3A_R_WORKSPACE_VIOLATION_CLEANUP_AND_PATCH_ROOT_HARDENING_READY",
+    "known_failed_verdict":  "FAIL_STAGE5_3A_CONTROLLED_SOLVER_DEMO_SMOKE_SAFETY_BOUNDARY_VIOLATION",
+    "generated_at":  "2026-07-06T22:16:36",
+    "project_root":  "D:\\Projects\\AbqPilot-v2",
+    "forbidden_root":  "D:\\Users\\wuxia\\Documents\\AbqPilot",
+    "root_cause_summary":  "apply_patch resolved relative paths against the forbidden root during the failed Stage 5.3A attempt.",
+    "stray_files_found":  [
+                              {
+                                  "path":  "D:\\Users\\wuxia\\Documents\\AbqPilot\\tests\\test_controlled_solver_demo_smoke.py",
+                                  "contained_stage5_3a_markers":  true,
+                                  "safe_to_delete":  true,
+                                  "deletion_decision":  "DELETED",
+                                  "exists_after_cleanup":  false
+                              },
+                              {
+                                  "path":  "D:\\Users\\wuxia\\Documents\\AbqPilot\\tests\\test_controlled_solver_demo_smoke_card.py",
+                                  "contained_stage5_3a_markers":  true,
+                                  "safe_to_delete":  true,
+                                  "deletion_decision":  "DELETED",
+                                  "exists_after_cleanup":  false
+                              },
+                              {
+                                  "path":  "D:\\Users\\wuxia\\Documents\\AbqPilot\\tests\\test_controlled_solver_demo_smoke_report.py",
+                                  "contained_stage5_3a_markers":  true,
+                                  "safe_to_delete":  true,
+                                  "deletion_decision":  "DELETED",
+                                  "exists_after_cleanup":  false
+                              },
+                              {
+                                  "path":  "D:\\Users\\wuxia\\Documents\\AbqPilot\\tests\\test_controlled_solver_demo_smoke_runner.py",
+                                  "contained_stage5_3a_markers":  true,
+                                  "safe_to_delete":  true,
+                                  "deletion_decision":  "DELETED",
+                                  "exists_after_cleanup":  false
+                              },
+                              {
+                                  "path":  "D:\\Users\\wuxia\\Documents\\AbqPilot\\tests\\test_controlled_solver_demo_smoke_validator.py",
+                                  "contained_stage5_3a_markers":  true,
+                                  "safe_to_delete":  true,
+                                  "deletion_decision":  "DELETED",
+                                  "exists_after_cleanup":  false
+                              },
+                              {
+                                  "path":  "D:\\Users\\wuxia\\Documents\\AbqPilot\\tests\\test_stage5_3a_docs.py",
+                                  "contained_stage5_3a_markers":  true,
+                                  "safe_to_delete":  true,
+                                  "deletion_decision":  "DELETED",
+                                  "exists_after_cleanup":  false
+                              }
+                          ],
+    "files_deleted":  [
+                          "D:\\Users\\wuxia\\Documents\\AbqPilot\\tests\\test_controlled_solver_demo_smoke.py",
+                          "D:\\Users\\wuxia\\Documents\\AbqPilot\\tests\\test_controlled_solver_demo_smoke_card.py",
+                          "D:\\Users\\wuxia\\Documents\\AbqPilot\\tests\\test_controlled_solver_demo_smoke_report.py",
+                          "D:\\Users\\wuxia\\Documents\\AbqPilot\\tests\\test_controlled_solver_demo_smoke_runner.py",
+                          "D:\\Users\\wuxia\\Documents\\AbqPilot\\tests\\test_controlled_solver_demo_smoke_validator.py",
+                          "D:\\Users\\wuxia\\Documents\\AbqPilot\\tests\\test_stage5_3a_docs.py"
+                      ],
+    "files_left_untouched":  [
+
+                             ],
+    "forbidden_root_stage5_3a_hits_after_cleanup":  [
+
+                                                    ],
+    "forbidden_root_clean_for_stage5_3a_markers":  true,
+    "stage5_3a_solver_demo_resumed":  false,
+    "abaqus_invoked":  false,
+    "solver_request_json_created_by_remediation":  false,
+    "final_evidence_touched":  false,
+    "task_final_evidence_ledger_updated":  false,
+    "cleanup_reports_under_project_root":  true,
+    "tests_result_after":  "845 passed",
+    "forbidden_root_post_cleanup_rg_result":  "0 hits",
+    "secret_audit_result":  "no real key; placeholder .env.example/docs and test fake keys only",
+    "abaqus_solver_run":  false,
+    "solver_request_created":  false
+}

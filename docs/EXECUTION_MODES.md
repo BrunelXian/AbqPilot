@@ -64,3 +64,19 @@ Stage 5.2A also keeps execution modes unchanged. High-risk gate UX records are s
 Stage 5.2B keeps execution modes unchanged as well. Controlled solver approval token validation is preview-only; future real approval and future solver execution must remain separate stages, and ODB/metrics/final evidence remain separately gated.
 
 Stage 5.2C also keeps execution modes unchanged. The inactive controlled solver human gate draft is not active approval and not execution. It may define expected future shapes, but those shapes are not written as active task gates or executable handoffs.
+
+Stage 5.2D keeps execution modes unchanged. Active controlled solver human gate records are defined only as schema, validation, token-consumption, candidate-hash, disabled-writer, GUI-card, and report design objects. Stage 5.2D does not call Codex CLI, run solver, create solver requests, write real active task gates, write active execution handoffs, open ODB, approve metrics, approve final evidence, or freeze verdict.
+
+Stage 5.2E also keeps execution modes unchanged. Fixture-only active gate writer verification can write test fixture gate records only. It does not write real task gates, create solver requests, run solver, open ODB, approve metrics, approve final evidence, or freeze verdict.
+
+Stage 5.2F creates one real human approval gate under the dedicated smoke task only. This does not change execution modes: solver execution is still not allowed, no solver request is created, no ODB or metrics authority is granted, and final evidence remains locked.
+
+Stage 5.2G creates a controlled solver execution handoff draft only in non-active draft/report locations. It does not create active `HANDOFF_*.md` execution records, solver request files, solver execution, queue mutation, ODB, metrics, final evidence, or verdict freeze.
+
+Stage 5.2H creates controlled solver request draft schema artifacts only in non-active draft/report locations. It does not create active `solver_request.json`, `job_request.json`, `abaqus_job.json`, solver launchers, active execution handoffs, solver execution, queue mutation, ODB, metrics, final evidence, or verdict freeze.
+
+Stage 5.2I validates the controlled solver request draft as a preflight-only report. It does not create active request files, output execution directories, solver launchers, active execution handoffs, solver execution, queue mutation, ODB, metrics, final evidence, or verdict freeze.
+
+Stage 5.2J materializes a dry-run-only controlled solver request artifact. It does not create active `solver_request.json`, `job_request.json`, or `abaqus_job.json`, does not create output execution directories, does not call Abaqus, does not run solver, does not queue jobs, does not open ODB, and does not approve metrics, final evidence, or verdict.
+
+Stage 5.3A-v2 adds one fixed controlled Abaqus demo smoke corridor after workspace guard remediation. It can attempt the fixed Abaqus command for a copied demo INP only and capture status; it does not generalize solver execution, open ODB, extract metrics, queue jobs, approve final evidence, or freeze verdict.

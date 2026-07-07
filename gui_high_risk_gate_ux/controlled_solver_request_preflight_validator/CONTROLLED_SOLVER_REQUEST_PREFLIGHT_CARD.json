@@ -1,0 +1,18 @@
+{
+  "title": "Controlled Solver Request Preflight [NO EXECUTION]",
+  "preflight_exists": true,
+  "source_gate_validated": true,
+  "source_handoff_draft_validated": true,
+  "source_request_draft_validated": true,
+  "candidate_hash_verified": true,
+  "solver_command_label_validated": true,
+  "output_dir_policy_validated": true,
+  "resource_policy_validated": true,
+  "request_active": false,
+  "executable_request": false,
+  "solver_execution_allowed": false,
+  "solver_request_created": false,
+  "future_execution_stage_required": true,
+  "final_evidence_locked": true,
+  "backend_callback": null
+}

@@ -1,0 +1,22 @@
+# Controlled Solver Real Gate Validation Report
+
+- gate_json_exists: True
+- gate_markdown_exists: True
+- gate_under_smoke_task_only: True
+- candidate_artifact_exists: True
+- candidate_hash_matches_token: True
+- token_consumed_once: True
+- solver_approved_true: True
+- solver_execution_allowed_false: True
+- solver_request_created_false: True
+- solver_run_false: True
+- queue_runner_launched_false: True
+- odb_opened_false: True
+- final_evidence_approved_false: True
+- final_verdict_frozen_false: True
+- task_final_evidence_ledger_updated_false: True
+- no_solver_request_files_found: True
+- no_queue_files_found: True
+- no_odb_files_found: True
+- no_execution_handoff_found: True
+- no_task_final_evidence_ledger: True

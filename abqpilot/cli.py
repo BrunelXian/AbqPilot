@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import argparse
 import json
@@ -43,6 +43,8 @@ from abqpilot.diagnostics import (
 )
 from abqpilot.guards import run_model_condition_guard
 from abqpilot.guards.model_condition_schema import parse_target_change
+from abqpilot.gui.controlled_solver_demo_smoke import run_controlled_solver_demo_smoke
+from abqpilot.gui.controlled_solver_demo_smoke_v2 import run_controlled_solver_demo_smoke_v2
 from abqpilot.odb import OdbMetricsExtractor
 from abqpilot.patching.equivalent_real_odb_stage import run_stage3_9c_equivalent_odb
 from abqpilot.patching.dflux_lifecycle_preview import preview_dflux_deactivation_patch_stage
@@ -116,6 +118,18 @@ def command_status(config_path: str | Path | None = None, result_json: str | Pat
         safety_flags=safety_flags(config),
         details=details,
     )
+    write_result_json(result, result_json)
+    return result
+
+
+def command_run_controlled_solver_demo_smoke(result_json: str | Path | None = None) -> dict[str, Any]:
+    result = run_controlled_solver_demo_smoke(PROJECT_ROOT, attempt_solver=True)
+    write_result_json(result, result_json)
+    return result
+
+
+def command_run_controlled_solver_demo_smoke_v2(result_json: str | Path | None = None) -> dict[str, Any]:
+    result = run_controlled_solver_demo_smoke_v2(PROJECT_ROOT, attempt_solver=True)
     write_result_json(result, result_json)
     return result
 
@@ -2107,6 +2121,18 @@ def build_parser() -> argparse.ArgumentParser:
     report_dflux_solver.add_argument("--solver-run-dir", required=True)
     report_dflux_solver.add_argument("--result-json", default=None)
 
+    stage5_3a_demo = subparsers.add_parser(
+        "run-controlled-solver-demo-smoke",
+        help="Run the fixed Stage 5.3A controlled solver demo smoke task only",
+    )
+    stage5_3a_demo.add_argument("--result-json", default=None)
+
+    stage5_3a_v2_demo = subparsers.add_parser(
+        "run-controlled-solver-demo-smoke-v2",
+        help="Run the fixed Stage 5.3A-v2 controlled solver demo smoke task only",
+    )
+    stage5_3a_v2_demo.add_argument("--result-json", default=None)
+
     diagnose_job = subparsers.add_parser("diagnose-job-output", help="Diagnose Abaqus job logs and ODB acceptability")
     diagnose_job.add_argument("--job-dir", default=None)
     diagnose_job.add_argument("--job-name", default=None)
@@ -2532,6 +2558,10 @@ def main(argv: list[str] | None = None) -> int:
     elif args.command == "report-dflux-guarded-solver-run":
         result = report_dflux_guarded_solver_run(args.solver_run_dir)
         write_result_json(result, args.result_json)
+    elif args.command == "run-controlled-solver-demo-smoke":
+        result = command_run_controlled_solver_demo_smoke(result_json=args.result_json)
+    elif args.command == "run-controlled-solver-demo-smoke-v2":
+        result = command_run_controlled_solver_demo_smoke_v2(result_json=args.result_json)
     elif args.command == "diagnose-job-output":
         result = command_diagnose_job_output(
             job_dir=args.job_dir,
@@ -3410,3 +3440,6 @@ def _version() -> str:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+
+

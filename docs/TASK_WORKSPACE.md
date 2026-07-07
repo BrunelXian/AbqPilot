@@ -473,3 +473,19 @@ Stage 5.2A writes preview-only high-risk gate UX specification artifacts under `
 Stage 5.2B writes controlled solver gate preview artifacts under `gui_high_risk_gate_ux/controlled_solver_gate_preview/`. These artifacts include a readiness checklist, inactive approval token schema, token validation rules, and preview report. They are not solver request files, not active approval gate records, and not authorization to run Abaqus.
 
 Stage 5.2C writes inactive controlled solver human gate draft artifacts under `gui_high_risk_gate_ux/controlled_solver_inactive_gate_draft/`. These artifacts are not active task `gates/` records, not solver request files, and not executable handoffs.
+
+Stage 5.2D writes active controlled solver gate design artifacts under `gui_high_risk_gate_ux/controlled_solver_active_gate_design/`. These artifacts are not active task `gates/` records, not solver request files, not active execution handoffs, and not final evidence.
+
+Stage 5.2E writes fixture-writer reports under `gui_high_risk_gate_ux/controlled_solver_active_gate_writer_fixture/`. Test fixture gate records may be written only under pytest temporary directories or `tests/fixtures/`; real task `runs/tasks/*/gates` writes remain blocked.
+
+Stage 5.2F creates the dedicated smoke task `runs/tasks/stage5_2f_controlled_solver_real_gate_smoke/` and writes its active human approval gate under that task's `gates/` directory only. No unrelated task gate is written and no solver request, active execution handoff, queue file, ODB, or final evidence ledger is created.
+
+Stage 5.2G writes execution handoff drafts only under `artifacts/handoff_drafts/` in the Stage 5.2F smoke task and under the non-final GUI high-risk report directory. It must not write active execution handoffs under task `handoffs/`.
+
+Stage 5.2H writes request draft schema artifacts only under `artifacts/request_drafts/` in the Stage 5.2F smoke task and under the non-final GUI high-risk report directory. It must not write active `solver_request.json`, `job_request.json`, or `abaqus_job.json`.
+
+Stage 5.2I writes request preflight artifacts only under `artifacts/request_preflight/` in the Stage 5.2F smoke task and under the non-final GUI high-risk report directory. It must not create output execution directories or active request files.
+
+Stage 5.2J writes only `artifacts/dry_run_requests/CONTROLLED_SOLVER_DRY_RUN_REQUEST.json` and related non-final reports. It must not write active `solver_request.json`, `job_request.json`, `abaqus_job.json`, active `HANDOFF_*.md`, queue files, ODB files, metrics files, output execution directories, or `TASK_FINAL_EVIDENCE_LEDGER.md`.
+
+Stage 5.3A-v2 writes the dedicated task `runs/tasks/stage5_3a_v2_controlled_solver_demo_smoke/`. The only allowed active solver request filename is `artifacts/solver_requests/solver_request.json` in that task. It must not create `job_request.json`, `abaqus_job.json`, queue files, metrics files, active arbitrary handoffs, or `TASK_FINAL_EVIDENCE_LEDGER.md`.
